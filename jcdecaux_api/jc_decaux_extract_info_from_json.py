@@ -5,6 +5,7 @@ import time
 import os
 import dbinfo
 import json
+from sqlalchemy import create_engine
 
 def stations_to_db(text):
     # let us load the stations from the text received from jcdecaux

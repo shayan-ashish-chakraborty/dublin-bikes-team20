@@ -29,20 +29,23 @@ def stations_to_db(text, in_engine):
         print(type(station))
 
         # let us load only the parts that we have included in our db:
+        # number INTEGER NOT NULL PRIMARY KEY,
         # address VARCHAR(256), 
         # banking INTEGER,
         # bikestands INTEGER,
         # name VARCHAR(256),
+        # position_lat FLOAT,
+        # position_lng FLOAT,
         # status VARCHAR(256))
         
         # let us extract the relevant info from the dictionary
-        vals = (station.get('address'), int(station.get('banking')), int(station.get('bike_stands')), 
-                station.get('name'), station.get('status'))
+        vals = (int(station.get('number')), station.get('address'), int(station.get('banking')), int(station.get('bike_stands')), 
+                station.get('name'), float(station.get('position').get('lat')), float(station.get('position').get('lng')), station.get('status'))
         
         # now let us use the engine to insert into the stations
         in_engine.execute("""
-                          INSERT INTO station (address, banking, bikestands, name, status) 
-                          VALUES (%s, %s, %s, %s, %s);
+                          INSERT INTO station (number, address, banking, bike_stands, name, position_lat, position_lng, status) 
+                          VALUES (%s, %s, %s, %s, %s, %s, %s, %s);
                           """, vals)
 
 

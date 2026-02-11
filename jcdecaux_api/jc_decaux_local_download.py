@@ -26,8 +26,8 @@ def write_to_file(text):
 
     # now is a variable from datetime, which will go in {}.
     # replace is replacing white spaces with underscores in the file names
-    now = datetime.datetime.now()
-    with open("data/bikes_{}".format(now).replace(" ", "_"), "w") as f:
+    now = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    with open(f"data/bikes_{now}.json", "w") as f:
         f.write(text)
 
 # Empty for now

@@ -50,7 +50,11 @@ def stations_to_db(text, in_engine):
         in_engine.execute("""
                             INSERT INTO availability
                             (number, available_bikes, available_bike_stands, last_update, status)
-                            VALUES (%s, %s, %s, %s, %s);
+                            VALUES (%s, %s, %s, %s, %s)
+                            ON DUPLICATE KEY UPDATE
+                            available_bikes = VALUES(available_bikes),
+                            available_bike_stands = VALUES(available_bike_stands),
+                            status = VALUES(status);
                             """, vals)
 
 
