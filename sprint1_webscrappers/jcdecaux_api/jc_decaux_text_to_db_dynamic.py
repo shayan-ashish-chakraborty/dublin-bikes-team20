@@ -15,6 +15,7 @@ import simplejson as json
 import requests
 import time
 from IPython.display import display
+from datetime import datetime
 
 
 def stations_to_db(text, in_engine):
@@ -36,14 +37,26 @@ def stations_to_db(text, in_engine):
         # status VARCHAR(256))
         
         # let us extract the relevant info from the dictionary
-        vals = (station.get('address'), int(station.get('banking')), int(station.get('bike_stands')), 
-                station.get('name'), station.get('status'))
+        vals = (
+                int(station.get('number')),
+                int(station.get('available_bikes')),
+                int(station.get('available_bike_stands')),
+                datetime.fromtimestamp(station.get("last_update")/1000),
+                station.get('status')
+                )
+
         
         # now let us use the engine to insert into the stations
         in_engine.execute("""
-                          INSERT INTO station (address, banking, bikestands, name, status) 
-                          VALUES (%s, %s, %s, %s, %s);
-                          """, vals)
+                            INSERT INTO availability
+                            (number, available_bikes, available_bike_stands, last_update, status)
+                            VALUES (%s, %s, %s, %s, %s)
+                            ON DUPLICATE KEY UPDATE
+                            available_bikes = VALUES(available_bikes),
+                            available_bike_stands = VALUES(available_bike_stands),
+                            status = VALUES(status);
+                            """, vals)
+
 
 
 def main():
