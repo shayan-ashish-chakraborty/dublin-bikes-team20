@@ -24,18 +24,31 @@ def get_db():
         db_engine = g._database = connect_to_db()
     return db_engine
 
-# Show all stations in json
+# Show all weather in json
 @app.route('/weather')
 def get_weather():
     engine = get_db()
     
     weather = []
-    rows = engine.execute("SELECT * from current;") # current is the name of your table in the database
+    rows = engine.execute("SELECT * from current;") #current is the name of your table in the database
     
     for row in rows:
         weather.append(dict(row))
     
     return jsonify(weather=weather)
+
+#Show hourly in json
+@app.route('/hourly')
+def get_hourly():
+    engine = get_db()
+    
+    hourly = []
+    rows = engine.execute("SELECT * from hourly;") #hourly is the name of your table in the database
+    
+    for row in rows:
+        hourly.append(dict(row))
+    
+    return jsonify(hourly=hourly)
 
 
 if __name__ == "__main__":
