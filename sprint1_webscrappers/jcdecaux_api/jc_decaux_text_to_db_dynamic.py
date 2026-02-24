@@ -3,7 +3,6 @@ import traceback
 import datetime
 import time
 import os
-import dbinfo
 import json
 import sqlalchemy as sqla
 from sqlalchemy import create_engine
@@ -16,6 +15,7 @@ import requests
 import time
 from IPython.display import display
 from datetime import datetime
+from dotenv import load_dotenv
 
 
 def stations_to_db(text, in_engine):
@@ -60,18 +60,20 @@ def stations_to_db(text, in_engine):
 
 
 def main():
-    USER = "root"
-    PASSWORD = "shayan1664"
-    PORT = "3306"
-    DB = "local_databasejcdecaux"
-    URI = "127.0.0.1"
+    load_dotenv(dotenv_path="var.env")
+
+    USER = os.getenv("DB_USER")
+    PASSWORD = os.getenv("DB_PASSWORD")
+    PORT = os.getenv("DB_PORT")
+    DB = os.getenv("DB_NAME_JCDECAUX")
+    URI = os.getenv("DB_HOST")
 
     connection_string = "mysql+pymysql://{}:{}@{}:{}/{}".format(USER, PASSWORD, URI, PORT, DB)
 
     engine = create_engine(connection_string, echo = True)
 
     try:
-        r = requests.get(dbinfo.STATIONS_URI, params={"apiKey": dbinfo.JCKEY, "contract": dbinfo.NAME})
+        r = requests.get(os.getenv('STATIONS_URI'), params={"apiKey": os.getenv('JCDECAUX_API_KEY'), "contract": os.getenv('CITY')})
         stations_to_db(r.text, engine)
         time.sleep(5*60)
     except:

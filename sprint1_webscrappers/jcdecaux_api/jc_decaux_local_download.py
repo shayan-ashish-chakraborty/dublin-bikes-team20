@@ -4,14 +4,11 @@ import traceback
 import datetime
 import time
 import os
-import dbinfo
+from dotenv import load_dotenv
 
-"""
-Data are in dbinfo.py
-CKEY = "b46d259f68fc8cf6e74cbb1c49022e8d9398e586"
-NAME = "dublin"
-STATIONS_URI = "https://api.jcdecaux.com/vls/v1/stations"
-"""
+
+# Data are in dbinfo.py
+
 
 # Will be used to store text in a file
 def write_to_file(text):
@@ -36,8 +33,9 @@ def write_to_db(text):
 
 def main():
     while True:
+        load_dotenv(dotenv_path="var.env")
         try:
-            r = requests.get(dbinfo.STATIONS_URI, params={"apiKey": dbinfo.JCKEY, "contract": dbinfo.NAME})
+            r = requests.get(os.getenv('STATIONS_URI'), params={"apiKey": os.getenv('JCDECAUX_API_KEY'), "contract": os.getenv('CITY')})
             print(r)
             write_to_file(r.text)
             time.sleep(5*60)

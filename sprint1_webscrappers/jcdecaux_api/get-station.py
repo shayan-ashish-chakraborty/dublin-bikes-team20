@@ -1,8 +1,11 @@
-import dbinfo
+import os
 import requests
 import json
+from dotenv import load_dotenv
 
-r = requests.get(dbinfo.STATIONS_URI, params={"apiKey": dbinfo.JCKEY, "contract": dbinfo.NAME})
+load_dotenv(dotenv_path="var.env")
+
+r = requests.get(os.getenv('STATION_URI'), params={"apiKey": os.getenv('JCDECAUX_API_KEY'), "contract": os.getenv('CITY')})
 
 data = json.loads(r.text)
 print(json.dumps(data, indent=4))
