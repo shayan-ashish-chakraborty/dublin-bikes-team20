@@ -1,10 +1,11 @@
+import os
 import requests
 import json
 import traceback
 from sqlalchemy import create_engine
 from datetime import datetime
-import dbinfo
 import time
+from dotenv import load_dotenv
 
 def current_to_db(text, in_engine):
 
@@ -57,18 +58,20 @@ def current_to_db(text, in_engine):
     """, vals)
 
 def main():
-    USER = "root"
-    PASSWORD = "shayan1664"
-    PORT = "3306"
-    DB = "local_databaseopenweather"
-    URI = "127.0.0.1"
+    load_dotenv(dotenv_path="var.env")
+
+    USER = os.getenv("DB_USER")
+    PASSWORD = os.getenv("DB_PASSWORD")
+    PORT = os.getenv("DB_PORT")
+    DB = os.getenv("DB_NAME_WEATHER")
+    URI = os.getenv("DB_HOST")
 
     connection_string = "mysql+pymysql://{}:{}@{}:{}/{}".format(USER, PASSWORD, URI, PORT, DB)
 
     engine = create_engine(connection_string, echo = True)
 
     try:
-        r = requests.get(dbinfo.CURRENT_WEATHER_URI, params={"lat": dbinfo.LAT, "lon": dbinfo.LON, "appid": dbinfo.WEATHER_KEY, "units": "metric"})
+        r = requests.get(os.getenv('CURRENT_WEATHER_URI'), params={"lat": os.getenv('LAT'), "lon": os.getenv('LON'), "appid": os.getenv('OPENWEATHER_API_KEY'), "units": "metric"})
         print(r)
 
         if r.status_code == 200:

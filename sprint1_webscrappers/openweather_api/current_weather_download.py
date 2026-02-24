@@ -3,16 +3,11 @@ import traceback
 import datetime
 import time
 import os
-import dbinfo
+from dotenv import load_dotenv
 
-"""
-Data are in dbinfo.py
 
-WEATHER_KEY = "your_key"
-LAT = 53.3498
-LON = -6.2603
-CURRENT_WEATHER_URI = "https://api.openweathermap.org/data/2.5/weather"
-"""
+# Data are in dbinfo.py
+
 
 # Will be used to store text in a file
 def write_to_file(text):
@@ -38,13 +33,14 @@ def write_to_db(text):
 def main():
     while True:
         try:
+            load_dotenv(dotenv_path="var.env")
             r = requests.get(
-                dbinfo.CURRENT_WEATHER_URI,
+                os.getenv('CURRENT_WEATHER_URI'),
                 params={
-                    "lat": dbinfo.LAT,
-                    "lon": dbinfo.LON,
+                    "lat": os.get('LAT'),
+                    "lon": os.get('LON'),
                     "units": "metric",
-                    "appid": dbinfo.WEATHER_KEY
+                    "appid": os.get('OPENWEATHER_API_KEY')
                 }
             )
 
