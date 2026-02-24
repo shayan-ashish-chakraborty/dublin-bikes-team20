@@ -1,0 +1,25 @@
+# Ignore environment variables
+var.env
+*.env
+
+# Ignore Python cache
+__pycache__/
+*.pyc
+
+# Ignore data folders (your JSON files)
+data/
+weather_data/
+
+# Ignore VS Code settings
+.vscode/
+
+# Ignore system files
+.DS_Store
+Thumbs.db
+
+# Ignore Personal API keys
+API_keys.txt
+
+# Ignore python files as of now
+dbinfo.py
+weather_forecast_api.py

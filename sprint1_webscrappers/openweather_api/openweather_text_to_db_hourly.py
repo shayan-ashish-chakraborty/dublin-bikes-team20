@@ -1,10 +1,11 @@
+import os
 import requests
 import traceback
 import datetime
 import time
-import dbinfo
 import json
 from sqlalchemy import create_engine
+from dotenv import load_dotenv
 
 def hourly_to_db(text, in_engine):
 
@@ -65,12 +66,13 @@ def hourly_to_db(text, in_engine):
 
 
 def main():
+    load_dotenv(dotenv_path="var.env")
 
-    USER = "root"
-    PASSWORD = "shayan1664"
-    PORT = "3306"
-    DB = "local_databaseopenweather"
-    URI = "127.0.0.1"
+    USER = os.getenv("DB_USER")
+    PASSWORD = os.getenv("DB_PASSWORD")
+    PORT = os.getenv("DB_PORT")
+    DB = os.getenv("DB_NAME_WEATHER")
+    URI = os.getenv("DB_HOST")
 
     connection_string = f"mysql+pymysql://{USER}:{PASSWORD}@{URI}:{PORT}/{DB}"
 
@@ -78,10 +80,10 @@ def main():
 
     try:
         r = requests.get(
-            dbinfo.FORECAST_WEATHER_URI,
+            os.getenv('FORECAST_WEATHER_URI'),
             params={
-                "q": dbinfo.CITY,
-                "appid": dbinfo.WEATHER_KEY,
+                "q": os.getenv('CITY'),
+                "appid": os.getenv('OPENWEATHER_API_KEY'),
                 "units": "metric"
             }
         )

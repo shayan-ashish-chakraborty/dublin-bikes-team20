@@ -1,0 +1,4 @@
+JCDecaux API key - b46d259f68fc8cf6e74cbb1c49022e8d9398e586
+
+
+OpenWeather API key - 70fc10d7ab1946ec517456c3876b9e27

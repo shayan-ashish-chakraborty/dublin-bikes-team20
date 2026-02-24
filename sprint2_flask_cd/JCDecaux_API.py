@@ -1,18 +1,24 @@
 from flask import Flask, render_template, jsonify
+from dotenv import load_dotenv
 import requests
+import os
 
 app = Flask(__name__)
 
+load_dotenv(dotenv_path="var.env")
+
 # API Keys (Replace with your own keys)
-JCDECAUX_API_KEY = "b46d259f68fc8cf6e74cbb1c49022e8d9398e586"
-CITY_NAME = "Dublin"  # Change to your desired city
-CONTRACT_NAME = "dublin"  # Change as needed
+#JCDECAUX_API_KEY = "b46d259f68fc8cf6e74cbb1c49022e8d9398e586"
+#CITY_NAME = "Dublin"  # Change to your desired city
+#CONTRACT_NAME = "dublin"  # Change as needed
 
 # JCDecaux API - Get bike stations
 def get_bike_data():
-    url = f"https://api.jcdecaux.com/vls/v1/stations?contract={CONTRACT_NAME}&apiKey={JCDECAUX_API_KEY}"
-    response = requests.get(url)
-    return response.json() if response.status_code == 200 else []
+    r = requests.get(os.getenv('STATIONS_URI'), params={"apiKey": os.getenv('JCDECAUX_API_KEY'), "contract": os.getenv('CITY')})
+    #url = f"https://api.jcdecaux.com/vls/v1/stations?contract={CONTRACT_NAME}&apiKey={JCDECAUX_API_KEY}"
+    #response = requests.get(url)
+    #return response.json() if response.status_code == 200 else []
+    return r.json() if r.status_code == 200 else []
 
 @app.route("/")
 def home():
