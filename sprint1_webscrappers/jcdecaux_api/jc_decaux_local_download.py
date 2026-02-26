@@ -33,7 +33,8 @@ def write_to_db(text):
 
 def main():
     while True:
-        load_dotenv(dotenv_path="var.env")
+        if os.path.exists("var.env"):
+            load_dotenv(dotenv_path="var.env")
         try:
             r = requests.get(os.getenv('STATIONS_URI'), params={"apiKey": os.getenv('JCDECAUX_API_KEY'), "contract": os.getenv('CITY')})
             print(r)

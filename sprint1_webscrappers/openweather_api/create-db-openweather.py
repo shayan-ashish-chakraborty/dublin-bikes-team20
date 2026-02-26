@@ -3,7 +3,8 @@ import sqlalchemy as sqla
 from sqlalchemy import create_engine
 from dotenv import load_dotenv
 
-load_dotenv(dotenv_path="var.env")
+if os.path.exists("var.env"):
+    load_dotenv(dotenv_path="var.env")
 
 USER = os.getenv("DB_USER")
 PASSWORD = os.getenv("DB_PASSWORD")
