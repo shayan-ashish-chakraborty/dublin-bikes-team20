@@ -23,3 +23,6 @@ API_keys.txt
 # Ignore python files as of now
 dbinfo.py
 weather_forecast_api.py
+
+#ec2 keys
+ec2/
