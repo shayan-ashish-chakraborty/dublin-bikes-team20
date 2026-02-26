@@ -66,7 +66,8 @@ def hourly_to_db(text, in_engine):
 
 
 def main():
-    load_dotenv(dotenv_path="var.env")
+    if os.path.exists("var.env"):
+        load_dotenv(dotenv_path="var.env")
 
     USER = os.getenv("DB_USER")
     PASSWORD = os.getenv("DB_PASSWORD")
