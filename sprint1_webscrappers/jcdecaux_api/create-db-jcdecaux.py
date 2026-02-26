@@ -1,4 +1,3 @@
-import dbinfo
 import requests
 import json
 import sqlalchemy as sqla
