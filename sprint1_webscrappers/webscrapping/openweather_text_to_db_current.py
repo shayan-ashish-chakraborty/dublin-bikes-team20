@@ -71,7 +71,7 @@ def current_to_db(text, in_engine):
     """, vals)
 
 
-def data_config():
+def db_connection():
     if os.path.exists("var.env"):
         load_dotenv(dotenv_path="var.env")
 
@@ -83,7 +83,11 @@ def data_config():
 
     connection_string = "mysql+pymysql://{}:{}@{}:{}/{}".format(USER, PASSWORD, URI, PORT, DB)
 
-    engine = create_engine(connection_string, echo=True)
+    engine = create_engine(connection_string,
+                           pool_pre_ping=True,
+                           pool_recycle=3600,
+                           echo=True)
+
     return engine
 
 def current_weather_to_db(engine):
