@@ -12,7 +12,7 @@ logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
     handlers=[
-        logging.FileHandler("current_weather.log"),
+        logging.FileHandler("hourly_weather.py"),
         logging.StreamHandler()
     ]
 )
