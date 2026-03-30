@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Register</title>
+  <link rel="stylesheet" href="{{ url_for('auth.static', filename='css/style.css') }}">
+</head>
+<body>
+
+  <div class="form-wrapper">
+    <div class="form-container">
+      <h2>Create Account</h2>
+
+      <!-- Flash messages inside container -->
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="flash-message {{ category }}">
+              {{ message }}
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      <form method="POST">
+        <input type="text" name="full_name" placeholder="Full Name" required>
+
+        <input type="email" name="email" placeholder="Email Address" required>
+
+        <input type="password" name="password"
+               placeholder="6-digit Password"
+               required maxlength="6">
+
+        <input type="password" name="confirm_password"
+               placeholder="Confirm Password"
+               required maxlength="6">
+
+        <button type="submit">Register</button>
+      </form>
+
+      <p class="switch-page">
+        Already have an account?
+        <a href="{{ url_for('auth.login') }}">Login here</a>
+      </p>
+    </div>
+  </div>
+</body>
+</html>
