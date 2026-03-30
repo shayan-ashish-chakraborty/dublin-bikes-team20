@@ -1,0 +1,108 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  height: 100vh;
+  background: url('/auth/static/images/loginbg.png') no-repeat center center fixed;
+  background-size: cover;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Wrapper */
+.form-wrapper {
+  width: 100%;
+  max-width: 340px;
+}
+
+/* Card */
+.form-container {
+  background-color: rgba(255, 255, 255, 0.742);
+  padding: 25px 20px;
+  border-radius: 12px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.3);
+  text-align: center;
+}
+
+/* Title */
+.form-container h2 {
+  margin-bottom: 25px;
+  color: #000000;
+}
+
+/* Make sure form stacks vertically */
+.form-container form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Inputs */
+.form-container input {
+  width: 100%;
+  padding: 10px;
+  margin: 6px 0;
+  border-radius: 6px;
+  border: 1px solid #858383cb;
+  background-color: #ECFBCE;
+  font-size: 15px;
+  transition: 0.2s;
+}
+
+.form-container input:focus {
+  outline: none;
+  border-color: #aaff00;
+  box-shadow: 0 0 5px rgba(170, 255, 0, 0.5);
+}
+
+/* Button */
+.form-container button {
+  width: 100%;
+  padding: 10px;
+  margin-top: 8px;
+  background-color: #aaff00;
+  color: rgb(0, 0, 0);
+  font-size: 15px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.form-container button:hover {
+  background-color: #c3ff4a;
+}
+
+/* Links */
+.form-container a {
+  color: #1e00ff;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+/* Bottom text */
+.switch-page {
+  margin-top: 15px;
+  font-size: 14px;
+}
+
+/* Flash messages */
+.flash-message {
+  background-color: #f8d7da;
+  color: #842029;
+  padding: 10px;
+  margin-bottom: 15px;
+  border-radius: 6px;
+  border: 1px solid #f5c2c7;
+  font-size: 14px;
+  text-align: center;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.flash-message.success {
+  background-color: #d1e7dd;
+  color: #0f5132;
+  border: 1px solid #badbcc;
+}
+
