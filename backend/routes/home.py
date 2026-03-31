@@ -2,8 +2,8 @@ from flask import Blueprint, render_template
 import pathlib
 
 
-_TEMPLATES = "../../../sprint3_frontend_Leah/templates"
-_STATIC    = "../../../sprint3_frontend_Leah/static"
+_TEMPLATES = "../../../main_project/templates"
+_STATIC    = "../../../main_project/static"
 
 home_bp = Blueprint(
     "frontend",

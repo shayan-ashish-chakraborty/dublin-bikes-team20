@@ -6,8 +6,8 @@ from sqlalchemy import text
 
 
 _BASE      = pathlib.Path(__file__).resolve().parent.parent.parent
-_TEMPLATES = _BASE / "sprint3_frontend_Leah" / "templates"
-_STATIC    = _BASE / "sprint3_frontend_Leah" / "static"
+_TEMPLATES = _BASE / "main_project" / "templates"
+_STATIC    = _BASE / "main_project" / "static"
 
 
 weather_bp = Blueprint(

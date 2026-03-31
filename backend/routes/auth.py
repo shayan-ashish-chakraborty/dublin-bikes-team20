@@ -7,8 +7,8 @@ import pathlib
 
 # Paths for templates and static
 BASE_DIR = pathlib.Path(__file__).resolve().parent.parent.parent
-template_path = BASE_DIR / 'sprint3_frontend_Leah' / 'templates'
-static_path = BASE_DIR / 'sprint3_frontend_Leah' / 'static'
+template_path = BASE_DIR / 'main_project' / 'templates'
+static_path = BASE_DIR / 'main_project' / 'static'
 
 # Blueprint
 auth_bp = Blueprint(
