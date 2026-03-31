@@ -1,87 +1,82 @@
-from __future__ import annotations
-
-import os
-
-import requests
-from flask import Blueprint, current_app, jsonify, request
+from flask import Blueprint, render_template, jsonify, request
+import pathlib
+from backend.db import create_engine_for, DbConfig
+from sqlalchemy.orm import sessionmaker
 from sqlalchemy import text
 
-from ..db import DbConfig, create_engine_for
 
-weather_bp = Blueprint("weather", __name__)
+_BASE      = pathlib.Path(__file__).resolve().parent.parent.parent
+_TEMPLATES = _BASE / "sprint3_frontend_Leah" / "templates"
+_STATIC    = _BASE / "sprint3_frontend_Leah" / "static"
 
 
-def _get_city() -> str:
-    # allow overriding per-request: /api/weather/current?city=...
-    return request.args.get("city") or current_app.config.get("CITY")  # type: ignore[return-value]
+weather_bp = Blueprint(
+    "weather",
+    __name__,
+    template_folder=str(_TEMPLATES),
+    static_folder=str(_STATIC),
+    static_url_path="/static",
+)
 
+
+# Database config for weather
+weather_db_cfg = DbConfig(
+    host="localhost",
+    port=3306,
+    user="root",
+    password="shayan1664",  # From var.env
+    db_name="local_databaseopenweather"
+)
+
+weather_engine = create_engine_for(weather_db_cfg)
+WeatherSession = sessionmaker(bind=weather_engine)
+
+
+# ROUTES 
 
 @weather_bp.get("/")
-def weather_index():
-    return {
-        "endpoints": {
-            "current_external": "/api/weather/current",
-            "forecast_external": "/api/weather/forecast",
-            "current_db": "/api/weather/db/current",
-            "hourly_db": "/api/weather/db/hourly",
-        }
-    }
-
-
-@weather_bp.get("/current")
-def current_weather_external():
-    api_key = current_app.config.get("OPENWEATHER_API_KEY")
-    if not api_key:
-        return {"error": "OPENWEATHER_API_KEY is not set"}, 500
-
-    r = requests.get(
-        current_app.config["CURRENT_WEATHER_URI"],
-        params={"appid": api_key, "q": _get_city(), "units": "metric"},
-        timeout=15,
-    )
-    return jsonify(r.json()), r.status_code
-
-
-@weather_bp.get("/forecast")
-def forecast_weather_external():
-    api_key = current_app.config.get("OPENWEATHER_API_KEY")
-    if not api_key:
-        return {"error": "OPENWEATHER_API_KEY is not set"}, 500
-
-    r = requests.get(
-        current_app.config["FORECAST_WEATHER_URI"],
-        params={"appid": api_key, "q": _get_city(), "units": "metric"},
-        timeout=15,
-    )
-    return jsonify(r.json()), r.status_code
-
-
-def _weather_engine():
-    cfg = DbConfig(
-        host=current_app.config["DB_HOST"],
-        port=str(current_app.config["DB_PORT"]),
-        user=current_app.config["DB_USER"],
-        password=current_app.config["DB_PASSWORD"],
-        db_name=current_app.config["DB_NAME_WEATHER"],
-    )
-    echo = os.getenv("SQL_ECHO", "false").lower() == "true"
-    return create_engine_for(cfg, echo=echo)
+def weather_page():
+    """
+    GET /weather
+    Weather page — current conditions card, 7-hour hourly strip,
+    40-hour temperature Chart.js graph, ML availability placeholder.
+    All data is fetched client-side (in the page's JS), not here.
+    See weather.html for full details.
+    """
+    return render_template("weather.html")
 
 
 @weather_bp.get("/db/current")
-def current_weather_db():
-    engine = _weather_engine()
-    with engine.connect() as conn:
-        rows = conn.execute(text("SELECT * FROM current ORDER BY dt DESC LIMIT :limit"), {"limit": int(request.args.get("limit", 200))})
-        data = [dict(row._mapping) for row in rows]
-    return jsonify({"weather": data})
+def get_current_weather():
+    """
+    GET /api/weather/db/current
+    Returns current weather data from the local database.
+    Query parameter: limit (default 1, max 10)
+    """
+    try:
+        limit = min(int(request.args.get('limit', 1)), 10)
+        db_session = WeatherSession()
+        result = db_session.execute(text("SELECT * FROM current ORDER BY dt DESC LIMIT :limit"), {"limit": limit})
+        weather_data = [dict(row) for row in result]
+        db_session.close()
+        return jsonify(weather=weather_data)
+    except Exception as e:
+        return jsonify(error=str(e)), 500
 
 
 @weather_bp.get("/db/hourly")
-def hourly_weather_db():
-    engine = _weather_engine()
-    with engine.connect() as conn:
-        rows = conn.execute(text("SELECT * FROM hourly ORDER BY dt DESC, future_dt DESC LIMIT :limit"), {"limit": int(request.args.get("limit", 200))})
-        data = [dict(row._mapping) for row in rows]
-    return jsonify({"hourly": data})
-
+def get_hourly_weather():
+    """
+    GET /api/weather/db/hourly
+    Returns hourly weather forecast from the local database.
+    Query parameter: limit (default 40, max 100)
+    """
+    try:
+        limit = min(int(request.args.get('limit', 40)), 100)
+        db_session = WeatherSession()
+        result = db_session.execute(text("SELECT * FROM hourly ORDER BY dt ASC LIMIT :limit"), {"limit": limit})
+        hourly_data = [dict(row) for row in result]
+        db_session.close()
+        return jsonify(hourly=hourly_data)
+    except Exception as e:
+        return jsonify(error=str(e)), 500

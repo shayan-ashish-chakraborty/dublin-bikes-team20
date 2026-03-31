@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <!-- Chat bubble -->
+  <path d="M8 10 H56 A4 4 0 0 1 60 14 V40 A4 4 0 0 1 56 44 H38 L28 56 L26 44 H8 A4 4 0 0 1 4 40 V14 A4 4 0 0 1 8 10 Z" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/>
+  <!-- AI circuit dots -->
+  <circle cx="20" cy="27" r="4" fill="currentColor" opacity="0.8"/>
+  <circle cx="32" cy="27" r="4" fill="currentColor" opacity="0.8"/>
+  <circle cx="44" cy="27" r="4" fill="currentColor" opacity="0.8"/>
+  <!-- antenna -->
+  <line x1="32" y1="10" x2="32" y2="4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+  <circle cx="32" cy="3" r="2" fill="currentColor"/>
+</svg>

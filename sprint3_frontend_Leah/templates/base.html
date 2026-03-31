@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  {# base.html — The Layout (Shayan)
+    
+     This is the "parent" template. Every page in this project
+     inherits from it by putting this at the very top of their file:
+
+         {% extends "base.html" %}
+
+     Once a page does that, it gets the navbar, footer, chatbot,
+     CSS and JS automatically — no copy-pasting needed.
+
+     EXAMPLE — a new page called stations.html:
+         {% extends "base.html" %}
+
+         {% block title %}Stations — Dublin Bikes{% endblock %}
+
+         {% block content %}
+           <h1>All Stations</h1>
+           <p>Your HTML here...</p>
+         {% endblock %}
+
+     That's it. Flask/Jinja2 automatically merges your content
+     into this layout when it renders the page.
+   #}
+
+  {# Page Title
+     Child pages override this block:
+       {% block title %}My Page{% endblock %}
+     If not overridden, the tab just says "Dublin Bikes".
+   #}
+  <title>{% block title %}Dublin Bikes{% endblock %}</title>
+
+  {# Google Fonts — loaded once here so every page gets them for free #}
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+  {# Shared StyleSheet 
+     url_for('frontend.static', filename='css/style.css') builds
+     the correct URL for the file at:
+       shayan_frontend_sprint3/sprint3_frontend_Shayan/static/css/style.css
+
+     This stylesheet applies to EVERY page. Do not remove it.
+   #}
+  <link rel="stylesheet" href="{{ url_for('frontend.static', filename='css/style.css') }}">
+
+</head>
+<body>
+
+{# Navbar — automatically included on every page
+   
+   You do NOT need to copy this into your own templates.
+
+   How to add a new nav link (when create a new page):
+ 
+   1. Add a <a> tag in the desktop nav below 
+   2. Use url_for('blueprint_name.function_name') if you have a
+      Flask route, or a plain href="/path" if not yet wired up.
+
+   request.endpoint holds the current route name, e.g. 'frontend.home'.
+   We compare it to each link's endpoint and add the 'active' CSS
+   class if they match — that's what makes the current page's link
+   appear highlighted/underlined in the navbar.
+
+   How login/logout buttons Work:
+   
+   session.get('user_id') checks Flask's session dictionary.
+   When a user logs in via Leah's auth.py, it stores:
+       session['user_id'] = result._mapping['id']
+   If that key exists → show "Sign Out".
+   If it doesn't exist → show "Log In" and "Sign Up".
+   url_for('auth.login'), url_for('auth.register'), url_for('auth.logout')
+   all point to routes in backend/routes/auth.py (Leah's blueprint).
+ #}
+
+<header class="navbar">
+
+  {# Logo — clicking it always takes the user back to the home page #}
+  <a href="{{ url_for('frontend.home') }}" class="nav-logo">
+    <img src="{{ url_for('frontend.static', filename='images/icons/bike.svg') }}"
+         alt="Bike" class="nav-logo-icon">
+    Dublin<span>Bikes</span>
+  </a>
+
+  <nav class="nav-links">
+    {# Home link — gets 'active' class when request.endpoint == 'frontend.home' #}
+    <a href="{{ url_for('frontend.home') }}"
+       class="nav-link {% if request.endpoint == 'frontend.home' %}active{% endif %}">
+      Home
+    </a>
+
+    {# Weather link — gets 'active' class when on the weather page #}
+    <a href="{{ url_for('frontend.weather_page') }}"
+       class="nav-link {% if request.endpoint == 'frontend.weather_page' %}active{% endif %}">
+      Weather
+    </a>
+
+    {# Add the new nav links here 
+       Once your Flask blueprint + route are ready, replace the plain
+       href with url_for() and add the active-class check. Example:
+         <a href="{{ url_for('journey.page') }}"
+            class="nav-link {% if request.endpoint == 'journey.page' %}active{% endif %}">
+           Journey &amp; Map
+         </a>
+    #}
+    <a href="/journey"  class="nav-link">Journey &amp; Map</a>
+    <a href="/stations" class="nav-link">Stations</a>
+  </nav>
+
+  <div class="nav-right">
+    {# Live weather chip — #hdr-temp is updated by main.js on every page load.
+       It calls /api/weather/db/current and fills in the temperature.
+       You don't need to change anything here. #}
+    <div class="weather-chip">
+      <img src="{{ url_for('frontend.static', filename='images/icons/cloud.svg') }}"
+           alt="Weather" class="chip-icon">
+      <span id="hdr-temp">--&deg;C</span>
+    </div>
+
+    {# Auth buttons — swap between Sign Out / Log In + Sign Up
+       depending on whether the user is logged in (session check). #}
+    {% if session.get('user_id') %}
+      <a href="{{ url_for('auth.logout') }}" class="btn-nav-outline">Sign Out</a>
+    {% else %}
+      <a href="{{ url_for('auth.login') }}"    class="btn-nav-outline">Log In</a>
+      <a href="{{ url_for('auth.register') }}" class="btn-nav-solid">Sign Up</a>
+    {% endif %}
+  </div>
+
+</header>
+
+{# MAIN CONTENT BLOCK 
+   
+   In the child template (e.g. stations.html), write:
+
+       {% block content %}
+         <h1>Your page HTML here</h1>
+       {% endblock %}
+
+   The navbar above and footer + chatbot below are injected
+   automatically — you never need to copy them.
+ #}
+<main>
+  {% block content %}{% endblock %}
+</main>
+
+
+{# FOOTER — automatically included on every page
+   
+   #footer-year is set to the current year by main.js.
+   #If you add a new top-level page, add its link here too. 
+ #}
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <img src="{{ url_for('frontend.static', filename='images/icons/bike.svg') }}"
+           alt="Dublin Bikes" class="footer-logo-icon">
+      <span>Dublin Bike Share</span>
+    </div>
+    <div class="footer-links">
+      <a href="{{ url_for('frontend.home') }}">Home</a>
+      <a href="{{ url_for('frontend.weather_page') }}">Weather</a>
+      <a href="/journey">Map</a>
+      <a href="/stations">Stations</a>
+      {# ADD NEW PAGE LINK HERE #}
+    </div>
+    <span>&copy; <span id="footer-year"></span> Dublin Bike Share</span>
+  </div>
+</footer>
+
+
+{# AI chatbot floating button + panel
+  
+   This appears on every page automatically via base.html.
+   You do NOT need to add anything in your page templates.
+
+   HOW IT WORKS:
+   - Clicking the "Ask AI" button (chatbot-fab) opens the panel.
+   - main.js handles all the open/close and messaging logic.
+   - Messages are sent directly to the Google Gemini API.
+   - The API key must be set inside main.js.
+   - sendSuggestion() is defined in main.js — the chip buttons call it.
+ #}
+<button class="chatbot-fab" id="chatbot-fab">
+  <img src="{{ url_for('frontend.static', filename='images/icons/chatbot.svg') }}"
+       alt="AI" class="fab-icon">
+  Ask AI
+</button>
+
+<div class="chatbot-panel" id="chatbot-panel">
+  <div class="chat-header">
+    <div class="chat-header-left">
+      <img src="{{ url_for('frontend.static', filename='images/icons/chatbot.svg') }}"
+           alt="AI" class="chat-header-icon">
+      <div>
+        <div class="chat-title">Dublin Bikes AI</div>
+        <div class="chat-sub">Powered by Google</div>
+      </div>
+    </div>
+    <button class="chat-close" id="chat-close">&#x2715;</button>
+  </div>
+  <div class="chat-messages" id="chat-messages">
+    <div class="chat-msg bot">
+      <div class="chat-bubble">Hi! Ask me about bikes, routes or cycling tips in Dublin!</div>
+    </div>
+  </div>
+  <div class="chat-chips" id="chat-chips">
+    {# Quick-reply suggestion chips — clicking one sends it as a message via main.js #}
+    <button class="chip" onclick="sendSuggestion(this)">Best time to cycle?</button>
+    <button class="chip" onclick="sendSuggestion(this)">Find a station?</button>
+    <button class="chip" onclick="sendSuggestion(this)">How much does it cost?</button>
+  </div>
+  <div class="chat-input-row">
+    <input id="chat-input" class="chat-input" placeholder="Ask about bikes..." maxlength="500" autocomplete="off">
+    <button class="chat-send" id="chat-send">&#x27A4;</button>
+  </div>
+</div>
+
+
+{# Shared js (main.js)
+   Runs on EVERY page. Handles:
+     - Footer year (#footer-year)
+     - Navbar weather chip temperature (#hdr-temp)
+     - Home page weather strip (#hw-temp, #hw-feels, etc.)
+     - AI Chatbot open/close and message sending
+   Loaded at the bottom of <body> so the DOM is fully ready.
+ #}
+<script src="{{ url_for('frontend.static', filename='js/main.js') }}"></script>
+
+{% block extra_js %}{% endblock %}
+
+</body>
+</html>

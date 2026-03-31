@@ -1,0 +1,124 @@
+{# index.html — home page  (Shayan)
+  
+   URL:    GET /
+   Route:  frontend_bp  →  project/backend/routes/frontend.py  →  home()
+   Layout: Extends base.html (navbar, footer, chatbot all automatic)
+
+   What this page contents (top to bottom):
+     1. Hero section      — big banner with CTA buttons
+     2. Live weather strip — real-time weather pulled by JS
+     3. Stats bar         — static service numbers
+     4. Feature cards     — links to the 4 main app sections
+#}
+
+{% extends "base.html" %}
+{% block title %}Dublin Bike Share &mdash; Home{% endblock %}
+
+{% block content %}
+
+{# Hero section
+   Full-width banner at the top of the home page.
+   Background image / gradient is controlled by .hero in style.css.
+   The CTA buttons link to /journey and /stations.
+   Replace the href values with url_for() once those blueprint
+   routes are registered in backend/__init__.py 
+ #}
+<section class="hero">
+  <div class="hero-content">
+    <h1>Explore Dublin<br>on Two Wheels</h1>
+    <p>Find bikes, check the weather, and plan your route &mdash; all in one place. First 30 minutes free.</p>
+    <div class="hero-btns">
+      <a href="/journey"  class="btn-primary">Plan a Journey</a>
+      <a href="/stations" class="btn-outline-white">Find Stations</a>
+    </div>
+  </div>
+</section>
+
+{# Live Weather Strip
+   Shows real-time Dublin weather across the page.
+
+   How the data is fetched:
+   main.js (runs on every page) checks for the element #hw-temp.
+   If it finds it, it fetches /api/weather/db/current and fills:
+     #hw-temp   → current temperature
+     #hw-feels  → feels-like temperature
+     #hw-hum    → humidity %
+     #hw-wind   → wind speed m/s
+
+   Data source priority:
+     1. Our MySQL DB  →  /api/weather/db/current   (backend/routes/weather.py)
+ #}
+<section class="wx-strip">
+  <div class="wx-strip-label">
+    <img src="{{ url_for('frontend.static', filename='images/icons/cloud.svg') }}"
+         alt="Weather" class="wx-strip-icon">
+    Current Dublin Weather
+  </div>
+  <div class="wx-strip-items">
+    <div class="wx-item"><span class="wx-val" id="hw-temp">&mdash;</span><span class="wx-key">Temperature</span></div>
+    <div class="wx-item"><span class="wx-val" id="hw-feels">&mdash;</span><span class="wx-key">Feels Like</span></div>
+    <div class="wx-item"><span class="wx-val" id="hw-hum">&mdash;</span><span class="wx-key">Humidity</span></div>
+    <div class="wx-item"><span class="wx-val" id="hw-wind">&mdash;</span><span class="wx-key">Wind</span></div>
+  </div>
+  <a href="{{ url_for('frontend.weather_page') }}" class="btn-primary btn-sm">Full Forecast &rarr;</a>
+</section>
+
+{# Stats bar
+   Static numbers about the Dublin Bikes service.
+#}
+<section class="stats-bar">
+  <div class="stat"><span class="stat-num">116</span><span class="stat-lbl">Stations</span></div>
+  <div class="stat"><span class="stat-num">1,500+</span><span class="stat-lbl">Bikes</span></div>
+  <div class="stat"><span class="stat-num">30 min</span><span class="stat-lbl">Free per Trip</span></div>
+  <div class="stat"><span class="stat-num">&euro;35</span><span class="stat-lbl">Annual Membership</span></div>
+</section>
+
+{# Feature cards
+   Four cards linking to the main app sections.
+   Each card: SVG icon + heading + description + link.
+ #}
+<section class="features">
+
+  {# Card 1: Interactive Map #}
+  <div class="feature-card">
+    <img src="{{ url_for('frontend.static', filename='images/icons/map.svg') }}"
+         alt="Interactive Map" class="fc-icon-img">
+    <h3>Interactive Map</h3>
+    <p>Find stations with live bike and dock availability across Dublin.</p>
+    <a href="/journey" class="fc-link">Open Map &rarr;</a>
+  </div>
+
+  {# Card 2: Weather Forecast — uses url_for() because this route exists #}
+  <div class="feature-card">
+    <img src="{{ url_for('frontend.static', filename='images/icons/weather.svg') }}"
+         alt="Weather Forecast" class="fc-icon-img">
+    <h3>Weather Forecast</h3>
+    <p>Real-time Dublin weather and a cycling conditions score.</p>
+    <a href="{{ url_for('frontend.weather_page') }}" class="fc-link">Check Weather &rarr;</a>
+  </div>
+
+  {# Card 3: Journey Planner #}
+  <div class="feature-card">
+    <img src="{{ url_for('frontend.static', filename='images/icons/journey.svg') }}"
+         alt="Journey Planner" class="fc-icon-img">
+    <h3>Journey Planner</h3>
+    <p>Plan cycling routes between any two stations with turn-by-turn directions.</p>
+    <a href="/journey" class="fc-link">Plan Route &rarr;</a>
+  </div>
+
+  {# Card 4: Live Availability #}
+  <div class="feature-card">
+    <img src="{{ url_for('frontend.static', filename='images/icons/live.svg') }}"
+         alt="Live Availability" class="fc-icon-img">
+    <h3>Live Availability</h3>
+    <p>Up-to-the-minute bike and stand counts, updated every 5 minutes.</p>
+    <a href="/stations" class="fc-link">View Stations &rarr;</a>
+  </div>
+
+  
+
+</section>
+
+
+
+{% endblock %}
