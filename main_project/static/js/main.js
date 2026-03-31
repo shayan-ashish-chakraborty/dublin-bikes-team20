@@ -134,56 +134,32 @@ if (el_yr) el_yr.textContent = _d.getFullYear();
     const typing = addTyping(); // show "..." animation while waiting
 
     try {
-      // Google Gemini API CALL (Free Tier)
-      // Sends the full conversation history so Gemini has context.
-      const GEMINI_API_KEY = 'AIzaSyBjyz0HG3NLA0ENI4iu15h9cv8x6KKgaWo'; 
-      
-      // Format messages for Google Gemini API
-      const contents = [];
-      for (const msg of history) {
-        contents.push({
-          role: msg.role === 'user' ? 'user' : 'model',
-          parts: [{ text: msg.content }]
-        });
+      // POST to our backend proxy endpoint (no API key in browser)
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          systemInstruction: SYSTEM,
+          messages: history,
+        }),
+      });
+
+      if (!res.ok) {
+        const err = await res.text();
+        throw new Error(`Chat endpoint error: ${res.status} ${err}`);
       }
-      
-      const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            system_instruction: {
-              parts: [{ text: SYSTEM }]
-            },
-            contents: contents,
-            safety_settings: [
-              {
-                category: 'HARM_CATEGORY_HATE_SPEECH',
-                threshold: 'BLOCK_NONE',
-              },
-              {
-                category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
-                threshold: 'BLOCK_NONE',
-              },
-            ],
-            generation_config: {
-              max_output_tokens: 400,
-              temperature: 1,
-            },
-          }),
-        }
-      );
+
       typing.remove();
       const data = await res.json();
-      const reply = data.candidates?.[0]?.content?.parts?.[0]?.text ?? "Sorry, couldn't get a response.";
+      const reply = data.reply || "Sorry, couldn't get a response.";
       history.push({ role: 'assistant', content: reply });
       addBubble('bot', reply);
-    } catch (_) {
+    } catch (error) {
       typing.remove();
-      addBubble('bot', ' Chatbot not connected. Add your Google Gemini API key to enable it.');
+      console.error('Chatbot error:', error);
+      addBubble('bot', 'Chatbot not connected. Check server logs and GEMINI_API_KEY.');
     }
 
     send.disabled = input.disabled = false;
