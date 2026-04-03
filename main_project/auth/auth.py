@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
-from backend.db import create_engine_for, DbConfig
+from ..db import create_engine_for, DbConfig
 from sqlalchemy.orm import sessionmaker
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy import text

@@ -48,6 +48,7 @@
      This stylesheet applies to EVERY page. Do not remove it.
    #}
   <link rel="stylesheet" href="{{ url_for('frontend.static', filename='css/style.css') }}">
+  {% block head %}{% endblock %}
 
 </head>
 <body>
