@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, jsonify, request
 import pathlib
-from backend.db import create_engine_for, DbConfig
+from ..db import create_engine_for, DbConfig
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import text
 

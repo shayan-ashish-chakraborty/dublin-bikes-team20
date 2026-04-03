@@ -25,8 +25,13 @@ class Config:
     # External APIs
     CITY: str = os.getenv("CITY", "Dublin,IE")
     OPENWEATHER_API_KEY: str | None = os.getenv("OPENWEATHER_API_KEY")
+    
     JCDECAUX_API_KEY: str | None = os.getenv("JCDECAUX_API_KEY")
-
+    JCDECAUX_CONTRACT = "dublin"
+    JCDECAUX_BASE_URL = "https://api.jcdecaux.com/vls/v1"
+    
+    GOOGLE_MAPS_API_KEY = os.getenv("GOOGLE_MAPS_API_KEY")
+   
     CURRENT_WEATHER_URI: str = os.getenv(
         "CURRENT_WEATHER_URI", "https://api.openweathermap.org/data/2.5/weather"
     )

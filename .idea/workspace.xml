@@ -1,0 +1,365 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="9c7e6d75-89b3-4405-815f-21d89eec6734" name="Changes" comment="Running Flask on EC3">
+      <change afterPath="$PROJECT_DIR$/main_project/templates/Journey.html" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+        <option value="HTML File" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;history&quot;: [
+    {
+      &quot;state&quot;: &quot;OPEN&quot;
+    }
+  ],
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/shayan-ashish-chakraborty/dublin-bikes-team20.git&quot;,
+    &quot;accountId&quot;: &quot;5bb753e1-1ee5-4da2-a7f8-47041e14b011&quot;
+  }
+}</component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 7
+}</component>
+  <component name="ProjectId" id="39XQ7GRhwCU6bXiqgYaIU2MhwNe" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;DefaultHtmlFileTemplate&quot;: &quot;HTML File&quot;,
+    &quot;JavaScript Debug.index.html.executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;Python.JCDecaux_API (1).executor&quot;: &quot;Run&quot;,
+    &quot;Python.JCDecaux_API.executor&quot;: &quot;Run&quot;,
+    &quot;Python.app.executor&quot;: &quot;Run&quot;,
+    &quot;Python.create-db-jcdecaux.executor&quot;: &quot;Run&quot;,
+    &quot;Python.create-db-openweather.executor&quot;: &quot;Run&quot;,
+    &quot;Python.current_weather.executor&quot;: &quot;Run&quot;,
+    &quot;Python.get-station.executor&quot;: &quot;Run&quot;,
+    &quot;Python.hourly_weather.executor&quot;: &quot;Run&quot;,
+    &quot;Python.jc_decaux_local_download.executor&quot;: &quot;Run&quot;,
+    &quot;Python.jc_decaux_text_to_db_dynamic.executor&quot;: &quot;Run&quot;,
+    &quot;Python.jcdecaux.executor&quot;: &quot;Run&quot;,
+    &quot;Python.jcdecaux_api (1).executor&quot;: &quot;Run&quot;,
+    &quot;Python.jcdecaux_api.executor&quot;: &quot;Run&quot;,
+    &quot;Python.play_around.executor&quot;: &quot;Run&quot;,
+    &quot;Python.python-basic-db.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;ai.playground.ignore.import.keys.banner.in.settings&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;frontend/Sean&quot;,
+    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/sean/Documents/GitHub/dublin-bikes-team20/sprint1_webscrappers/webscrapping&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  },
+  &quot;keyToStringList&quot;: {
+    &quot;DatabaseDriversLRU&quot;: [
+      &quot;mysql&quot;
+    ]
+  }
+}</component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/sprint1_webscrappers/webscrapping" />
+      <recent name="$PROJECT_DIR$" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/sprint1_webscrappers/webscrapping" />
+      <recent name="$PROJECT_DIR$" />
+      <recent name="$PROJECT_DIR$/sprint1_webscrappers/jcdecaux_api" />
+      <recent name="$PROJECT_DIR$/Flask_cd" />
+      <recent name="$PROJECT_DIR$/Flask_cd/templates" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Python.hourly_weather">
+    <configuration name="create-db-openweather" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="dublin-bikes-team20" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="RUN_TOOL" value="" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/sprint1_webscrappers/openweather_api/create-db-openweather.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="current_weather" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="dublin-bikes-team20" />
+      <option name="ENV_FILES" value="$PROJECT_DIR$/var.env" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/sprint1_webscrappers/webscrapping" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="RUN_TOOL" value="" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/sprint1_webscrappers/webscrapping/current_weather.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="hourly_weather" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="dublin-bikes-team20" />
+      <option name="ENV_FILES" value="$PROJECT_DIR$/var.env" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/sprint1_webscrappers/webscrapping" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="RUN_TOOL" value="" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/sprint1_webscrappers/webscrapping/hourly_weather.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="jcdecaux" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="dublin-bikes-team20" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/sprint1_webscrappers/webscrapping" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="RUN_TOOL" value="" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/sprint1_webscrappers/webscrapping/jcdecaux.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="python-basic-db" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="dublin-bikes-team20" />
+      <option name="ENV_FILES" value="$PROJECT_DIR$/var.env" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/sprint1_webscrappers/openweather_api" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="RUN_TOOL" value="" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/sprint1_webscrappers/openweather_api/python-basic-db.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <list>
+      <item itemvalue="Python.create-db-openweather" />
+      <item itemvalue="Python.current_weather" />
+      <item itemvalue="Python.hourly_weather" />
+      <item itemvalue="Python.jcdecaux" />
+      <item itemvalue="Python.python-basic-db" />
+    </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Python.hourly_weather" />
+        <item itemvalue="Python.current_weather" />
+        <item itemvalue="Python.create-db-openweather" />
+        <item itemvalue="Python.python-basic-db" />
+        <item itemvalue="Python.jcdecaux" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-js-predefined-d6986cc7102b-9b0f141eb926-JavaScript-PY-253.31033.139" />
+        <option value="bundled-python-sdk-2653e85de345-6d6dccd035ac-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-253.31033.139" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="9c7e6d75-89b3-4405-815f-21d89eec6734" name="Changes" comment="" />
+      <created>1770839768182</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1770839768182</updated>
+      <workItem from="1770839770063" duration="1304000" />
+      <workItem from="1771445976726" duration="4591000" />
+      <workItem from="1771513454877" duration="612000" />
+      <workItem from="1771514170886" duration="115000" />
+      <workItem from="1771514494063" duration="398000" />
+      <workItem from="1771517280192" duration="3728000" />
+      <workItem from="1771591066797" duration="7000" />
+      <workItem from="1771867760245" duration="2728000" />
+      <workItem from="1771922781599" duration="14487000" />
+      <workItem from="1772138167388" duration="13804000" />
+      <workItem from="1772181254827" duration="1774000" />
+      <workItem from="1772490333567" duration="2789000" />
+      <workItem from="1772529070672" duration="3592000" />
+      <workItem from="1772568872431" duration="172000" />
+      <workItem from="1772721885647" duration="4344000" />
+      <workItem from="1772798892196" duration="523000" />
+      <workItem from="1772896373035" duration="2612000" />
+      <workItem from="1773055237905" duration="529000" />
+      <workItem from="1774019472137" duration="826000" />
+      <workItem from="1774020436045" duration="1358000" />
+      <workItem from="1775087333035" duration="1534000" />
+    </task>
+    <task id="LOCAL-00001" summary="Flask functions to retrieve current JCDecaux data">
+      <option name="closed" value="true" />
+      <created>1771450402995</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1771450402995</updated>
+    </task>
+    <task id="LOCAL-00002" summary="Sean's Web scrapping">
+      <option name="closed" value="true" />
+      <created>1772150686120</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1772150686120</updated>
+    </task>
+    <task id="LOCAL-00003" summary="Sean's Web scrapping">
+      <option name="closed" value="true" />
+      <created>1772152924979</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1772152924979</updated>
+    </task>
+    <task id="LOCAL-00004" summary="fixed the database connection issue">
+      <option name="closed" value="true" />
+      <created>1772182208909</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1772182208909</updated>
+    </task>
+    <task id="LOCAL-00005" summary="Running Flask on EC3">
+      <option name="closed" value="true" />
+      <created>1772490403391</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1772490403391</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Flask functions to retrieve current JCDecaux data" />
+    <MESSAGE value="Sean's Web scrapping" />
+    <MESSAGE value="fixed the database connection issue" />
+    <MESSAGE value="Running Flask on EC3" />
+    <option name="LAST_COMMIT_MESSAGE" value="Running Flask on EC3" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/sprint1_webscrappers/openweather_api/forecast_weather_download.py</url>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/sprint1_webscrappers/webscrapping/openweather_text_to_db_current.py</url>
+          <option name="timeStamp" value="2" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/dublin_bikes_team20$hourly_weather.coverage" NAME="hourly_weather Coverage Results" MODIFIED="1772182038881" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/sprint1_webscrappers/webscrapping" />
+    <SUITE FILE_PATH="coverage/dublin_bikes_team20$create_db_jcdecaux.coverage" NAME="create-db-jcdecaux Coverage Results" MODIFIED="1772141960603" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/sprint1_webscrappers/jcdecaux_api" />
+    <SUITE FILE_PATH="coverage/dublin_bikes_team20$jcdecaux_api__1_.coverage" NAME="jcdecaux_api (1) Coverage Results" MODIFIED="1771448259743" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Flask_cd" />
+    <SUITE FILE_PATH="coverage/dublin_bikes_team20$get_station.coverage" NAME="get-station Coverage Results" MODIFIED="1772140694568" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/sprint1_webscrappers/jcdecaux_api" />
+    <SUITE FILE_PATH="coverage/dublin_bikes_team20$jc_decaux_local_download.coverage" NAME="jc_decaux_local_download Coverage Results" MODIFIED="1772141109346" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/sprint1_webscrappers/jcdecaux_api" />
+    <SUITE FILE_PATH="coverage/dublin_bikes_team20$app.coverage" NAME="app Coverage Results" MODIFIED="1771448374453" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Flask_cd" />
+    <SUITE FILE_PATH="coverage/dublin_bikes_team20$jcdecaux_api.coverage" NAME="jcdecaux_api Coverage Results" MODIFIED="1771448086057" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/flask" />
+    <SUITE FILE_PATH="coverage/dublin_bikes_team20$jc_decaux_text_to_db_dynamic.coverage" NAME="jc_decaux_text_to_db_dynamic Coverage Results" MODIFIED="1772147476758" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/sprint1_webscrappers/jcdecaux_api" />
+    <SUITE FILE_PATH="coverage/dublin_bikes_team20$JCDecaux_API.coverage" NAME="JCDecaux_API Coverage Results" MODIFIED="1771518509709" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Flask_cd" />
+    <SUITE FILE_PATH="coverage/dublin_bikes_team20$jcdecaux.coverage" NAME="jcdecaux Coverage Results" MODIFIED="1772148442553" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/sprint1_webscrappers/webscrapping" />
+    <SUITE FILE_PATH="coverage/dublin_bikes_team20$python_basic_db.coverage" NAME="python-basic-db Coverage Results" MODIFIED="1772149833795" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/sprint1_webscrappers/openweather_api" />
+    <SUITE FILE_PATH="coverage/dublin_bikes_team20$current_weather.coverage" NAME="current_weather Coverage Results" MODIFIED="1772149901737" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/sprint1_webscrappers/webscrapping" />
+    <SUITE FILE_PATH="coverage/dublin_bikes_team20$JCDecaux_API__1_.coverage" NAME="JCDecaux_API (1) Coverage Results" MODIFIED="1771867789515" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/sprint2_flask_cd" />
+    <SUITE FILE_PATH="coverage/dublin_bikes_team20$create_db_openweather.coverage" NAME="create-db-openweather Coverage Results" MODIFIED="1772149843996" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/dublin_bikes_team20$play_around.coverage" NAME="play_around Coverage Results" MODIFIED="1771518715029" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Flask_cd" />
+  </component>
+</project>

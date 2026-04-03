@@ -1,10 +1,143 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
-</html>
+{% extends "base.html" %}
+{% block title %}Journey Planner-plan your journey{% endblock %}
+
+{% block head %}
+    {{ super() }}
+     <link rel="stylesheet" href="{{ url_for('static', filename='css/journey.css') }}">
+    <script src="{{ url_for('static', filename='js/journey.js') }}"></script>
+    
+{% endblock %}
+
+{% block content %}
+<div id="app">
+     <!-- LEFT PANEL -->
+    <aside id="sidebar">
+        <!-- <header>
+        <div class="header-inner">
+          <div>
+            <h1>Dublin Bikes</h1>
+            <p class="subtitle">Plan your bike journey</p>
+          </div>
+        </div>
+      </header> -->
+        <!-- Journey Inputs -->
+        <section id="journey-form">
+             <div class="input-group">
+                 <label for="start-input">From</label>
+                 <input type="text" id="start-input" placeholder="e.g. O'Connell Street" autocomplete="off" />
+            </div>
+             <div class="input-group">
+                 <label for="end-input">To</label>
+                 <input type="text" id="end-input" placeholder="e.g. St Stephen's Green" autocomplete="off" />
+             </div>
+             <div class="input-row">
+                <div class="input-group half">
+                    <label for="date-input">Date</label>
+                    <input type="date" id="date-input" />
+                </div>
+                <div class="input-group half">
+                    <label for="time-input">Time</label>
+                    <input type="time" id="time-input" />
+                </div>
+             </div>
+             <div class="button-row">
+                 <button id="refresh-btn" class="btn btn-secondary" title="Refresh station availability">
+                    &#x21BB; Refresh <!-----Clockwise Open Circle Arrow---->
+                 </button>
+                 <button id="navigate-btn" class="btn btn-primary">
+                    Navigate &#x2192;
+                 </button>
+             </div>
+        </section>
+
+        <!-- Status / Error -->
+        <div id="status-message" class="hidden"></div>
+
+        <!-- Route Summary -->
+      <section id="route-summary" class="hidden panel-section">
+        <h2 class="section-title">Journey Summary</h2>
+        <div class="summary-stats">
+          <div class="summary-stat">
+            <span class="stat-icon">&#x1F4CD;</span>
+            <div>
+              <span class="stat-label">Distance</span>
+              <span id="summary-distance" class="stat-value"></span>
+            </div>
+          </div>
+          <div class="summary-stat">
+            <span class="stat-icon">&#x23F1;</span>
+            <div>
+              <span class="stat-label">Duration</span>
+              <span id="summary-duration" class="stat-value"></span>
+            </div>
+          </div>
+        </div>
+      </section>
+        <!-- Station Cards -->
+      <section id="station-cards" class="hidden panel-section">
+        <h2 class="section-title">Stations</h2>
+        <div class="cards-row">
+          <div class="station-card pickup">
+            <div class="card-label">Pickup</div>
+            <p id="pickup-name" class="station-name"></p>
+            <div class="availability">
+              <span class="avail-badge bikes" id="pickup-bikes"></span>
+              <span class="avail-badge stands" id="pickup-stands"></span>
+            </div>
+          </div>
+          <div class="station-card dropoff">
+            <div class="card-label">Dropoff</div>
+            <p id="dropoff-name" class="station-name"></p>
+            <div class="availability">
+              <span class="avail-badge bikes" id="dropoff-bikes"></span>
+              <span class="avail-badge stands" id="dropoff-stands"></span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Directions -->
+      <section id="directions-panel" class="hidden panel-section">
+        <h2 class="section-title">Directions</h2>
+
+        <div class="leg-section">
+          <div class="leg-header walk-color">
+            <span class="leg-mode">&#x1F6B6; Walk to Pickup</span>
+            <span class="leg-meta" id="leg1-meta"></span>
+          </div>
+          <ol class="steps-list" id="leg1-steps"></ol>
+        </div>
+
+        <div class="leg-section">
+          <div class="leg-header cycle-color">
+            <span class="leg-mode">&#x1F6B4; Cycle</span>
+            <span class="leg-meta" id="leg2-meta"></span>
+          </div>
+          <ol class="steps-list" id="leg2-steps"></ol>
+        </div>
+
+        <div class="leg-section">
+          <div class="leg-header walk2-color">
+            <span class="leg-mode">&#x1F6B6; Walk to Destination</span>
+            <span class="leg-meta" id="leg3-meta"></span>
+          </div>
+          <ol class="steps-list" id="leg3-steps"></ol>
+        </div>
+      </section>
+
+    </aside>
+
+    <!-- RIGHT PANEL: Map -->
+    <main id="map-container">
+      <div id="map"></div>
+      <div id="map-loading" class="hidden">
+        <div class="spinner"></div>
+        <span>Finding your route…</span>
+      </div>
+    </main>
+
+  </div>
+
+  <script src="/static/script.js"></script>
+{% endblock %}
+
