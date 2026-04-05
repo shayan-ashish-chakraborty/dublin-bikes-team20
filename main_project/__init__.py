@@ -23,7 +23,7 @@ def create_app() -> Flask:
     app.register_blueprint(auth_bp, url_prefix="/auth")
     app.register_blueprint(chat_bp, url_prefix="/api/chat")
     app.register_blueprint(journey_bp, url_prefix="/journey")
-    app.register_blueprint(stations_bp, url_prefix="/api/stations")
+    app.register_blueprint(stations_bp)
     app.register_blueprint(home_bp)
 
     return app
