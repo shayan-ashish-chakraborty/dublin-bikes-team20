@@ -66,3 +66,7 @@ weather_forecast_api.py
 #ec2 keys
 ec2/
 main_project/notebooks/final_merged_data.csv
+
+#model files
+*.pkl, *.json
+bike_forecast/
