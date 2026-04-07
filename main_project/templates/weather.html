@@ -1,8 +1,4 @@
 {# weather.html — Weather Page  (Shayan)
-   
-   URL:    GET /weather
-   Route:  frontend_bp  →  frontend.py  →  weather_page()
-   Layout: Extends base.html (navbar, footer, chatbot all automatic)
 
    WHAT THIS PAGE CONTAINS:
      Row 1 (side-by-side cards):
@@ -13,9 +9,6 @@
        - Temperature Forecast chart (next 40 hours) via Chart.js
      Row 3 (full-width card):
        - ML Availability Forecast placeholder
-
-   ALL Data is loaded asynchronously in {% block extra_js %} below.
-   Priority: our DB.
  #}
 
 {% extends "base.html" %}
@@ -245,32 +238,19 @@ function buildTempChart(labels, temps, feels) {
 
 // DATA LOADING 
 
-// Loads current weather and fills the left card.
-// Tries our DB first; falls back to the free Open-Meteo API.
+// Loads current weather from the local DB (with sprint-1 JSON fallback handled
+// server-side). Never calls any external third-party API.
 async function loadCurrent() {
-  let d = null;
   try {
-    // ★ PRIMARY: our own MySQL DB via the weather blueprint ★
     const res = await fetch('/api/weather/db/current?limit=1').then(r => r.json());
-    d = res.weather?.[0] ?? null;
-  } catch(_) {}
-
-  if (d && d.temp !== undefined) {
-    renderCurrent(d.temp, d.feels_like, d.humidity, d.wind_speed, d.rain_1h ?? 0, d.dt);
-  } else {
-    try {
-      // ★ FALLBACK: Open-Meteo free public API (no key needed) ★
-      const res = await fetch(
-        'https://api.open-meteo.com/v1/forecast?latitude=53.3498&longitude=-6.2603' +
-        '&current=temperature_2m,apparent_temperature,weathercode,windspeed_10m,relativehumidity_2m,precipitation' +
-        '&timezone=Europe/Dublin'
-      ).then(r => r.json());
-      const c = res.current;
-      const label = WMO_LABELS[c.weathercode] ?? 'Cloudy';
-      document.getElementById('wx-cond-label').textContent = label;
-      renderCurrent(c.temperature_2m, c.apparent_temperature,
-                    c.relativehumidity_2m, c.windspeed_10m / 3.6, c.precipitation, c.time);
-    } catch(_) {}
+    const d = res.weather?.[0] ?? null;
+    if (d && d.temp !== undefined) {
+      renderCurrent(d.temp, d.feels_like, d.humidity, d.wind_speed, d.rain_1h ?? 0, d.dt);
+    } else {
+      document.getElementById('wx-cond-label').textContent = 'Data unavailable';
+    }
+  } catch (_) {
+    document.getElementById('wx-cond-label').textContent = 'Data unavailable';
   }
 }
 
