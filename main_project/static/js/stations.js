@@ -9,7 +9,7 @@
   const STATIONS_API_URL =
     root.dataset.stationsApi ||
     new URL("/api/stations", window.location.origin).pathname;
-  
+
   /**if cannot get the user location, use the default center */
   const DEFAULT_CENTER = { lat: 53.3498, lng: -6.2603 };
   const MAP_ZOOM_DEFAULT = 13;
@@ -133,30 +133,24 @@
     });
   }
 
-  function escapeHtml(s) {
-    if (s == null) return "";
-    return String(s)
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;");
+  function destroyMlChartsIfPresent() {
+    if (window.StationML && typeof window.StationML.destroyIwCharts === "function") {
+      window.StationML.destroyIwCharts();
+    }
   }
 
-  /** Journey-style InfoWindow HTML  */
-  function stationInfoHtml(station) {
+  /** Basic InfoWindow when MLbikes.js is not loaded. */
+  function stationInfoHtmlBasic(station) {
     const bikes = station.available_bikes ?? 0;
     const stands =
       station.available_stands ?? station.available_bike_stands ?? 0;
-    const status = station.status ? escapeHtml(station.status) : "";
     return (
       `<div class="gm-iw">` +
-      `<strong>${escapeHtml(station.name)}</strong>` +
+      `<strong>${String(station.name || "").replace(/</g, "&lt;")}</strong>` +
       `<div class="iw-avail">` +
       `<span style="color:#16a34a">🚲 ${bikes} bikes</span>` +
       `<span style="color:#2563eb">🅿 ${stands} stands</span>` +
-      `</div>` +
-      (status ? `<div class="iw-status">${status}</div>` : "") +
-      `</div>`
+      `</div></div>`
     );
   }
 
@@ -196,8 +190,19 @@
         },
       });
       marker.addListener("click", () => {
-        infoWindow.setContent(stationInfoHtml(station));
-        infoWindow.open({ map, anchor: marker });
+        destroyMlChartsIfPresent();
+        const ml = window.StationML;
+        if (ml && typeof ml.stationInfoHtml === "function") {
+          infoWindow.setContent(ml.stationInfoHtml(station));
+          infoWindow.open({ map, anchor: marker });
+          google.maps.event.addListenerOnce(infoWindow, "domready", () => {
+            ml.setupInfoWindowPrediction(station);
+          });
+        } else {
+          console.warn("StationML missing: load MLbikes.js after Chart.js.");
+          infoWindow.setContent(stationInfoHtmlBasic(station));
+          infoWindow.open({ map, anchor: marker });
+        }
       });
       stationMarkers.push(marker);
     });
@@ -306,7 +311,14 @@
     });
 
     map.addListener("click", () => {
-      if (infoWindow) infoWindow.close();
+      if (infoWindow) {
+        destroyMlChartsIfPresent();
+        infoWindow.close();
+      }
+    });
+
+    infoWindow.addListener("closeclick", () => {
+      destroyMlChartsIfPresent();
     });
 
     const myLocBtn = document.getElementById("btn-my-location");
