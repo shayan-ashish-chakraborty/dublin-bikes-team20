@@ -5,6 +5,7 @@
 {% block head %}
   {{ super() }}
   <link rel="stylesheet" href="{{ url_for('static', filename='css/stations.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/ml.css') }}">
 {% endblock %}
 
 {% block content %}
@@ -12,6 +13,7 @@
   id="stations-app"
   class="stations-page"
   data-stations-api="{{ url_for('stations.stations') }}"
+  data-predict-range="/api/bikes/predict"
   data-maps-key="{{ (config.get('GOOGLE_MAPS_API_KEY') or '') | e }}"
 >
   <div class="app-root">
@@ -74,5 +76,10 @@
 {% endblock %}
 
 {% block extra_js %}
+<script
+  src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"
+  crossorigin="anonymous"
+></script>
+<script src="{{ url_for('static', filename='js/MLbikes.js') }}"></script>
 <script src="{{ url_for('static', filename='js/stations.js') }}"></script>
 {% endblock %}
