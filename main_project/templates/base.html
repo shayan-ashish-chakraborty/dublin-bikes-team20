@@ -109,8 +109,17 @@
            Journey &amp; Map
          </a>
     #}
-    <a href="/journey"  class="nav-link">Journey &amp; Map</a>
-    <a href="/stations" class="nav-link">Stations</a>
+
+    {# Journey link — gets 'active' class when on the weather page #}
+    <a href="{{ url_for('journey.index') }}"
+       class="nav-link {% if request.endpoint == 'journey.index' %}active{% endif %}">
+       Journey &amp; Map
+    </a>
+
+    <a href="{{ url_for('stations.stations_page') }}"
+       class="nav-link {% if request.endpoint == 'stations.stations_page' %}active{% endif %}">
+       Stations
+    </a>
   </nav>
 
   <div class="nav-right">
