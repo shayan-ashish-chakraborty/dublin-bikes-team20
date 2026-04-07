@@ -78,19 +78,8 @@ if (el_yr) el_yr.textContent = _d.getFullYear();
       document.getElementById('hw-feels').textContent  = Math.round(row.feels_like)   + '°C';
       document.getElementById('hw-hum').textContent    = row.humidity                 + '%';
       document.getElementById('hw-wind').textContent   = (+row.wind_speed).toFixed(1) + ' m/s';
-    } else {
-      // Show neutral placeholders if no data is available
-      ['hw-temp','hw-feels','hw-hum','hw-wind'].forEach(id => {
-        const e = document.getElementById(id);
-        if (e) e.textContent = '--';
-      });
     }
-  } catch (_) {
-    ['hw-temp','hw-feels','hw-hum','hw-wind'].forEach(id => {
-      const e = document.getElementById(id);
-      if (e) e.textContent = '--';
-    });
-  }
+  } catch (_) {}
 })();
 
 
