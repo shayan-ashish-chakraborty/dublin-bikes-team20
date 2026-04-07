@@ -1,16 +1,65 @@
 /* Stations page — sidebar + map-wrap; station markers use Journey-style look in JS only. */
+:root {
+  --color-primary: #1a7340;
+  --color-primary-dark: #135430;
+  --color-primary-light: #e8f5ee;
+  --color-walk: #4a90d9;
+  --color-cycle: #27ae60;
+  --color-walk2: #e67e22;
+  --color-surface: #ffffff;
+  --color-bg: #f0f2f5;
+  --color-text: #1a1a2e;
+  --color-text-muted: #6b7280;
+  --color-border: #e5e7eb;
+  --color-error-bg: #fef2f2;
+  --color-error: #dc2626;
+  --color-bikes: #16a34a;
+  --color-stands: #2563eb;
+  --radius: 8px;
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
 
-/* Stretch into global <main> (already flex:1 on body) so footer sits at viewport bottom without body bg gap. */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+/* Height = viewport - navbar - footer, no page-level scroll */
+:root {
+  --footer-h: 56px;
+}
+
+html:has(#stations-app.stations-page),
+body:has(#stations-app.stations-page) {
+  height: 100%;
+  overflow: hidden;
+}
+
+body:has(#stations-app.stations-page) {
+  display: flex;
+  flex-direction: column;
+}
+
 main:has(#stations-app.stations-page) {
   display: flex;
   flex-direction: column;
   flex: 1 1 auto;
   min-height: 0;
+  overflow: hidden;
 }
 
-/* Avoid stacking this with full-height main (was leaving a grey strip under footer). */
 main:has(#stations-app.stations-page) + .footer {
   margin-top: 0;
+  flex-shrink: 0;
+  height: var(--footer-h);
+}
+
+/* app-root fills exactly: 100vh - nav - footer */
+main:has(#stations-app.stations-page) #stations-app.stations-page {
+  height: calc(100vh - var(--nav-h) - var(--footer-h));
+  max-height: calc(100vh - var(--nav-h) - var(--footer-h));
+  overflow: hidden;
 }
 
 #stations-app.stations-page {
@@ -27,12 +76,11 @@ main:has(#stations-app.stations-page) + .footer {
 
 .stations-page .app-root {
   width: 100%;
-  max-width: 1510px;
-  margin: 0 auto;
   flex: 1 1 auto;
   display: flex;
   flex-direction: column;
   min-height: 0;
+  overflow: hidden;
 }
 
 .stations-page .top-spacer {
@@ -45,62 +93,85 @@ main:has(#stations-app.stations-page) + .footer {
   flex: 1 1 auto;
   min-height: 0;
   align-items: stretch;
+  overflow: hidden;
 }
 
 .stations-page .sidebar {
-  width: 358px;
-  max-width: 100%;
-  min-height: 400px;
-  background: #064e19;
-  color: #fff;
+  width: 380px;
+  min-width: 320px;
+  min-height: 0;
+  background: var(--color-surface);
+  color: var(--color-text);
   flex-shrink: 0;
   overflow-y: auto;
-  padding-top: 20px;
+  padding-top: 0;
+  box-shadow: 2px 0 12px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  z-index: 10;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+  padding: 16px 20px;
 }
 
-.stations-page .plan-title {
-  background: #c6f9a5;
-  color: #000;
-  padding: 15px 20px;
-  border-radius: 24px;
-  font-weight: bold;
-  font-size: 24px;
-  text-align: center;
-  margin: 0 20px 18px 20px;
-  text-decoration: none;
-  display: block;
-}
 
-/* Sidebar CTA — compact but still readable on dark green */
+
+/* Shared button base — identical sizing/shape for both sidebar buttons */
+.stations-page .plan-title,
 .stations-page .sidebar .btn-my-location {
-  appearance: none;
-  -webkit-appearance: none;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  width: calc(100% - 40px);
-  margin: 0 20px 20px 20px;
+  gap: 10px;
+  width: 100%;
   padding: 10px 16px;
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 600;
   font-family: var(--font-head, "Outfit", system-ui, sans-serif);
-  color: #0d2612;
-  background: linear-gradient(180deg, #fff59d 0%, #ffeb3b 55%, #ffc107 100%);
-  border: 1px solid rgba(13, 38, 18, 0.22);
-  border-radius: 14px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.22);
+  border-radius: var(--radius);
+  border: 1.5px solid var(--color-primary);
   cursor: pointer;
-  transition: transform 0.12s ease, box-shadow 0.15s ease, filter 0.15s ease;
+  text-decoration: none;
+  text-align: center;
+  box-sizing: border-box;
+  transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease, transform 0.12s ease;
+}
+
+/* "Plan Your Journey" — primary solid green */
+.stations-page .plan-title {
+  background: var(--color-primary);
+  color: #fff;
+  margin: 0 0 10px 0;
+  box-shadow: var(--shadow-sm);
+}
+
+.stations-page .plan-title:hover {
+  background: var(--color-primary-dark);
+  border-color: var(--color-primary-dark);
+  box-shadow: var(--shadow-md);
+}
+
+/* "My Location" — outlined green */
+.stations-page .sidebar .btn-my-location {
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  color: var(--color-primary);
+  margin: 0 0 4px 0;
 }
 
 .stations-page .sidebar .btn-my-location:hover {
-  filter: brightness(1.04);
-  box-shadow: 0 3px 14px rgba(0, 0, 0, 0.28);
+  background: var(--color-primary-light);
+  box-shadow: var(--shadow-sm);
 }
 
 .stations-page .sidebar .btn-my-location:active {
-  transform: scale(0.98);
+  transform: scale(0.97);
+}
+
+.stations-page .sidebar-section {
+  padding: 10px 0px;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .stations-page .sidebar .btn-my-location-icon {
@@ -110,45 +181,116 @@ main:has(#stations-app.stations-page) + .footer {
 }
 
 .stations-page .sidebar h2 {
-  margin-left: 20px;
-  margin-top: 0;
-  margin-bottom: 25px;
-  font-size: 36px;
-  color: #ffffff;
-  font-weight: bold;
+  margin: 10px 0 10px 0;
+  font-size: 20px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--color-text-muted);
 }
 
 .stations-page .warning {
-  margin-top: 20px;
-  margin-left: 20px;
-  color: #ffd700;
+  margin: 2px 0;
+  padding: 7px 10px;
+  background: var(--color-error-bg);
+  color: var(--color-error);
+  border-left: 4px solid var(--color-error);
+  border-radius: var(--radius);
+  font-size: 13px;
+  line-height: 1.45;
 }
 
-/* 2 km 内无推荐站点时的补充说明（侧栏仍显示更远推荐） */
 .stations-page .warning-2km {
-  margin-right: 20px;
-  margin-bottom: 8px;
-  padding: 10px 12px;
-  border-radius: 8px;
-  background: rgba(255, 215, 0, 0.22);
-  border: 1px solid rgba(255, 193, 7, 0.6);
-  color: #fff9c4;
+  margin: 2px 0;
+  padding: 7px 10px;
+  background: #fff7ed;
+  color: #9a3412;
+  border-left: 4px solid var(--color-walk2);
+  border-radius: var(--radius);
   font-size: 13px;
   line-height: 1.45;
 }
 
 .stations-page .station-block {
-  margin-top: 20px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-  padding-bottom: 25px;
+  position: relative;
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius);
+  margin-bottom: 10px;
+  padding: 10px 12px;
+  overflow: hidden;
+}
+
+#station-list{
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.stations-page .station-block::before {
+  content: '';
+  display: block;
+  height: 3px;
+  background: var(--color-walk);
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  border-radius: 2px 2px 0 0;
 }
 
 .stations-page .station-inner {
-  margin-left: 20px;
+  margin-left: 0;
 }
 
 .stations-page .station-name {
-  font-weight: bold;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 8px;
+  line-height: 1.3;
+}
+
+.stations-page .station-availability {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+
+.stations-page .avail-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 20px;
+  display: inline-block;
+}
+
+.stations-page .avail-badge.bikes {
+  background: #dcfce7;
+  color: var(--color-bikes);
+}
+
+.stations-page .avail-badge.stands {
+  background: #dbeafe;
+  color: var(--color-stands);
+}
+
+.stations-page .station-meta {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  margin-top: 6px;
+}
+
+.stations-page .btn-primary {
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  box-shadow: var(--shadow-sm);
+}
+
+.stations-page .btn-primary:hover {
+  background: var(--color-primary-dark);
+  box-shadow: var(--shadow-md);
 }
 
 .stations-page .map-wrap {
@@ -197,48 +339,45 @@ main:has(#stations-app.stations-page) + .footer {
   z-index: 500;
   display: block;
   padding: 10px 16px;
-  font-size: 15px;
-  font-weight: 600;
+  font-size: 14px;
+  font-weight: 400;
   font-family: var(--font-head, "Outfit", system-ui, sans-serif);
-  color: #0d2612;
+  color: var(--color-text);
   color-scheme: light;
-  background: rgba(255, 255, 255, 0.78);
-  backdrop-filter: blur(14px) saturate(160%);
-  -webkit-backdrop-filter: blur(14px) saturate(160%);
-  border: 1px solid rgba(255, 255, 255, 0.65);
-  border-radius: 14px;
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius);
   outline: none;
-  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.12);
+  box-shadow: var(--shadow-sm);
 }
 
 .stations-page .map-wrap input.search-input::placeholder {
-  color: rgba(13, 38, 18, 0.48);
-  font-weight: 500;
+  color: var(--color-text-muted);
+  font-weight: 400;
 }
 
 .stations-page .map-wrap input.search-input:focus {
-  box-shadow: 0 3px 20px rgba(0, 0, 0, 0.16);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(26, 115, 64, 0.12);
 }
 
-/* gmp-place-autocomplete — glass chip over map */
+/* gmp-place-autocomplete — clean style over map */
 .stations-page #places-search-host .stations-place-autocomplete {
   display: block;
   width: 100%;
   color-scheme: light;
-  border-radius: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.65);
-  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.12);
-  background: rgba(255, 255, 255, 0.78);
-  backdrop-filter: blur(14px) saturate(160%);
-  -webkit-backdrop-filter: blur(14px) saturate(160%);
-  color: #0d2612;
+  border-radius: var(--radius);
+  border: 1.5px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+  background: var(--color-surface);
+  color: var(--color-text);
   font-family: var(--font-head, "Outfit", system-ui, sans-serif);
-  font-size: 15px;
-  font-weight: 600;
-  --gmp-mat-color-surface: rgba(255, 255, 255, 0.78);
-  --gmp-mat-color-on-surface: #0d2612;
-  --gmp-mat-color-on-surface-variant: rgba(13, 38, 18, 0.52);
-  --gmp-mat-color-primary: #0d2612;
+  font-size: 14px;
+  font-weight: 400;
+  --gmp-mat-color-surface: #ffffff;
+  --gmp-mat-color-on-surface: #1a1a2e;
+  --gmp-mat-color-on-surface-variant: #6b7280;
+  --gmp-mat-color-primary: #1a7340;
   --gmp-mat-color-outline-decorative: rgba(0, 0, 0, 0.08);
   --gmp-mat-font-family: var(--font-head, "Outfit", system-ui, sans-serif);
 }
@@ -275,6 +414,7 @@ main:has(#stations-app.stations-page) + .footer {
     width: 100%;
     height: auto;
     min-height: unset;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
   }
 
   .stations-page .map-wrap {
@@ -287,3 +427,4 @@ main:has(#stations-app.stations-page) + .footer {
     inset: 0;
   }
 }
+

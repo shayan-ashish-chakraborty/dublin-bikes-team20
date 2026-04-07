@@ -50,7 +50,7 @@ function formatDuration(seconds) {
 
 function injectMapsScript(key) {
   const script = document.createElement("script");
-  script.src = `https://maps.googleapis.com/maps/api/js?key=${key}&callback=initMap&libraries=geometry`;
+  script.src = `https://maps.googleapis.com/maps/api/js?key=${key}&loading=async&callback=initMap&libraries=geometry,places`;
   script.async = true;
   script.defer = true;
   document.head.appendChild(script);
@@ -70,6 +70,7 @@ window.initMap = function () {
   setDefaultDateTime();
   attachEventListeners();
   fetchAndRenderStations();
+  googleAutoRefill();  
 };
 
 function setDefaultDateTime() {
@@ -167,6 +168,7 @@ function renderStationMarkers(stations) {
 function handleNavigate() {
   const start = document.getElementById("start-input").value.trim();
   const end = document.getElementById("end-input").value.trim();
+
 
   if (!start || !end) {
     showError("Please enter both a start and end address.");
@@ -385,6 +387,39 @@ function renderDirections(legs) {
     });
   });
 }
+// ── Google Auto Refill ────────────────────────────────────────────────────────────
+function googleAutoRefill() {
+  
+  const dublinBounds = new google.maps.LatLngBounds(
+      new google.maps.LatLng(53.2719, -6.3854),  
+      new google.maps.LatLng(53.4109, -6.1067)   
+  );
+
+  const options = {
+      bounds: dublinBounds,
+      componentRestrictions: { country: "ie" },  
+      fields: ["geometry", "name", "formatted_address"],
+  };
+
+  const originInput = document.getElementById('start-input');
+  const destinationInput = document.getElementById('end-input');
+
+  const originAutocomplete = new google.maps.places.Autocomplete(originInput, options);
+  const destinationAutocomplete = new google.maps.places.Autocomplete(destinationInput, options);
+
+  originAutocomplete.addListener('place_changed', function() {
+      const place = originAutocomplete.getPlace();
+      console.log('Starting Point：', place.geometry.location.lat(), place.geometry.location.lng());
+  });
+
+  destinationAutocomplete.addListener('place_changed', function() {
+      const place = destinationAutocomplete.getPlace();
+      console.log('Destination：', place.geometry.location.lat(), place.geometry.location.lng());
+  });
+
+}
+
+
 
 // ── Error / Status ────────────────────────────────────────────────────────────
 

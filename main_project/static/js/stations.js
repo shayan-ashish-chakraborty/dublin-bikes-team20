@@ -107,6 +107,7 @@
 
     if (!listEl) return;
     listEl.innerHTML = "";
+    if (noRef) return;
     nearby.forEach((station) => {
       const block = document.createElement("div");
       block.className = "station-block";
@@ -124,9 +125,11 @@
       block.innerHTML = `
         <div class="station-inner">
           <div class="station-name"></div>
-          <div>Available Bikes: ${station.available_bikes}</div>
-          <div>Distance: ${distText}</div>
-          <div>Walking Time: ${walkText}</div>
+          <div class="station-availability">
+            <span class="avail-badge bikes">🚲 ${station.available_bikes} bikes</span>
+            <span class="avail-badge stands">🅿 ${station.available_bike_stands ?? station.available_stands ?? 0} stands</span>
+          </div>
+          <div class="station-meta">📍 ${distText} &nbsp;·&nbsp; 🚶 ${walkText}</div>
         </div>`;
       block.querySelector(".station-name").textContent = station.name;
       listEl.appendChild(block);
