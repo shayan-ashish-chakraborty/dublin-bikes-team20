@@ -239,7 +239,7 @@ function buildTempChart(labels, temps, feels) {
 // DATA LOADING 
 
 // Loads current weather from the local DB (with sprint-1 JSON fallback handled
-// server-side). Never calls any external third-party API.
+// server-side)
 async function loadCurrent() {
   try {
     const res = await fetch('/api/weather/db/current?limit=1').then(r => r.json());

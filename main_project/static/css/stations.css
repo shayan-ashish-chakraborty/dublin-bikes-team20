@@ -1,0 +1,289 @@
+/* Stations page — sidebar + map-wrap; station markers use Journey-style look in JS only. */
+
+/* Stretch into global <main> (already flex:1 on body) so footer sits at viewport bottom without body bg gap. */
+main:has(#stations-app.stations-page) {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+/* Avoid stacking this with full-height main (was leaving a grey strip under footer). */
+main:has(#stations-app.stations-page) + .footer {
+  margin-top: 0;
+}
+
+#stations-app.stations-page {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  width: 100%;
+}
+
+.stations-page * {
+  box-sizing: border-box;
+}
+
+.stations-page .app-root {
+  width: 100%;
+  max-width: 1510px;
+  margin: 0 auto;
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.stations-page .top-spacer {
+  width: 125px;
+  flex-shrink: 0;
+}
+
+.stations-page .main-row {
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
+  align-items: stretch;
+}
+
+.stations-page .sidebar {
+  width: 358px;
+  max-width: 100%;
+  min-height: 400px;
+  background: #064e19;
+  color: #fff;
+  flex-shrink: 0;
+  overflow-y: auto;
+  padding-top: 20px;
+}
+
+.stations-page .plan-title {
+  background: #c6f9a5;
+  color: #000;
+  padding: 15px 20px;
+  border-radius: 24px;
+  font-weight: bold;
+  font-size: 24px;
+  text-align: center;
+  margin: 0 20px 18px 20px;
+  text-decoration: none;
+  display: block;
+}
+
+/* Sidebar CTA — compact but still readable on dark green */
+.stations-page .sidebar .btn-my-location {
+  appearance: none;
+  -webkit-appearance: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: calc(100% - 40px);
+  margin: 0 20px 20px 20px;
+  padding: 10px 16px;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: var(--font-head, "Outfit", system-ui, sans-serif);
+  color: #0d2612;
+  background: linear-gradient(180deg, #fff59d 0%, #ffeb3b 55%, #ffc107 100%);
+  border: 1px solid rgba(13, 38, 18, 0.22);
+  border-radius: 14px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.22);
+  cursor: pointer;
+  transition: transform 0.12s ease, box-shadow 0.15s ease, filter 0.15s ease;
+}
+
+.stations-page .sidebar .btn-my-location:hover {
+  filter: brightness(1.04);
+  box-shadow: 0 3px 14px rgba(0, 0, 0, 0.28);
+}
+
+.stations-page .sidebar .btn-my-location:active {
+  transform: scale(0.98);
+}
+
+.stations-page .sidebar .btn-my-location-icon {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+}
+
+.stations-page .sidebar h2 {
+  margin-left: 20px;
+  margin-top: 0;
+  margin-bottom: 25px;
+  font-size: 36px;
+  color: #ffffff;
+  font-weight: bold;
+}
+
+.stations-page .warning {
+  margin-top: 20px;
+  margin-left: 20px;
+  color: #ffd700;
+}
+
+/* 2 km 内无推荐站点时的补充说明（侧栏仍显示更远推荐） */
+.stations-page .warning-2km {
+  margin-right: 20px;
+  margin-bottom: 8px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: rgba(255, 215, 0, 0.22);
+  border: 1px solid rgba(255, 193, 7, 0.6);
+  color: #fff9c4;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.stations-page .station-block {
+  margin-top: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+  padding-bottom: 25px;
+}
+
+.stations-page .station-inner {
+  margin-left: 20px;
+}
+
+.stations-page .station-name {
+  font-weight: bold;
+}
+
+.stations-page .map-wrap {
+  flex: 1 1 auto;
+  position: relative;
+  min-width: 0;
+  min-height: 280px;
+}
+
+/* Fill the whole map column (same height as sidebar); avoids white band under a short fixed-height map. */
+.stations-page #map {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 320px;
+}
+
+/* Map search — frosted glass over map (sidebar My location stays yellow) */
+.stations-page #places-search-host {
+  position: absolute;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 450px;
+  max-width: calc(100% - 32px);
+  z-index: 500;
+  padding: 0;
+  border: none;
+  background: transparent;
+  transition: filter 0.15s ease;
+}
+
+.stations-page #places-search-host:hover {
+  filter: brightness(1.03);
+}
+
+/* Native <input> only — host keeps .search-input class after swap, so use input selector */
+.stations-page .map-wrap input.search-input {
+  position: absolute;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 450px;
+  max-width: calc(100% - 32px);
+  z-index: 500;
+  display: block;
+  padding: 10px 16px;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: var(--font-head, "Outfit", system-ui, sans-serif);
+  color: #0d2612;
+  color-scheme: light;
+  background: rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(14px) saturate(160%);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  border-radius: 14px;
+  outline: none;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.12);
+}
+
+.stations-page .map-wrap input.search-input::placeholder {
+  color: rgba(13, 38, 18, 0.48);
+  font-weight: 500;
+}
+
+.stations-page .map-wrap input.search-input:focus {
+  box-shadow: 0 3px 20px rgba(0, 0, 0, 0.16);
+}
+
+/* gmp-place-autocomplete — glass chip over map */
+.stations-page #places-search-host .stations-place-autocomplete {
+  display: block;
+  width: 100%;
+  color-scheme: light;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.12);
+  background: rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(14px) saturate(160%);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+  color: #0d2612;
+  font-family: var(--font-head, "Outfit", system-ui, sans-serif);
+  font-size: 15px;
+  font-weight: 600;
+  --gmp-mat-color-surface: rgba(255, 255, 255, 0.78);
+  --gmp-mat-color-on-surface: #0d2612;
+  --gmp-mat-color-on-surface-variant: rgba(13, 38, 18, 0.52);
+  --gmp-mat-color-primary: #0d2612;
+  --gmp-mat-color-outline-decorative: rgba(0, 0, 0, 0.08);
+  --gmp-mat-font-family: var(--font-head, "Outfit", system-ui, sans-serif);
+}
+
+/* Base InfoWindow text layout; ML-specific styles in ml.css */
+.stations-page .gm-iw {
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
+  min-width: 140px;
+  color: #1a1a2e;
+}
+
+.stations-page .gm-iw strong {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 14px;
+}
+
+.stations-page .gm-iw .iw-avail {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+@media (max-width: 900px) {
+  .stations-page .main-row {
+    flex-direction: column;
+    min-height: unset;
+  }
+
+  .stations-page .sidebar {
+    width: 100%;
+    height: auto;
+    min-height: unset;
+  }
+
+  .stations-page .map-wrap {
+    min-height: 50vh;
+    height: 50vh;
+  }
+
+  .stations-page #map {
+    position: absolute;
+    inset: 0;
+  }
+}
