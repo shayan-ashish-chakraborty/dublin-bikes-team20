@@ -122,11 +122,11 @@
     <span class="ml-tag">Time-Series Prediction</span>
   </div>
   <p class="ml-desc">
-    Predicted bike availability at nearby stations for the next 3 hours,
-    using a model trained on historical availability + weather patterns from the local DB.
+    Predicted bike availability at nearby stations for the next hour,
+    using a RandomForest model trained on historical availability + weather patterns.
   </p>
   <div id="ml-stations"><p class="loading-msg">Loading predictions&hellip;</p></div>
-  <p class="ml-note">Planned model: LSTM / Prophet on 3-hour weather + availability data</p>
+  <p class="ml-note" id="ml-model-note">Fetching from model&hellip;</p>
 </div>
 
 {% endblock %}{# end content block #}
@@ -179,8 +179,6 @@ function fmtDT(ts) {
 }
 
 // Calculates a cycling suitability score (0–100) from weather values.
-// Deductions: cold temps, high wind, rain.
-// ★ Adjust the thresholds here if you want to tune the scoring. ★
 function cyclingScore(temp, wind, rain) {
   let s = 100;
   if (temp < 5) s -= 40; else if (temp < 10) s -= 20; else if (temp < 15) s -= 5;
@@ -216,16 +214,17 @@ const WMO_LABELS = {
   65:'Heavy Rain', 80:'Rain Showers', 95:'Thunderstorm'
 };
 
+// Shared current-weather snapshot used by the ML section.
+// Updated by renderCurrent() so the ML fetch always uses live values.
+let _wx = { temp: 12.0, humidity: 80.0, pressure: 1013.0 };
+
 // CHART.JS TEMPERATURE CHART
 
-// Holds the Chart.js instance so we can destroy + recreate on refresh.
 let tempChart = null;
 
-// Draws (or redraws) the 40-hour temperature line chart.
-// labels = array of time strings, temps/feels = arrays of °C values.
 function buildTempChart(labels, temps, feels) {
   const ctx = document.getElementById('tempChart').getContext('2d');
-  if (tempChart) tempChart.destroy(); // destroy old chart before redrawing
+  if (tempChart) tempChart.destroy();
   tempChart = new Chart(ctx, {
     type: 'line',
     data: {
@@ -243,39 +242,42 @@ function buildTempChart(labels, temps, feels) {
   });
 }
 
-// DATA LOADING 
+// DATA LOADING
 
 // Loads current weather and fills the left card.
 // Tries our DB first; falls back to the free Open-Meteo API.
 async function loadCurrent() {
   let d = null;
   try {
-    // ★ PRIMARY: our own MySQL DB via the weather blueprint ★
     const res = await fetch('/api/weather/db/current?limit=1').then(r => r.json());
     d = res.weather?.[0] ?? null;
   } catch(_) {}
 
   if (d && d.temp !== undefined) {
-    renderCurrent(d.temp, d.feels_like, d.humidity, d.wind_speed, d.rain_1h ?? 0, d.dt);
+    renderCurrent(d.temp, d.feels_like, d.humidity, d.wind_speed, d.rain_1h ?? 0, d.dt, d.pressure ?? 1013.0);
   } else {
     try {
-      // ★ FALLBACK: Open-Meteo free public API (no key needed) ★
       const res = await fetch(
         'https://api.open-meteo.com/v1/forecast?latitude=53.3498&longitude=-6.2603' +
-        '&current=temperature_2m,apparent_temperature,weathercode,windspeed_10m,relativehumidity_2m,precipitation' +
+        '&current=temperature_2m,apparent_temperature,weathercode,windspeed_10m,relativehumidity_2m,precipitation,surface_pressure' +
         '&timezone=Europe/Dublin'
       ).then(r => r.json());
       const c = res.current;
       const label = WMO_LABELS[c.weathercode] ?? 'Cloudy';
       document.getElementById('wx-cond-label').textContent = label;
       renderCurrent(c.temperature_2m, c.apparent_temperature,
-                    c.relativehumidity_2m, c.windspeed_10m / 3.6, c.precipitation, c.time);
+                    c.relativehumidity_2m, c.windspeed_10m / 3.6, c.precipitation, c.time,
+                    c.surface_pressure ?? 1013.0);
     } catch(_) {}
   }
 }
 
 // Fills all the stat spans in the "Current Conditions" card.
-function renderCurrent(temp, feels, hum, wind, rain, dt) {
+// Also updates the shared _wx snapshot used by the ML forecast.
+function renderCurrent(temp, feels, hum, wind, rain, dt, pressure = 1013.0) {
+  // Save for ML section
+  _wx = { temp, humidity: hum, pressure };
+
   const condLabel = guessCondition(temp, rain);
   const score = cyclingScore(temp, wind, rain);
   const cl    = cyclingLabel(score);
@@ -288,14 +290,12 @@ function renderCurrent(temp, feels, hum, wind, rain, dt) {
   document.getElementById('wx-rain').textContent       = (+rain).toFixed(2) + ' mm';
   document.getElementById('wx-updated').textContent    = fmtDT(dt);
 
-  // Cycling score elements
   document.getElementById('score-circle').textContent         = score;
   document.getElementById('score-fill').style.width           = score + '%';
   document.getElementById('score-fill').style.backgroundColor  = cl.color;
   document.getElementById('score-text').textContent           = cl.label;
   document.getElementById('score-text').style.color           = cl.color;
 
-  // Also update the navbar weather chip (defined in base.html)
   const chip = document.getElementById('hdr-temp');
   if (chip) chip.textContent = Math.round(temp) + '°C';
 }
@@ -304,14 +304,13 @@ function renderCurrent(temp, feels, hum, wind, rain, dt) {
 async function loadHourly() {
   let rows = [];
   try {
-    // ★ PRIMARY: our DB ★
     const res = await fetch('/api/weather/db/hourly?limit=40').then(r => r.json());
     rows = (res.hourly ?? []).reverse();
   } catch(_) {}
 
   if (!rows.length) return;
 
-  // Fill the "Next 7 Hours" strip in the right card
+  // Fill the "Next 7 Hours" strip
   document.getElementById('hourly-list').innerHTML = rows.slice(0, 7).map(r => {
     const rain  = r.rain_3h ?? 0;
     const score = cyclingScore(r.temp, r.wind_speed, rain);
@@ -332,42 +331,87 @@ async function loadHourly() {
     rows.map(r => r.feels_like  != null ? +r.feels_like.toFixed(1) : null)
   );
 
-  // Fill ML placeholder
-  buildMLPlaceholder(rows);
+  // Trigger real ML forecast
+  loadMLForecast();
 }
 
-// ML PLACEHOLDER
-// Expected endpoint: GET /api/ml/forecast
-// Expected response: { stations: [{ name, predicted_bikes, current_bikes }] }
-function buildMLPlaceholder(rows) {
-  // Dummy station data — replace with real API response
-  const stations = [
-    { name: 'Grafton Street',       bikes: 8,  trend: +2 },
-    { name: "St. Stephen's Green",  bikes: 3,  trend: -1 },
-    { name: 'Trinity College',      bikes: 14, trend: +1 },
-  ];
-  const nextRain = rows[1]?.rain_3h ?? 0;
-  const nextTemp = rows[1]?.temp ?? 10;
-  const delta = (nextRain > 1 ? -3 : nextRain > 0 ? -1 : 0) + (nextTemp > 14 ? 2 : 0);
+// ML AVAILABILITY FORECAST
+// Fetches /api/stations for live station list, then calls
+// /api/ml/forecast with current weather params to get predictions.
 
-  document.getElementById('ml-stations').innerHTML = stations.map(s => {
-    const pred  = Math.max(0, s.bikes + s.trend + delta);
-    const diff  = pred - s.bikes;
-    const arrow = diff > 0 ? '&uarr;' : diff < 0 ? '&darr;' : '&rarr;';
-    const col   = diff > 0 ? '#007A33' : diff < 0 ? '#c0392b' : '#888';
-    const pct   = Math.round(Math.min(100, (pred / 20) * 100));
+async function loadMLForecast() {
+  const mlEl   = document.getElementById('ml-stations');
+  const noteEl = document.getElementById('ml-model-note');
+  mlEl.innerHTML = '<p class="loading-msg">Running ML predictions&hellip;</p>';
+
+  try {
+    // 1. Fetch station list (JCDecaux live data)
+    const allStations = await fetch('/api/stations').then(r => r.json());
+
+    // Pick up to 6 stations that have a valid capacity
+    const stations = allStations
+      .filter(s => s.bike_stands > 0)
+      .slice(0, 6)
+      .map(s => ({
+        station_id: s.number,
+        capacity:   s.bike_stands,
+        name:       s.name,
+      }));
+
+    if (!stations.length) throw new Error('No station data available');
+
+    // 2. Build query — use live weather snapshot captured by renderCurrent()
+    const params = new URLSearchParams({
+      stations:     JSON.stringify(stations),
+      hour:         new Date().getHours(),
+      avg_temp:     _wx.temp.toFixed(1),
+      avg_humidity: _wx.humidity.toFixed(1),
+      avg_pressure: _wx.pressure.toFixed(1),
+    });
+
+    // 3. Call the ML endpoint
+    const mlData = await fetch('/api/ml/forecast?' + params).then(r => r.json());
+    if (mlData.error) throw new Error(mlData.error);
+
+    // 4. Render predictions
+    renderMLResults(mlData);
+
+  } catch (err) {
+    mlEl.innerHTML = `<p class="loading-msg" style="color:#c0392b">
+      Predictions unavailable — ${err.message}
+    </p>`;
+    if (noteEl) noteEl.textContent = 'ML model could not be reached.';
+  }
+}
+
+// Renders the ML prediction rows and updates the model info note.
+function renderMLResults({ predictions, hour, model, mae, r2 }) {
+  const mlEl   = document.getElementById('ml-stations');
+  const noteEl = document.getElementById('ml-model-note');
+
+  mlEl.innerHTML = predictions.map(p => {
+    const col = p.pct >= 60 ? '#007A33' : p.pct >= 30 ? '#e6bc00' : '#c0392b';
     return `<div class="ml-row">
-      <span class="ml-name">${s.name}</span>
-      <div class="ml-bar"><div class="ml-bar-fill" style="width:${pct}%;border-left:3px solid ${col}"></div></div>
-      <span class="ml-pred" style="color:${col}">${pred} bikes ${arrow}</span>
+      <span class="ml-name">${p.name}</span>
+      <div class="ml-bar">
+        <div class="ml-bar-fill" style="width:${p.pct}%;background:${col}"></div>
+      </div>
+      <span class="ml-pred" style="color:${col}">
+        ${p.predicted_bikes}&nbsp;/&nbsp;${p.capacity} bikes &nbsp;(${p.pct}%)
+      </span>
     </div>`;
   }).join('');
+
+  // Model note removed per user request
+  if (noteEl) {
+    noteEl.textContent = '';
+  }
 }
 
-// RUN ON PAGE LOAD 
+// RUN ON PAGE LOAD
 loadCurrent();
 loadHourly();
-// Auto-refresh every 5 minutes (300,000 ms)
+// Auto-refresh every 5 minutes
 setInterval(() => { loadCurrent(); loadHourly(); }, 5 * 60 * 1000);
 </script>
 {% endblock %}

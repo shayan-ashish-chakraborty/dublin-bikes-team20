@@ -43,4 +43,5 @@ def format_station(raw):
         "available_bikes": raw.get("available_bikes", 0),
         "available_stands": raw.get("available_bike_stands", 0),
         "total_stands": raw.get("bike_stands", 0),
+        "bike_stands": raw.get("bike_stands", 0),
     }

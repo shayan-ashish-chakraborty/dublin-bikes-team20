@@ -1,0 +1,13 @@
+{
+  "best_model": "RandomForest",
+  "features": [
+    "station_id",
+    "capacity",
+    "avg_humidity",
+    "hour",
+    "avg_pressure",
+    "avg_temp"
+  ],
+  "mae": 1.4342,
+  "r2": 0.9319
+}

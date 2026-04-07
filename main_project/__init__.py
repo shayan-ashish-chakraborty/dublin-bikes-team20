@@ -9,6 +9,7 @@ from .home.home import home_bp
 from .chat.chat import chat_bp
 from .journey.routes import journey_bp
 from .station.routes import stations_bp
+from .bike_forecast.forecast import forecast_bp as bike_forecast_bp
 import os
 
 def create_app() -> Flask:
@@ -23,6 +24,7 @@ def create_app() -> Flask:
     app.register_blueprint(auth_bp, url_prefix="/auth")
     app.register_blueprint(chat_bp, url_prefix="/api/chat")
     app.register_blueprint(journey_bp, url_prefix="/journey")
+    app.register_blueprint(bike_forecast_bp, url_prefix="/api/ml/forecast")
     app.register_blueprint(stations_bp)
     app.register_blueprint(home_bp)
 
