@@ -1,8 +1,4 @@
 {# weather.html — Weather Page  (Shayan)
-   
-   URL:    GET /weather
-   Route:  frontend_bp  →  frontend.py  →  weather_page()
-   Layout: Extends base.html (navbar, footer, chatbot all automatic)
 
    WHAT THIS PAGE CONTAINS:
      Row 1 (side-by-side cards):
@@ -13,9 +9,6 @@
        - Temperature Forecast chart (next 40 hours) via Chart.js
      Row 3 (full-width card):
        - ML Availability Forecast placeholder
-
-   ALL Data is loaded asynchronously in {% block extra_js %} below.
-   Priority: our DB.
  #}
 
 {% extends "base.html" %}
@@ -244,10 +237,9 @@ function buildTempChart(labels, temps, feels) {
 
 // DATA LOADING
 
-// Loads current weather and fills the left card.
-// Tries our DB first; falls back to the free Open-Meteo API.
+// Loads current weather from the local DB (with sprint-1 JSON fallback handled
+// server-side). Never calls any external third-party API.
 async function loadCurrent() {
-  let d = null;
   try {
     const res = await fetch('/api/weather/db/current?limit=1').then(r => r.json());
     d = res.weather?.[0] ?? null;
