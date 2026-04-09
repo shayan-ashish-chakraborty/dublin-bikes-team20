@@ -4,6 +4,7 @@ import traceback
 import datetime
 import time
 import json
+from zoneinfo import ZoneInfo
 from sqlalchemy import create_engine
 from dotenv import load_dotenv
 import logging
@@ -30,7 +31,8 @@ def hourly_to_db(text, in_engine):
 
     for item in forecasts:
 
-        dt = datetime.datetime.fromtimestamp(item.get("dt"))
+        _DUBLIN = ZoneInfo("Europe/Dublin")
+        dt = datetime.datetime.fromtimestamp(item.get("dt"), tz=_DUBLIN).replace(tzinfo=None)
         future_dt = dt   # for forecast, dt itself is future
 
         main = item.get("main", {})
@@ -51,6 +53,7 @@ def hourly_to_db(text, in_engine):
             future_dt,
             main.get("feels_like"),
             main.get("humidity"),
+            item.get("pop"),
             main.get("pressure"),
             main.get("temp"),
             weather.get("id"),
@@ -62,13 +65,14 @@ def hourly_to_db(text, in_engine):
 
         in_engine.execute("""
             INSERT INTO hourly
-            (dt, future_dt, feels_like, humidity, pressure,
+            (dt, future_dt, feels_like, humidity, pop, pressure,
              temp, weather_id, wind_speed, wind_gust,
              rain_3h, snow_3h)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             ON DUPLICATE KEY UPDATE
                 feels_like = VALUES(feels_like),
                 humidity = VALUES(humidity),
+                pop = VALUES(pop),
                 pressure = VALUES(pressure),
                 temp = VALUES(temp),
                 wind_speed = VALUES(wind_speed),
