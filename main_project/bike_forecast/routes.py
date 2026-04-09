@@ -111,16 +111,17 @@ def station_forecast():
 def hourly_station_forecast():
     """
     GET /forecast/station/hourly
-    Predict bikes and docks for a single specific hour using provided weather data.
+    Predict bikes and docks for a single specific hour.
+    Weather params are optional — if omitted, the weather model predicts them.
 
     Query parameters
     number       = station_id                  (required)
     capacity     = total docks at the station  (required)
-    time         = ISO datetime string         (required, e.g. "2026-04-09T14:00")
-    avg_temp     = temperature °C              (required)
-    avg_humidity = humidity %                  (required)
-    avg_pressure = pressure hPa               (required)
-    is_raining   = rain flag 0 or 1           (required)
+    time         = datetime string             (required, e.g. "2026-04-09 12:31:11")
+    avg_temp     = temperature °C              (optional)
+    avg_humidity = humidity %                  (optional)
+    avg_pressure = pressure hPa               (optional)
+    is_raining   = rain flag 0 or 1           (optional)
 
     Response JSON
     {
@@ -135,29 +136,39 @@ def hourly_station_forecast():
         return jsonify(error=f"Models could not be loaded: {exc}"), 500
 
     try:
-        station_id   = int(request.args["number"])
-        capacity     = int(request.args["capacity"])
-        time_str     = request.args["time"]
-        avg_temp     = float(request.args["avg_temp"])
-        avg_humidity = float(request.args["avg_humidity"])
-        avg_pressure = float(request.args["avg_pressure"])
-        is_raining   = int(request.args["is_raining"])
-    except KeyError as exc:
-        return jsonify(error=f"Missing required parameter: {exc}"), 400
+        station_id = int(request.args.get("number",   -1))
+        capacity   = int(request.args.get("capacity", -1))
     except ValueError as exc:
         return jsonify(error=f"Invalid parameter: {exc}"), 400
+
+    if station_id < 0:
+        return jsonify(error="'number' (station_id) is required"), 400
+    if capacity < 0:
+        return jsonify(error="'capacity' is required"), 400
+
+    time_str = request.args.get("time")
+    if not time_str:
+        return jsonify(error="'time' is required"), 400
 
     try:
         target_dt = datetime.fromisoformat(time_str)
     except ValueError:
-        return jsonify(error=f"Invalid 'time' format, expected ISO 8601 (e.g. 2026-04-09T14:00)"), 400
+        return jsonify(error="Invalid 'time' format, expected e.g. '2026-04-09 12:31:11'"), 400
 
-    wx_override = {
-        "avg_temp"    : avg_temp,
-        "avg_humidity": avg_humidity,
-        "avg_pressure": avg_pressure,
-        "is_raining"  : is_raining,
-    }
+    # Optional weather override — only applied if all four params are present
+    wx_keys = ("avg_temp", "avg_humidity", "avg_pressure", "is_raining")
+    if all(k in request.args for k in wx_keys):
+        try:
+            wx_override = {
+                "avg_temp"    : float(request.args["avg_temp"]),
+                "avg_humidity": float(request.args["avg_humidity"]),
+                "avg_pressure": float(request.args["avg_pressure"]),
+                "is_raining"  : int(request.args["is_raining"]),
+            }
+        except ValueError as exc:
+            return jsonify(error=f"Invalid weather parameter: {exc}"), 400
+    else:
+        wx_override = None  # let the weather model predict
 
     result = _predict_hour(models, station_id, capacity, target_dt, wx_override)
 
