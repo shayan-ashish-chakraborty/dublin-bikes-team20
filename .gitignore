@@ -34,13 +34,7 @@ ec2/
 
 # Ignore machine learning files and .csv as they are too large
 
-model_meta.json
-weather_humidity.pkl
-weather_pressure.pkl
-weather_rain.pkl
-weather_temp.pkl
-bike_model.pkl
-docks_model.pkl
-
-final_merged_data.csv
+main_project/notebooks/model_meta.json
+main_project/notebooks/final_merged_data.csv
+main_project/bike_forecast/models/*.pkl
 
