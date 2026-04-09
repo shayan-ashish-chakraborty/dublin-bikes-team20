@@ -1,8 +1,14 @@
 #!/bin/bash
 
-export PYTHONPATH=/home/ubuntu/test/dublin-bikes-team20
 
-cd /home/ubuntu/test/dublin-bikes-team20
+SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
+PROJECT_DIR=$(dirname "$SCRIPT_DIR")
+
+export PYTHONPATH=$PROJECT_DIR
+
+cd $PROJECT_DIR
+
+mkdir -p logs
 
 nohup python sprint1_webscrappers/webscrapping_ec2/current_weather.py > logs/current_weather.log 2>&1 &
 echo "current_weather.py activated, PID: $!"
