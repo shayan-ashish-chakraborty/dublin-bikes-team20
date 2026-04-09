@@ -1,14 +1,18 @@
 from flask import Blueprint, render_template, jsonify, request
 import pathlib
+import requests
+from datetime import datetime
 from ..db import create_engine_for, DbConfig
+from ..config import Config
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import text
+from dotenv import load_dotenv
+import os 
 
 
 _BASE      = pathlib.Path(__file__).resolve().parent.parent.parent
 _TEMPLATES = _BASE / "main_project" / "templates"
 _STATIC    = _BASE / "main_project" / "static"
-
 
 weather_bp = Blueprint(
     "weather",
@@ -21,11 +25,11 @@ weather_bp = Blueprint(
 
 # Database config for weather
 weather_db_cfg = DbConfig(
-    host="localhost",
-    port=3306,
-    user="root",
-    password="shayan1664",  # From var.env
-    db_name="local_databaseopenweather"
+    host=Config.DB_HOST,
+    port=Config.DB_PORT,
+    user=Config.DB_USER,
+    password=Config.DB_PASSWORD,  
+    db_name=Config.DB_NAME_WEATHER
 )
 
 weather_engine = create_engine_for(weather_db_cfg)
@@ -68,15 +72,54 @@ def get_current_weather():
 def get_hourly_weather():
     """
     GET /api/weather/db/hourly
-    Returns hourly weather forecast from the local database.
+    Returns hourly weather forecast. Tries local DB first; falls back to
+    OpenWeather forecast API if DB is unavailable or returns no data.
     Query parameter: limit (default 40, max 100)
     """
+    limit = min(int(request.args.get('limit', 40)), 100)
+
+    # 1. Try DB first
     try:
-        limit = min(int(request.args.get('limit', 40)), 100)
         db_session = WeatherSession()
-        result = db_session.execute(text("SELECT * FROM hourly ORDER BY dt ASC LIMIT :limit"), {"limit": limit})
+        result = db_session.execute(
+            text("SELECT * FROM hourly ORDER BY dt ASC LIMIT :limit"),
+            {"limit": limit}
+        )
         hourly_data = [dict(row) for row in result]
         db_session.close()
+        if hourly_data:
+            return jsonify(hourly=hourly_data)
+    except Exception:
+        pass
+
+    # 2. Fallback: OpenWeather forecast API
+    try:
+        cfg = Config()
+        r = requests.get(
+            cfg.FORECAST_WEATHER_URI,
+            params={"appid": cfg.OPENWEATHER_API_KEY, "q": cfg.CITY, "units": "metric"},
+            timeout=10,
+        )
+        r.raise_for_status()
+        raw = r.json()
+
+        now_str = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+        hourly_data = []
+        for item in raw.get("list", [])[:limit]:
+            hourly_data.append({
+                "dt":         now_str,
+                "future_dt":  item.get("dt_txt"),
+                "feels_like": item["main"].get("feels_like"),
+                "humidity":   item["main"].get("humidity"),
+                "pop":        item.get("pop"),
+                "pressure":   item["main"].get("pressure"),
+                "temp":       item["main"].get("temp"),
+                "weather_id": item["weather"][0]["id"] if item.get("weather") else None,
+                "wind_speed": item.get("wind", {}).get("speed"),
+                "wind_gust":  item.get("wind", {}).get("gust"),
+                "rain_3h":    item.get("rain", {}).get("3h"),
+                "snow_3h":    item.get("snow", {}).get("3h"),
+            })
         return jsonify(hourly=hourly_data)
     except Exception as e:
         return jsonify(error=str(e)), 500
