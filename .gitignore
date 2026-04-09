@@ -39,4 +39,8 @@ weather_humidity.pkl
 weather_pressure.pkl
 weather_rain.pkl
 weather_temp.pkl
+bike_model.pkl
+docks_model.pkl
+
 final_merged_data.csv
+
