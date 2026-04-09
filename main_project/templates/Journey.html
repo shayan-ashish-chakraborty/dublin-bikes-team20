@@ -75,6 +75,7 @@
               <span class="avail-badge bikes" id="pickup-bikes"></span>
               <span class="avail-badge stands" id="pickup-stands"></span>
             </div>
+            <span class="predict-tag hidden" id="pickup-predict-tag">predicted</span>
           </div>
           <div class="station-card dropoff">
             <div class="card-label">Dropoff</div>
@@ -83,13 +84,19 @@
               <span class="avail-badge bikes" id="dropoff-bikes"></span>
               <span class="avail-badge stands" id="dropoff-stands"></span>
             </div>
+            <span class="predict-tag hidden" id="dropoff-predict-tag">predicted</span>
           </div>
         </div>
       </section>
 
+      
       <!-- Directions -->
       <section id="directions-panel" class="hidden panel-section">
         <h2 class="section-title">Directions</h2>
+
+        <!-- Prediction Banner -->
+        <div id="prediction-banner" class="hidden prediction-banner"></div>
+
 
         <div class="leg-section">
           <div class="leg-header walk-color">

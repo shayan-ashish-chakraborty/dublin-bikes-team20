@@ -137,6 +137,7 @@ header h1 {
   padding: 16px 20px;
   display: flex;
   flex-direction: column;
+  border-bottom: 1px solid #e5e7eb;
   gap: 12px;
 }
 
@@ -523,4 +524,30 @@ header h1 {
 .footer{
   margin-top: auto;
 
+}
+
+/* ── Predict Tag (station cards) ──────────────────────────────────────────── */
+.predict-tag {
+  position: absolute;
+  bottom: 6px;
+  right: 8px;
+  font-size: 10px;
+  color: #9ca3af;
+  letter-spacing: 0.02em;
+}
+
+/* ── Prediction Banner ─────────────────────────────────────────────────────── */
+.prediction-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 10px 0;
+  padding: 10px 14px;
+  background: #fffbeb;
+  border: 1px solid #f59e0b;
+  border-left: 4px solid #f59e0b;
+  border-radius: 6px;
+  color: #92400e;
+  font-size: 13px;
+  line-height: 1.45;
 }

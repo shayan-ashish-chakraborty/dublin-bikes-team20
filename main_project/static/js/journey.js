@@ -77,7 +77,15 @@ function setDefaultDateTime() {
   const now = new Date();
   const dateStr = now.toISOString().slice(0, 10);
   const timeStr = now.toTimeString().slice(0, 5);
-  document.getElementById("date-input").value = dateStr;
+
+  const max48h = new Date(now.getTime() + 48 * 60 * 60 * 1000);
+  const maxDateStr = max48h.toISOString().slice(0, 10);
+
+  const dateInput = document.getElementById("date-input");
+  dateInput.value = dateStr;
+  dateInput.min = dateStr;
+  dateInput.max = maxDateStr;
+
   document.getElementById("time-input").value = timeStr;
 }
 
@@ -166,29 +174,52 @@ function renderStationMarkers(stations) {
 // ── Route Flow ────────────────────────────────────────────────────────────────
 
 function handleNavigate() {
-  const start = document.getElementById("start-input").value.trim();
-  const end = document.getElementById("end-input").value.trim();
-
+  const start   = document.getElementById("start-input").value.trim();
+  const end     = document.getElementById("end-input").value.trim();
+  const dateStr = document.getElementById("date-input").value;
+  const timeStr = document.getElementById("time-input").value;
 
   if (!start || !end) {
     showError("Please enter both a start and end address.");
     return;
   }
 
+  // Validate selected time is within 48 hours
+  const selectedDt  = new Date(`${dateStr}T${timeStr}:00`);
+  const now         = new Date();
+  const diffHours   = (selectedDt - now) / (1000 * 60 * 60);
+
+  if (diffHours < -(1 / 60)) {          // allow up to 1 min in the past
+    showError("Please select a time in the future.");
+    return;
+  }
+
+  if (diffHours > 48) {
+    showError("Please select a time within the next 48 hours.");
+    return;
+  }
+
   clearError();
-  fetchRoute(start, end);
+
+  // > 1 hour in the future → use prediction endpoint
+  const usePrediction = diffHours > 1;
+  const timeForApi    = `${dateStr} ${timeStr}:00`;
+  fetchRoute(start, end, usePrediction ? timeForApi : null);
 }
 
-async function fetchRoute(start, end) {
+async function fetchRoute(start, end, timeStr = null) {
   const btn = document.getElementById("navigate-btn");
   btn.disabled = true;
   btn.textContent = "Finding route…";
   document.getElementById("map-loading").classList.remove("hidden");
 
+  const endpoint = timeStr ? "journey/api/route/predict" : "journey/api/route";
+  const body     = timeStr ? { start, end, time: timeStr } : { start, end };
+
   try {
-    const data = await apiFetch("journey/api/route", {
+    const data = await apiFetch(endpoint, {
       method: "POST",
-      body: JSON.stringify({ start, end }),
+      body: JSON.stringify(body),
     });
     state.routeData = data;
     renderRoute(data);
@@ -209,6 +240,17 @@ function renderRoute(data) {
   renderSummary(data.summary);
   renderDirections(data.legs);
   fitMapToBounds(data);
+
+  // Prediction banner
+  const banner = document.getElementById("prediction-banner");
+  if (data.prediction_mode) {
+    let msg = "The journey plan is based on prediction data, not live data.";
+    if (data.weather_warning) msg += ` (${data.weather_warning})`;
+    banner.textContent = msg;
+    banner.classList.remove("hidden");
+  } else {
+    banner.classList.add("hidden");
+  }
 
   document.getElementById("route-summary").classList.remove("hidden");
   document.getElementById("station-cards").classList.remove("hidden");
@@ -349,13 +391,17 @@ function fitMapToBounds(data) {
 function renderStationCards(data) {
   const { pickup_station: p, dropoff_station: d } = data;
 
-  document.getElementById("pickup-name").textContent = p.name;
-  document.getElementById("pickup-bikes").textContent = `🚲 ${p.available_bikes} bikes`;
+  document.getElementById("pickup-name").textContent   = p.name;
+  document.getElementById("pickup-bikes").textContent  = `🚲 ${p.available_bikes} bikes`;
   document.getElementById("pickup-stands").textContent = `🅿 ${p.available_stands} stands`;
 
-  document.getElementById("dropoff-name").textContent = d.name;
-  document.getElementById("dropoff-bikes").textContent = `🚲 ${d.available_bikes} bikes`;
+  document.getElementById("dropoff-name").textContent   = d.name;
+  document.getElementById("dropoff-bikes").textContent  = `🚲 ${d.available_bikes} bikes`;
   document.getElementById("dropoff-stands").textContent = `🅿 ${d.available_stands} stands`;
+
+  const showTag = data.prediction_mode ? "" : "hidden";
+  document.getElementById("pickup-predict-tag").className  = `predict-tag ${showTag}`.trim();
+  document.getElementById("dropoff-predict-tag").className = `predict-tag ${showTag}`.trim();
 }
 
 function renderSummary(summary) {
