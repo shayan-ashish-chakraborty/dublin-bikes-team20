@@ -30,7 +30,6 @@ auth_db_cfg = DbConfig(
 
 auth_engine = create_engine_for(auth_db_cfg)
 AuthSession = sessionmaker(bind=auth_engine)
-print("Auth engine created:", auth_engine)
 
 
 # ==========================
