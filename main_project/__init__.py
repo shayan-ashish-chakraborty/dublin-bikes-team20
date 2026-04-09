@@ -3,7 +3,7 @@ from flask import Flask
   
 from .config import Config
 from .station.bikes_original import bikes_bp
-from .weather.weather import weather_bp
+from .weather.routes import weather_bp
 from .auth.auth import auth_bp
 from .home.home import home_bp
 from .chat.chat import chat_bp
