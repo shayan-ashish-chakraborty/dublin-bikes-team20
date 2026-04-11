@@ -43,44 +43,42 @@
 <div class="wx-row">
 
   {#  LEFT CARD: Current Conditions #}
-  <div class="card">
+  <div class="card card-current">
     <h3>Current Conditions</h3>
 
-    {# Big temperature display — filled by renderCurrent() in JS below #}
-    <div class="wx-temp-big" id="wx-temp">&mdash;&deg;C</div>
-
-    {# Weather condition label (e.g. "Light Rain", "Partly Cloudy")
-       Icon and label filled by renderCurrent() #}
-    <div class="wx-condition" id="wx-condition">
-      <img id="wx-cond-icon" src="{{ url_for('frontend.static', filename='images/icons/cloud.svg') }}"
-           alt="Condition" class="wx-cond-icon-img">
-      <span id="wx-cond-label">Loading&hellip;</span>
+    {# Box 1: Temperature + Condition #}
+    <div class="wx-box">
+      <div class="wx-temp-big" id="wx-temp">&mdash;&deg;C</div>
+      <div class="wx-condition" id="wx-condition">
+        <img id="wx-cond-icon" src="{{ url_for('frontend.static', filename='images/icons/cloud.svg') }}"
+             alt="Condition" class="wx-cond-icon-img">
+        <span id="wx-cond-label">Loading&hellip;</span>
+      </div>
     </div>
 
-    {# Stats grid — each .val span is filled by renderCurrent() in JS #}
-    <div class="wx-stats">
-      <div class="wx-stat"><span class="val" id="wx-feels">&mdash;</span><span class="lbl">Feels Like</span></div>
-      <div class="wx-stat"><span class="val" id="wx-hum">&mdash;</span><span class="lbl">Humidity</span></div>
-      <div class="wx-stat"><span class="val" id="wx-wind">&mdash;</span><span class="lbl">Wind</span></div>
-      <div class="wx-stat"><span class="val" id="wx-rain">&mdash;</span><span class="lbl">Rain (1h)</span></div>
+    {# Box 2: Stats grid #}
+    <div class="wx-box">
+      <div class="wx-stats">
+        <div class="wx-stat"><span class="val" id="wx-feels">&mdash;</span><span class="lbl">Feels Like</span></div>
+        <div class="wx-stat"><span class="val" id="wx-hum">&mdash;</span><span class="lbl">Humidity</span></div>
+        <div class="wx-stat"><span class="val" id="wx-wind">&mdash;</span><span class="lbl">Wind</span></div>
+        <div class="wx-stat"><span class="val" id="wx-rain">&mdash;</span><span class="lbl">Rain (1h)</span></div>
+      </div>
     </div>
 
-    {# Cycling Score (0--100)
-       Calculated from temp + wind + rain by cyclingScore() in JS.
-       #score-circle  → shows the number
-       #score-fill    → CSS progress bar width (%)
-       #score-text    → label: Excellent / Good / Fair / Poor / Bad
-    #}
-    <p class="score-label-top">
-      <img src="{{ url_for('frontend.static', filename='images/icons/bike.svg') }}"
-           alt="Cycling" class="score-bike-icon">
-      Cycling Conditions
-    </p>
-    <div class="cycling-score">
-      <div class="score-circle" id="score-circle">&mdash;</div>
-      <div class="score-right">
-        <div class="score-track"><div class="score-fill" id="score-fill"></div></div>
-        <div class="score-text" id="score-text">&mdash;</div>
+    {# Box 3: Cycling Score #}
+    <div class="wx-box">
+      <p class="score-label-top">
+        <img src="{{ url_for('frontend.static', filename='images/icons/bike.svg') }}"
+             alt="Cycling" class="score-bike-icon">
+        Cycling Conditions
+      </p>
+      <div class="cycling-score">
+        <div class="score-circle" id="score-circle">&mdash;</div>
+        <div class="score-right">
+          <div class="score-track"><div class="score-fill" id="score-fill"></div></div>
+          <div class="score-text" id="score-text">&mdash;</div>
+        </div>
       </div>
     </div>
   </div>

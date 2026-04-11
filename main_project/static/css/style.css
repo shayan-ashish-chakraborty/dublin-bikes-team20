@@ -439,13 +439,28 @@ h1, h2, h3, h4 { font-family: var(--font-head); }
 }
 
 /* current conditions */
+.card-current {
+  display: flex;
+  flex-direction: column;
+}
+
+.card-current h3 { flex-shrink: 0; }
+
+/* three equal sections */
+.wx-box {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
 .wx-temp-big {
-  font-size: 56px;
+  font-size: 88px;
   font-weight: 900;
   color: var(--green);
   line-height: 1;
-  margin-bottom: 8px;
   font-family: var(--font-head);
+  margin-bottom: 6px;
 }
 .wx-condition {
   display: flex;
@@ -453,7 +468,6 @@ h1, h2, h3, h4 { font-family: var(--font-head); }
   gap: 8px;
   font-size: 17px;
   color: var(--text-muted);
-  margin-bottom: 18px;
 }
 .wx-cond-icon-img {
   width: 24px;
@@ -461,7 +475,7 @@ h1, h2, h3, h4 { font-family: var(--font-head); }
   filter: invert(45%) sepia(5%) saturate(500%) hue-rotate(180deg) brightness(90%);
   flex-shrink: 0;
 }
-.wx-stats     { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+.wx-stats     { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .wx-stat      { background: var(--bg); border-radius: 8px; padding: 10px 12px; text-align: center; }
 .wx-stat .val { display: block; font-size: 18px; font-weight: 700; color: var(--green); font-family: var(--font-head); }
 .wx-stat .lbl { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
@@ -469,7 +483,7 @@ h1, h2, h3, h4 { font-family: var(--font-head); }
 .score-label-top {
   font-size: 13px;
   color: var(--text-muted);
-  margin-bottom: 8px;
+  margin-bottom: 16px;
   display: flex;
   align-items: center;
   gap: 6px;
@@ -497,7 +511,7 @@ h1, h2, h3, h4 { font-family: var(--font-head); }
 .score-text   { font-size: 13px; font-weight: 600; }
 
 /* 7-hour list — 4 equal columns: time | icon | °C | bar */
-.hourly-list { display: flex; flex-direction: column; gap: 4px; }
+.hourly-list { display: flex; flex-direction: column; gap: 4px; padding: 10px; }
 .hour-row {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
