@@ -22,7 +22,7 @@ def _forecast_row_unix_ts(row: Dict[str, Any]) -> Optional[float]:
 
 def _forecast_series_start_on_the_hour(now: datetime) -> datetime:
     """
-    First timestep on a clock hour (整点). If local time is already past :00
+    First timestep on a clock hour. If local time is already past :00
     (e.g. 16:14), start at the next hour (17:00), not the current hour floor (16:00).
     """
     base = now.replace(minute=0, second=0, microsecond=0)
@@ -124,7 +124,7 @@ def _weather_forecast_list_from_openweather(
 ) -> Optional[List[Dict[str, Any]]]:
     """
     Uses hourly_forecast_list_like_weather_page() — same list as the weather UI loadHourly().
-    Timesteps are clock hours (整点): from next :00 if past the hour, then +1h each.
+    Timesteps are clock hours: from next :00 if past the hour, then +1h each.
     """
     limit = min(100, max(24, hours))
     rows = hourly_forecast_list_like_weather_page(limit=limit)
