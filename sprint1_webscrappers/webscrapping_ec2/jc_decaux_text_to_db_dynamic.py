@@ -98,7 +98,7 @@ def db_connection():
 def jcdecaux_to_db(engine):
     logger.info("Program started")
     try:
-        r = requests.get(os.getenv('STATIONS_URI'), params={"apiKey": os.getenv('JCDECAUX_API_KEY'), "contract": os.getenv('CITY')})
+        r = requests.get(os.getenv('STATIONS_URI'), params={"apiKey": os.getenv('JCDECAUX_API_KEY'), "contract": os.getenv('JCDECAUX_City')})
         stations_to_db(r.text, engine)
         logger.info('Write to DB successfully')
     except:
