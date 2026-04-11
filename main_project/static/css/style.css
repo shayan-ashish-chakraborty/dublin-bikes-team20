@@ -430,7 +430,7 @@ h1, h2, h3, h4 { font-family: var(--font-head); }
   width: 100%;
 }
 
-/* 与 .wx-row 内两列同宽：行宽 min(1100px,100%)，左右各 32px → 内容 max 1036px */
+/* Same width as .wx-row columns: row width min(1100px,100%), 32px padding each side → content max 1036px */
 .card-full {
   width: 100%;
   max-width: min(1036px, calc(100% - 64px));

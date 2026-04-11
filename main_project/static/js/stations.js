@@ -25,7 +25,7 @@
   let userLocationMarker = null;
   const stationMarkers = [];
   let infoWindow = null;
-  /** 避免点标记后地图 click 立刻关掉刚打开的 InfoWindow */
+  /** Prevents map click from immediately closing the InfoWindow just opened by a marker click */
   let suppressMapClickClose = false;
 
   /** Backend format_station (main_project/station/routes.py) uses top-level lat/lng. */
@@ -179,7 +179,7 @@
     if (!gmIw) return;
     const iwD = gmIw.closest(".gm-style-iw-d");
     if (iwD) {
-      iwD.style.setProperty("padding", "12px 0 6px 12px", "important");
+      iwD.style.setProperty("padding", "12px", "important");
     }
     const shell = gmIw.closest(".gm-style-iw-c");
     if (!shell) return;

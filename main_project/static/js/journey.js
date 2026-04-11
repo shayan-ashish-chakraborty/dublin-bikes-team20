@@ -551,7 +551,7 @@ function journeyApplyIwLayoutFix() {
     if (!gmIw) return;
     const iwD = gmIw.closest(".gm-style-iw-d");
     if (iwD) {
-      iwD.style.setProperty("padding", "12px 0 6px 12px", "important");
+      iwD.style.setProperty("padding", "12px", "important");
     }
     const shell = gmIw.closest(".gm-style-iw-c");
     if (!shell) return;

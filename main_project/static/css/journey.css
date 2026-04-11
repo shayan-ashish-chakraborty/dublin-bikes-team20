@@ -668,9 +668,11 @@ header h1 {
 /* ── Journey: InfoWindow card layout (mirror stations.css — same as Stations map) ─
    Without .gm-iw-inner { flex; gap } the status line can overlap the green button. */
 #app .gm-style-iw-d {
-  padding: 12px 0 6px 12px !important;
+  padding: 12px !important;
   box-sizing: border-box !important;
   max-width: min(288px, calc(100vw - 32px));
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
 }
 
 #app.journey-page .gm-iw:has(.gm-iw-inner) {
@@ -679,7 +681,7 @@ header h1 {
   line-height: 1.45;
   width: 100%;
   max-width: none;
-  min-width: 0;
+  min-width: 200px;
   margin: 0;
   padding: 0;
   box-sizing: border-box;

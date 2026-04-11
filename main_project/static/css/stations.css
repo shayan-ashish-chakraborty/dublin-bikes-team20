@@ -399,7 +399,7 @@ main:has(#stations-app.stations-page) #stations-app.stations-page {
 /*
  * Map InfoWindow: trim Google chrome (CSS + JS) + card content aligned with sidebar badges.
  */
-/* 勿改 gm-style-iw-c 的 position，否则部分环境下整张气泡不显示 */
+/* Do not change gm-style-iw-c position — the bubble may not render in some environments */
 #stations-app .gm-style-iw-c {
   padding: 0 !important;
 }
@@ -418,11 +418,13 @@ main:has(#stations-app.stations-page) #stations-app.stations-page {
   min-height: 0 !important;
 }
 
-/* 底边略小于顶边，减轻按钮下方的「空一截」观感 */
+/* Bottom padding slightly less than top to reduce the visual gap below the close button */
 #stations-app .gm-style-iw-d {
-  padding: 12px 12px 6px 12px !important;
+  padding: 12px !important;
   box-sizing: border-box !important;
   max-width: min(288px, calc(100vw - 32px));
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
 }
 
 .stations-page .gm-iw {
@@ -431,7 +433,7 @@ main:has(#stations-app.stations-page) #stations-app.stations-page {
   line-height: 1.45;
   width: 100%;
   max-width: none;
-  min-width: 0;
+  min-width: 200px;
   margin: 0;
   padding: 0;
   box-sizing: border-box;
