@@ -112,6 +112,7 @@ function attachEventListeners() {
 // ── Station Layer ─────────────────────────────────────────────────────────────
 
 async function fetchAndRenderStations() {
+  setDefaultDateTime();
   const date = document.getElementById("date-input").value;
   const time = document.getElementById("time-input").value;
   const btn = document.getElementById("refresh-btn");
@@ -131,6 +132,8 @@ async function fetchAndRenderStations() {
   document.getElementById("route-summary").classList.add("hidden");
   document.getElementById("station-cards").classList.add("hidden");
   document.getElementById("directions-panel").classList.add("hidden");
+  const hint = document.querySelector(".form-hint");
+  if (hint) hint.classList.remove("hidden");
 
   try {
     const stations = await apiFetch(`/journey/api/availability?date=${date}&time=${time}`); 
@@ -190,13 +193,15 @@ function handleNavigate() {
   }
 
   // Validate selected time is within 48 hours
-  const selectedDt  = new Date(`${dateStr}T${timeStr}:00`);
+  let selectedDt  = new Date(`${dateStr}T${timeStr}:00`);
   const now         = new Date();
-  const diffHours   = (selectedDt - now) / (1000 * 60 * 60);
+  let diffHours   = (selectedDt - now) / (1000 * 60 * 60);
 
-  if (diffHours < -(1 / 60)) {          // allow up to 1 min in the past
-    showError("Please select a time in the future.");
-    return;
+  // If user selected a past time, silently snap to now and use live data
+  if (diffHours < -(1 / 60)) {
+    setDefaultDateTime();
+    selectedDt = new Date();
+    diffHours  = 0;
   }
 
   if (diffHours > 48) {
@@ -260,6 +265,8 @@ function renderRoute(data) {
   document.getElementById("route-summary").classList.remove("hidden");
   document.getElementById("station-cards").classList.remove("hidden");
   document.getElementById("directions-panel").classList.remove("hidden");
+  const hint = document.querySelector(".form-hint");
+  if (hint) hint.classList.add("hidden");
 }
 
 // ── Map Drawing ───────────────────────────────────────────────────────────────
@@ -399,22 +406,34 @@ function renderStationCards(data) {
   document.getElementById("dropoff-bikes").textContent  = `🚲 ${d.available_bikes} bikes`;
   document.getElementById("dropoff-stands").textContent = `🅿 ${d.available_stands} stands`;
 
-  const puMore = document.getElementById("journey-pickup-more");
-  const doMore = document.getElementById("journey-dropoff-more");
-  if (puMore) {
-    puMore.classList.remove("hidden");
-    puMore.onclick = () => {
+  [".station-card.pickup", ".station-card.dropoff"].forEach((sel) => {
+    const card = document.querySelector(sel);
+    if (!card) return;
+    const existing = card.querySelector(".predicted-label");
+    if (data.prediction_mode) {
+      if (!existing) {
+        const label = document.createElement("span");
+        label.className = "predicted-label";
+        label.textContent = "predicted";
+        card.appendChild(label);
+      }
+    } else if (existing) {
+      existing.remove();
+    }
+  });
+
+  const puCard = document.querySelector(".station-card.pickup");
+  const doCard = document.querySelector(".station-card.dropoff");
+  if (puCard) {
+    puCard.onclick = () => {
       if (state.routePickupMarker && typeof google !== "undefined" && google.maps) {
-        state.map.panTo(state.routePickupMarker.getPosition());
         google.maps.event.trigger(state.routePickupMarker, "click");
       }
     };
   }
-  if (doMore) {
-    doMore.classList.remove("hidden");
-    doMore.onclick = () => {
+  if (doCard) {
+    doCard.onclick = () => {
       if (state.routeDropoffMarker && typeof google !== "undefined" && google.maps) {
-        state.map.panTo(state.routeDropoffMarker.getPosition());
         google.maps.event.trigger(state.routeDropoffMarker, "click");
       }
     };
@@ -504,6 +523,26 @@ function journeyDestroyMlChartsIfPresent() {
   }
 }
 
+
+/**
+ * Centers the map so the marker sits in the lower portion of the viewport,
+ * leaving ~250px of room above it for the info window to render fully.
+ */
+function journeyCenterMarkerLow(marker) {
+  const projection = state.map.getProjection();
+  if (!projection) {
+    state.map.panTo(marker.getPosition());
+    return;
+  }
+  const scale     = Math.pow(2, state.map.getZoom());
+  const worldPt   = projection.fromLatLngToPoint(marker.getPosition());
+  // Shift center 250 screen-pixels north so marker sits in lower area
+  const newCenter = projection.fromPointToLatLng(
+    new google.maps.Point(worldPt.x, worldPt.y - 250 / scale)
+  );
+  state.map.panTo(newCenter);
+}
+
 function journeyApplyIwLayoutFix() {
   try {
     const app = document.getElementById("app");
@@ -512,7 +551,7 @@ function journeyApplyIwLayoutFix() {
     if (!gmIw) return;
     const iwD = gmIw.closest(".gm-style-iw-d");
     if (iwD) {
-      iwD.style.setProperty("padding", "12px 12px 6px 12px", "important");
+      iwD.style.setProperty("padding", "12px 0 6px 12px", "important");
     }
     const shell = gmIw.closest(".gm-style-iw-c");
     if (!shell) return;
@@ -558,22 +597,27 @@ function journeyStationInfoHtmlBasic(station) {
 function journeyOpenStationMlInfoWindow(marker, station) {
   journeyDestroyMlChartsIfPresent();
   state.suppressMapClickClose = true;
-  const ml = window.StationML;
-  if (ml && typeof ml.stationInfoHtml === "function") {
-    state.infoWindow.setContent(ml.stationInfoHtml(station));
-    state.infoWindow.open({ map: state.map, anchor: marker });
-    google.maps.event.addListenerOnce(state.infoWindow, "domready", () => {
-      journeyApplyIwLayoutFix();
-      ml.setupInfoWindowPrediction(station);
-    });
-  } else {
-    state.infoWindow.setContent(journeyStationInfoHtmlBasic(station));
-    state.infoWindow.open({ map: state.map, anchor: marker });
-    google.maps.event.addListenerOnce(state.infoWindow, "domready", () => {
-      journeyApplyIwLayoutFix();
-    });
-  }
-  window.setTimeout(() => {
-    state.suppressMapClickClose = false;
-  }, 400);
+  journeyCenterMarkerLow(marker);
+
+  // Wait for the smooth pan to finish before opening the info window
+  google.maps.event.addListenerOnce(state.map, "idle", () => {
+    const ml = window.StationML;
+    if (ml && typeof ml.stationInfoHtml === "function") {
+      state.infoWindow.setContent(ml.stationInfoHtml(station));
+      state.infoWindow.open({ map: state.map, anchor: marker });
+      google.maps.event.addListenerOnce(state.infoWindow, "domready", () => {
+        journeyApplyIwLayoutFix();
+        ml.setupInfoWindowPrediction(station);
+      });
+    } else {
+      state.infoWindow.setContent(journeyStationInfoHtmlBasic(station));
+      state.infoWindow.open({ map: state.map, anchor: marker });
+      google.maps.event.addListenerOnce(state.infoWindow, "domready", () => {
+        journeyApplyIwLayoutFix();
+      });
+    }
+    window.setTimeout(() => {
+      state.suppressMapClickClose = false;
+    }, 400);
+  });
 }

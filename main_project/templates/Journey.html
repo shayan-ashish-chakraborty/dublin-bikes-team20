@@ -43,6 +43,7 @@
                  </button>
              </div>
         </section>
+        <p class="form-hint">Journeys over 1 hour ahead use a machine learning model to predict bike availability — for reference only.</p>
 
         <!-- Status / Error -->
         <div id="status-message" class="hidden"></div>
@@ -50,6 +51,8 @@
         <!-- Route Summary -->
       <section id="route-summary" class="hidden panel-section">
         <h2 class="section-title">Journey Summary</h2>
+        <!-- Prediction Banner -->
+        <div id="prediction-banner" class="hidden prediction-banner"></div>
         <div class="summary-stats">
           <div class="summary-stat">
             <span class="stat-icon">&#x1F4CD;</span>
@@ -78,9 +81,6 @@
               <span class="avail-badge bikes" id="pickup-bikes"></span>
               <span class="avail-badge stands" id="pickup-stands"></span>
             </div>
-            <button type="button" class="journey-card-more-btn hidden" id="journey-pickup-more">
-              More information
-            </button>
           </div>
           <div class="station-card dropoff">
             <div class="card-label">Dropoff</div>
@@ -89,9 +89,6 @@
               <span class="avail-badge bikes" id="dropoff-bikes"></span>
               <span class="avail-badge stands" id="dropoff-stands"></span>
             </div>
-            <button type="button" class="journey-card-more-btn hidden" id="journey-dropoff-more">
-              More information
-            </button>
           </div>
         </div>
       </section>
@@ -99,9 +96,6 @@
       <!-- Directions -->
       <section id="directions-panel" class="hidden panel-section">
         <h2 class="section-title">Directions</h2>
-        <!-- Prediction Banner -->
-        <div id="prediction-banner" class="hidden prediction-banner"></div>
-
 
         <div class="leg-section">
           <div class="leg-header walk-color">

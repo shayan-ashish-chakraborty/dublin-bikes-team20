@@ -234,6 +234,13 @@ header h1 {
   border-color: #9ca3af;
 }
 
+.form-hint {
+  margin: 10px 20px;
+  font-size: 11px;
+  color: #b0b7c3;
+  line-height: 1.5;
+}
+
 /* ── Status / Error ──────────────────────────────── */
 
 #status-message {
@@ -311,6 +318,26 @@ header h1 {
   padding: 10px 12px;
   overflow: hidden;
   position: relative;
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.station-card:hover {
+  background: var(--color-primary-light);
+  border-color: var(--color-primary);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.predicted-label {
+  position: absolute;
+  bottom: 6px;
+  right: 10px;
+  font-size: 10px;
+  font-weight: 500;
+  color: #9ca3af;
+  letter-spacing: 0.3px;
+  pointer-events: none;
+  user-select: none;
 }
 
 .station-card::before {
@@ -617,7 +644,7 @@ header h1 {
 #app .gm-iw .iw-chart-wrap {
   position: relative;
   height: 130px;
-  margin-bottom: 8px;
+  margin-bottom: 0;
 }
 
 #app .gm-iw .iw-chart-wrap-line {
@@ -641,7 +668,7 @@ header h1 {
 /* ── Journey: InfoWindow card layout (mirror stations.css — same as Stations map) ─
    Without .gm-iw-inner { flex; gap } the status line can overlap the green button. */
 #app .gm-style-iw-d {
-  padding: 12px 12px 6px 12px !important;
+  padding: 12px 0 6px 12px !important;
   box-sizing: border-box !important;
   max-width: min(288px, calc(100vw - 32px));
 }
@@ -670,7 +697,7 @@ header h1 {
 #app.journey-page .gm-iw:has(.gm-iw-inner) strong {
   display: block;
   margin: 0;
-  padding: 0 30px 0 0;
+  padding: 0 32px 0 0;
   font-size: 13px;
   font-weight: 600;
   line-height: 1.35;

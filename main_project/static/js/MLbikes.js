@@ -145,7 +145,7 @@
       responsive: true,
       maintainAspectRatio: false,
       layout: {
-        padding: { bottom: 22, left: 2, right: 2, top: 2 },
+        padding: { bottom: 8, left: 2, right: 2, top: 2 },
       },
       interaction: { mode: "index", intersect: false },
       plugins: {

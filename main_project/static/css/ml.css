@@ -63,7 +63,7 @@
 .stations-page .gm-iw .iw-chart-wrap {
   position: relative;
   height: 130px;
-  margin-bottom: 8px;
+  margin-bottom: 0;
 }
 
 .stations-page .gm-iw .iw-chart-wrap-line {

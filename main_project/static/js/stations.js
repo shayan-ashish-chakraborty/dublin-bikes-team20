@@ -134,8 +134,27 @@
           <div class="station-meta">📍 ${distText} &nbsp;·&nbsp; 🚶 ${walkText}</div>
         </div>`;
       block.querySelector(".station-name").textContent = station.name;
+      block.addEventListener("click", () => {
+        if (!map || !window.google || !google.maps) return;
+        const marker = stationMarkers.find((m) => m.getTitle() === station.name);
+        if (marker) google.maps.event.trigger(marker, "click");
+      });
       listEl.appendChild(block);
     });
+  }
+
+  function centerMarkerLow(marker) {
+    const projection = map.getProjection();
+    if (!projection) {
+      map.panTo(marker.getPosition());
+      return;
+    }
+    const scale     = Math.pow(2, map.getZoom());
+    const worldPt   = projection.fromLatLngToPoint(marker.getPosition());
+    const newCenter = projection.fromPointToLatLng(
+      new google.maps.Point(worldPt.x, worldPt.y - 250 / scale)
+    );
+    map.panTo(newCenter);
   }
 
   function destroyMlChartsIfPresent() {
@@ -160,7 +179,7 @@
     if (!gmIw) return;
     const iwD = gmIw.closest(".gm-style-iw-d");
     if (iwD) {
-      iwD.style.setProperty("padding", "12px 12px 6px 12px", "important");
+      iwD.style.setProperty("padding", "12px 0 6px 12px", "important");
     }
     const shell = gmIw.closest(".gm-style-iw-c");
     if (!shell) return;
@@ -239,25 +258,28 @@
       marker.addListener("click", () => {
         destroyMlChartsIfPresent();
         suppressMapClickClose = true;
-        const ml = window.StationML;
-        if (ml && typeof ml.stationInfoHtml === "function") {
-          infoWindow.setContent(ml.stationInfoHtml(station));
-          infoWindow.open({ map, anchor: marker });
-          google.maps.event.addListenerOnce(infoWindow, "domready", () => {
-            applyStationsInfoWindowLayoutFix();
-            ml.setupInfoWindowPrediction(station);
-          });
-        } else {
-          console.warn("StationML missing");
-          infoWindow.setContent(stationInfoHtmlBasic(station));
-          infoWindow.open({ map, anchor: marker });
-          google.maps.event.addListenerOnce(infoWindow, "domready", () => {
-            applyStationsInfoWindowLayoutFix();
-          });
-        }
-        window.setTimeout(() => {
-          suppressMapClickClose = false;
-        }, 400);
+        centerMarkerLow(marker);
+        google.maps.event.addListenerOnce(map, "idle", () => {
+          const ml = window.StationML;
+          if (ml && typeof ml.stationInfoHtml === "function") {
+            infoWindow.setContent(ml.stationInfoHtml(station));
+            infoWindow.open({ map, anchor: marker });
+            google.maps.event.addListenerOnce(infoWindow, "domready", () => {
+              applyStationsInfoWindowLayoutFix();
+              ml.setupInfoWindowPrediction(station);
+            });
+          } else {
+            console.warn("StationML missing");
+            infoWindow.setContent(stationInfoHtmlBasic(station));
+            infoWindow.open({ map, anchor: marker });
+            google.maps.event.addListenerOnce(infoWindow, "domready", () => {
+              applyStationsInfoWindowLayoutFix();
+            });
+          }
+          window.setTimeout(() => {
+            suppressMapClickClose = false;
+          }, 400);
+        });
       });
       stationMarkers.push(marker);
     });
