@@ -76,4 +76,3 @@ def availability_db():
         )
         data = [dict(row._mapping) for row in rows]
     return jsonify({"availability": data})
-

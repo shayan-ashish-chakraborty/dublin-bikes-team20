@@ -1,5 +1,8 @@
 import requests, math
+from datetime import datetime
 from ..config import Config
+from ..weather.services import _fetch_nearest_weather
+from ..bike_forecast.models.forecast import _predict_hour
 
 GOOGLE_MAPS_API_KEY = Config.GOOGLE_MAPS_API_KEY
 
@@ -44,6 +47,53 @@ def find_nearest_station(lat, lng, stations, require_bikes=False, require_stands
         candidates.append({**s, "distance_m": round(dist)})
     candidates.sort(key=lambda x: x["distance_m"])
     return candidates[:limit]
+
+def predict_stations_availability(
+    stations: list[dict],
+    time_str: str,
+    models,
+) -> tuple[list[dict], str | None]:
+    """
+    Fetch weather ONCE, then predict bike availability for all stations.
+
+    stations : list of dicts, each must have "number" and "total_stands"
+    time_str : "YYYY-MM-DD HH:MM:SS" or "now"
+    models   : preloaded ML models from _load_models()
+
+    Returns (results, weather_warning):
+      results         — copies of input dicts with available_bikes / available_stands overwritten
+      weather_warning — None on success, descriptive string if weather unavailable
+    """
+    target_dt = datetime.now() if time_str == "now" else datetime.fromisoformat(time_str)
+
+    # Fetch weather once for all stations
+    weather = _fetch_nearest_weather(time_str) if time_str != "now" else None
+    if weather:
+        is_raining = 1 if (weather.get("rain_3h") or 0) > 0 or (weather.get("pop") or 0) >= 0.5 else 0
+        wx_override = {
+            "avg_temp"    : weather.get("temp"),
+            "avg_humidity": weather.get("humidity"),
+            "avg_pressure": weather.get("pressure"),
+            "is_raining"  : is_raining,
+        }
+        weather_warning = None
+    else:
+        wx_override     = None
+        weather_warning = "Could not fetch weather data; prediction used internal weather model"
+
+    results = []
+    for s in stations:
+        capacity = s.get("total_stands", 0)
+        pred = _predict_hour(models, s["number"], capacity, target_dt, wx_override)
+        available_bikes  = max(0, min(capacity, round(pred["predicted_bikes"])))
+        available_stands = capacity - available_bikes
+        results.append({
+            **s,
+            "available_bikes" : available_bikes,
+            "available_stands": available_stands,
+        })
+
+    return results, weather_warning
 
 
 def get_directions(origin_lat, origin_lng, dest_lat, dest_lng, mode="bicycling"):

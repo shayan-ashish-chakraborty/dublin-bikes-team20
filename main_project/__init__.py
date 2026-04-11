@@ -3,12 +3,13 @@ from flask import Flask
   
 from .config import Config
 from .station.bikes_original import bikes_bp
-from .weather.weather import weather_bp
+from .weather.routes import weather_bp
 from .auth.auth import auth_bp
 from .home.home import home_bp
 from .chat.chat import chat_bp
 from .journey.routes import journey_bp
 from .station.routes import stations_bp
+from .bike_forecast.routes import forecast_bp
 import os
 
 def create_app() -> Flask:
@@ -26,5 +27,7 @@ def create_app() -> Flask:
     app.register_blueprint(stations_bp)
     app.register_blueprint(home_bp)
 
+    # April 8 add machine learning models
+    app.register_blueprint(forecast_bp, url_prefix="/forecast" )
     return app
 

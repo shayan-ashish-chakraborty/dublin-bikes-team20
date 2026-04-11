@@ -25,6 +25,8 @@
   let userLocationMarker = null;
   const stationMarkers = [];
   let infoWindow = null;
+  /** 避免点标记后地图 click 立刻关掉刚打开的 InfoWindow */
+  let suppressMapClickClose = false;
 
   /** Backend format_station (main_project/station/routes.py) uses top-level lat/lng. */
   function stationLatLng(station) {
@@ -142,6 +144,47 @@
     }
   }
 
+  /** Reduce default InfoWindow top padding (Maps often sets inline styles). */
+  function applyStationsInfoWindowLayoutFix() {
+    try {
+      _applyStationsInfoWindowLayoutFixInner();
+    } catch (err) {
+      console.warn("InfoWindow layout fix:", err);
+    }
+  }
+
+  function _applyStationsInfoWindowLayoutFixInner() {
+    const app = document.getElementById("stations-app");
+    if (!app) return;
+    const gmIw = app.querySelector(".gm-style-iw-d .gm-iw");
+    if (!gmIw) return;
+    const iwD = gmIw.closest(".gm-style-iw-d");
+    if (iwD) {
+      iwD.style.setProperty("padding", "12px 12px 6px 12px", "important");
+    }
+    const shell = gmIw.closest(".gm-style-iw-c");
+    if (!shell) return;
+    shell.style.setProperty("padding", "0", "important");
+    const chr = shell.querySelector(".gm-style-iw-chr");
+    if (chr) {
+      chr.style.setProperty("height", "0", "important");
+      chr.style.setProperty("min-height", "0", "important");
+      chr.style.setProperty("max-height", "0", "important");
+      chr.style.setProperty("padding", "0", "important");
+      chr.style.setProperty("overflow", "visible", "important");
+    }
+    const toolbar = shell.querySelector(".gm-style-iw-t");
+    if (toolbar) {
+      toolbar.style.setProperty("min-height", "0", "important");
+      toolbar.style.setProperty("padding", "0", "important");
+    }
+    const tbc = shell.querySelector(".gm-style-iw-tc");
+    if (tbc) {
+      tbc.style.setProperty("padding-top", "0", "important");
+      tbc.style.setProperty("min-height", "0", "important");
+    }
+  }
+
   /** Basic InfoWindow when MLbikes.js is not loaded. */
   function stationInfoHtmlBasic(station) {
     const bikes = station.available_bikes ?? 0;
@@ -149,11 +192,12 @@
       station.available_stands ?? station.available_bike_stands ?? 0;
     return (
       `<div class="gm-iw">` +
+      `<div class="gm-iw-inner">` +
       `<strong>${String(station.name || "").replace(/</g, "&lt;")}</strong>` +
       `<div class="iw-avail">` +
-      `<span style="color:#16a34a">🚲 ${bikes} bikes</span>` +
-      `<span style="color:#2563eb">🅿 ${stands} stands</span>` +
-      `</div></div>`
+      `<span class="iw-tag iw-tag-bikes">🚲 ${bikes} bikes</span>` +
+      `<span class="iw-tag iw-tag-stands">🅿 ${stands} stands</span>` +
+      `</div></div></div>`
     );
   }
 
@@ -194,18 +238,26 @@
       });
       marker.addListener("click", () => {
         destroyMlChartsIfPresent();
+        suppressMapClickClose = true;
         const ml = window.StationML;
         if (ml && typeof ml.stationInfoHtml === "function") {
           infoWindow.setContent(ml.stationInfoHtml(station));
           infoWindow.open({ map, anchor: marker });
           google.maps.event.addListenerOnce(infoWindow, "domready", () => {
+            applyStationsInfoWindowLayoutFix();
             ml.setupInfoWindowPrediction(station);
           });
         } else {
-          console.warn("StationML missing: load MLbikes.js after Chart.js.");
+          console.warn("StationML missing");
           infoWindow.setContent(stationInfoHtmlBasic(station));
           infoWindow.open({ map, anchor: marker });
+          google.maps.event.addListenerOnce(infoWindow, "domready", () => {
+            applyStationsInfoWindowLayoutFix();
+          });
         }
+        window.setTimeout(() => {
+          suppressMapClickClose = false;
+        }, 400);
       });
       stationMarkers.push(marker);
     });
@@ -314,6 +366,9 @@
     });
 
     map.addListener("click", () => {
+      if (suppressMapClickClose) {
+        return;
+      }
       if (infoWindow) {
         destroyMlChartsIfPresent();
         infoWindow.close();

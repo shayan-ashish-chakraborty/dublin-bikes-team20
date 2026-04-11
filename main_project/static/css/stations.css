@@ -382,26 +382,95 @@ main:has(#stations-app.stations-page) #stations-app.stations-page {
   --gmp-mat-font-family: var(--font-head, "Outfit", system-ui, sans-serif);
 }
 
-/* Base InfoWindow text layout; ML-specific styles in ml.css */
+/*
+ * Map InfoWindow: trim Google chrome (CSS + JS) + card content aligned with sidebar badges.
+ */
+/* 勿改 gm-style-iw-c 的 position，否则部分环境下整张气泡不显示 */
+#stations-app .gm-style-iw-c {
+  padding: 0 !important;
+}
+
+#stations-app .gm-style-iw-chr {
+  height: 0 !important;
+  max-height: 0 !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  overflow: visible !important;
+}
+
+#stations-app .gm-style-iw-t,
+#stations-app .gm-style-iw-tc {
+  padding-top: 0 !important;
+  min-height: 0 !important;
+}
+
+/* 底边略小于顶边，减轻按钮下方的「空一截」观感 */
+#stations-app .gm-style-iw-d {
+  padding: 12px 12px 6px 12px !important;
+  box-sizing: border-box !important;
+  max-width: min(288px, calc(100vw - 32px));
+}
+
 .stations-page .gm-iw {
-  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  font-family: var(--font-head, "Segoe UI", system-ui, sans-serif);
   font-size: 13px;
-  line-height: 1.5;
-  min-width: 140px;
-  color: #1a1a2e;
+  line-height: 1.45;
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  color: var(--color-text);
+}
+
+/* One column: even vertical rhythm; button spans full card width */
+.stations-page .gm-iw-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  width: 100%;
+  min-width: 0;
 }
 
 .stations-page .gm-iw strong {
   display: block;
-  margin-bottom: 4px;
-  font-size: 14px;
+  margin: 0;
+  padding: 0 30px 0 0;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: 0.02em;
+  color: #111827;
 }
 
 .stations-page .gm-iw .iw-avail {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 4px;
+  gap: 6px;
+  align-items: center;
+  margin: 0;
+}
+
+/* Same pill idea as sidebar `.avail-badge` */
+.stations-page .gm-iw .iw-tag {
+  display: inline-flex;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 999px;
+  line-height: 1.2;
+}
+
+.stations-page .gm-iw .iw-tag-bikes {
+  background: #dcfce7;
+  color: var(--color-bikes);
+}
+
+.stations-page .gm-iw .iw-tag-stands {
+  background: #dbeafe;
+  color: var(--color-stands);
 }
 
 @media (max-width: 900px) {

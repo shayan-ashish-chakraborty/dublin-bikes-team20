@@ -59,6 +59,16 @@ if (el_yr) el_yr.textContent = _d.getFullYear();
       return;
     }
   } catch (_) {}
+
+  try {
+    // fallback: OpenWeather via backend proxy
+    const res2 = await fetch('/api/weather/openweather/current').then(r => r.json());
+    const w = res2.weather;
+    if (w?.temp !== undefined) {
+      chip.textContent = Math.round(w.temp) + '°C';
+      return;
+    }
+  } catch (_) {}
 })();
 
 
@@ -78,6 +88,18 @@ if (el_yr) el_yr.textContent = _d.getFullYear();
       document.getElementById('hw-feels').textContent  = Math.round(row.feels_like)   + '°C';
       document.getElementById('hw-hum').textContent    = row.humidity                 + '%';
       document.getElementById('hw-wind').textContent   = (+row.wind_speed).toFixed(1) + ' m/s';
+      return;
+    }
+  } catch (_) {}
+
+  try {
+    const res2 = await fetch('/api/weather/openweather/current').then(r => r.json());
+    const w = res2.weather;
+    if (w?.temp !== undefined) {
+      document.getElementById('hw-temp').textContent   = Math.round(w.temp)        + '°C';
+      document.getElementById('hw-feels').textContent  = Math.round(w.feels_like)  + '°C';
+      document.getElementById('hw-hum').textContent    = Math.round(w.humidity)    + '%';
+      document.getElementById('hw-wind').textContent   = (+w.wind_speed).toFixed(1) + ' m/s';
     }
   } catch (_) {}
 })();

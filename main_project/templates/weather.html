@@ -8,7 +8,7 @@
      Row 1 (side-by-side cards):
        - Current Conditions  (temp, feels-like, humidity, wind, rain,
                               + cycling score 0--100)
-       - Next 7 Hours        (hourly forecast strip)
+       - Upcoming forecast   (7 × 3-hour steps)
      Row 2 (full-width card):
        - Temperature Forecast chart (next 40 hours) via Chart.js
      Row 3 (full-width card):
@@ -37,7 +37,7 @@
 {# 
    ROW 1: TWO SIDE-BY-SIDE CARDS
    Left card  → Current Conditions
-   Right card → Next 7 Hours
+   Right card → Upcoming forecast
    Laid out via CSS Grid (.wx-row in style.css)
  #}
 <div class="wx-row">
@@ -85,12 +85,13 @@
     </div>
   </div>
 
-  {#  RIGHT CARD: Next 7 Hours 
+  {#  RIGHT CARD: Upcoming forecast (7 points, 3 h apart)
      #hourly-list is populated by loadHourly() → generates .hour-row divs
      Each row shows: time | condition | temp | cycling score bar
   #}
   <div class="card">
-    <h3>Next 7 Hours</h3>
+    <h3>Upcoming forecast</h3>
+    <div class="chart-wrap chart-wrap-sm"><canvas id="temp7Chart"></canvas></div>
     <div class="hourly-list" id="hourly-list">
       <p class="loading-msg">Loading&hellip;</p>
     </div>
@@ -100,33 +101,26 @@
 
 {# ROW 2: TEMPERATURE CHART (full width)
    Chart.js draws a line chart on the <canvas> element.
-   buildTempChart() in JS below handles this.
+   buildTempChart() prepends "Now" when current data exists.
    Chart.js is loaded via {% block extra_js %} at the bottom.
  #}
 <div class="card card-full">
   <h3>
     <img src="{{ url_for('frontend.static', filename='images/icons/weather.svg') }}"
          alt="Temperature" class="card-title-icon">
-    Temperature Forecast &mdash; next 40 hours
+    Temperature &mdash; current &amp; forecast
   </h3>
   <div class="chart-wrap"><canvas id="tempChart"></canvas></div>
 </div>
 
-{# ROW 3: ML AVAILABILITY FORECAST PLACEHOLDER
-   Currently shows dummy/placeholder data via buildMLPlaceholder().
- #}
-<div class="card card-full ml-card">
-  <div class="ml-header">
-    <span class="ml-badge">ML</span>
-    <h3>Availability Forecast</h3>
-    <span class="ml-tag">Time-Series Prediction</span>
-  </div>
-  <p class="ml-desc">
-    Predicted bike availability at nearby stations for the next 3 hours,
-    using a model trained on historical availability + weather patterns from the local DB.
-  </p>
-  <div id="ml-stations"><p class="loading-msg">Loading predictions&hellip;</p></div>
-  <p class="ml-note">Planned model: LSTM / Prophet on 3-hour weather + availability data</p>
+{# ROW 3: RAIN FORECAST CHART (full width) #}
+<div class="card card-full">
+  <h3>
+    <img src="{{ url_for('frontend.static', filename='images/icons/weather.svg') }}"
+         alt="Rain" class="card-title-icon">
+    Rain &mdash; current &amp; forecast
+  </h3>
+  <div class="chart-wrap"><canvas id="rainChart"></canvas></div>
 </div>
 
 {% endblock %}{# end content block #}
@@ -157,7 +151,7 @@
      2. /api/weather/db/hourly    (local DB)
      
 
-   AUTO-REFRESH: loadCurrent() + loadHourly() run every 5 minutes.
+   AUTO-REFRESH: refreshWeather() runs every 5 minutes (current then hourly).
  #}
 {% block extra_js %}
 {# Chart.js from CDN — needed for the temperature line chart #}
@@ -165,17 +159,37 @@
 <script>
 // UTILITY FUNCTIONS 
 
-// Converts a timestamp (Unix seconds or ISO string) to "HH:MM AM/PM"
-function fmtTime(ts) {
-  const d = typeof ts === 'number' ? new Date(ts * 1000) : new Date(ts);
-  return d.toLocaleTimeString('en-IE', { hour: '2-digit', minute: '2-digit', hour12: true });
+// Parses DB ISO strings (Europe/Dublin offset from API), unix seconds, or legacy GMT strings.
+function parseInstant(ts) {
+  if (ts == null || ts === '') return new Date(NaN);
+  if (typeof ts === 'number' && Number.isFinite(ts)) return new Date(ts * 1000);
+  return new Date(ts);
 }
 
-// Converts a timestamp to "Mon 31 Mar HH:MM AM/PM"
+// Converts a timestamp (Unix seconds or ISO string) to "HH:MM AM/PM" in Europe/Dublin
+function fmtTime(ts) {
+  const d = parseInstant(ts);
+  return d.toLocaleTimeString('en-IE', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true,
+    timeZone: 'Europe/Dublin',
+  });
+}
+
+// Converts a timestamp to "Mon 31 Mar HH:MM AM/PM" (Dublin)
 function fmtDT(ts) {
-  const d = typeof ts === 'number' ? new Date(ts * 1000) : new Date(ts);
-  return d.toLocaleDateString('en-IE', { weekday: 'short', day: 'numeric', month: 'short' })
-       + ' ' + fmtTime(ts);
+  const d = parseInstant(ts);
+  return (
+    d.toLocaleDateString('en-IE', {
+      weekday: 'short',
+      day: 'numeric',
+      month: 'short',
+      timeZone: 'Europe/Dublin',
+    }) +
+    ' ' +
+    fmtTime(ts)
+  );
 }
 
 // Calculates a cycling suitability score (0–100) from weather values.
@@ -209,17 +223,30 @@ function guessCondition(temp, rain) {
   return                 'Partly Cloudy';
 }
 
-// WMO weather code → plain-text label (used with Open-Meteo fallback)
-const WMO_LABELS = {
-  0:'Clear', 1:'Mainly Clear', 2:'Partly Cloudy', 3:'Overcast',
-  45:'Foggy', 51:'Drizzle', 61:'Light Rain', 63:'Moderate Rain',
-  65:'Heavy Rain', 80:'Rain Showers', 95:'Thunderstorm'
+// Icon per guessCondition() label (img src from static/icons)
+const WX_COND_ICON_SRC = {
+  'Heavy Rain': "{{ url_for('frontend.static', filename='images/icons/weather-rain-heavy.svg') }}",
+  'Light Rain': "{{ url_for('frontend.static', filename='images/icons/weather-rain.svg') }}",
+  'Freezing': "{{ url_for('frontend.static', filename='images/icons/weather-snow.svg') }}",
+  'Cold': "{{ url_for('frontend.static', filename='images/icons/weather-cloud.svg') }}",
+  'Warm & Sunny': "{{ url_for('frontend.static', filename='images/icons/weather-sun.svg') }}",
+  'Partly Cloudy': "{{ url_for('frontend.static', filename='images/icons/weather-partly.svg') }}",
 };
+
+function conditionIconHtml(cond) {
+  const src = WX_COND_ICON_SRC[cond] || WX_COND_ICON_SRC['Partly Cloudy'];
+  const esc = String(cond).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+  return `<span class="h-cond h-cond-icon" title="${esc}" aria-label="${esc}">
+    <img src="${src}" alt="" width="24" height="24" class="h-cond-img" decoding="async" role="presentation">
+  </span>`;
+}
 
 // CHART.JS TEMPERATURE CHART
 
 // Holds the Chart.js instance so we can destroy + recreate on refresh.
 let tempChart = null;
+let rainChart = null;
+let temp7Chart = null;
 
 // Draws (or redraws) the 40-hour temperature line chart.
 // labels = array of time strings, temps/feels = arrays of °C values.
@@ -243,10 +270,113 @@ function buildTempChart(labels, temps, feels) {
   });
 }
 
+function buildRainChart(labels, rainMmPerH) {
+  const el = document.getElementById('rainChart');
+  if (!el) return;
+  const ctx = el.getContext('2d');
+  if (rainChart) rainChart.destroy();
+  rainChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Rain (mm/h)', data: rainMmPerH, backgroundColor: 'rgba(0,122,51,0.25)', borderColor: '#007A33', borderWidth: 1 }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: true } },
+      scales: {
+        y: { beginAtZero: true, ticks: { callback: v => v + ' mm' } }
+      }
+    }
+  });
+}
+
+function buildTemp7Chart(labels, temps) {
+  const el = document.getElementById('temp7Chart');
+  if (!el) return;
+  const ctx = el.getContext('2d');
+  if (temp7Chart) temp7Chart.destroy();
+  temp7Chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Temp (°C)', data: temps, borderColor: '#007A33', backgroundColor: 'rgba(0,122,51,0.08)', borderWidth: 2, fill: true, tension: 0.35, pointRadius: 2 }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { maxRotation: 0, autoSkip: true } },
+        y: { ticks: { callback: v => v + '°C' } }
+      }
+    }
+  });
+}
+
 // DATA LOADING 
 
+/** Same sources as loadCurrent — used to prepend a "Now" point on forecast charts. */
+async function fetchCurrentWeatherRow() {
+  try {
+    const res = await fetch('/api/weather/db/current?limit=1').then(r => r.json());
+    const d = res.weather?.[0] ?? null;
+    if (d && d.temp !== undefined) return d;
+  } catch (_) {}
+  try {
+    const res2 = await fetch('/api/weather/openweather/current').then(r => r.json());
+    const w = res2.weather;
+    if (w && w.temp !== undefined) return w;
+  } catch (_) {}
+  return null;
+}
+
+function rainMmPerHFromHourlyRow(r) {
+  const v3 = r.rain_3h;
+  const v1 = r.rain_1h;
+  if (v1 != null) return +(+v1).toFixed(2);
+  if (v3 != null) return +((+v3) / 3).toFixed(2);
+  return 0;
+}
+
+/** ms for a forecast row (OpenWeather + DB hourly shapes). */
+function rowTimeMs(r) {
+  return parseInstant(r.dt ?? r.future_dt).getTime();
+}
+
+/** Align to ~OpenWeather 3h steps so DB hourly rows merge with API rows. */
+function forecastSlotKey(tMs) {
+  return Math.floor(tMs / (3 * 60 * 60 * 1000));
+}
+
+/**
+ * DB may return fewer than requested rows (ETL partial / stale). Merge with API:
+ * same 3h slot → keep DB row; other slots → fill from API.
+ */
+function mergeHourlyPreferDb(dbRows, apiRows, nowMs) {
+  const skew = 60 * 1000;
+  const map = new Map();
+  const put = (r, fromDb) => {
+    const t = rowTimeMs(r);
+    if (!Number.isFinite(t) || t < nowMs - skew) return;
+    const k = forecastSlotKey(t);
+    const prev = map.get(k);
+    if (!prev) map.set(k, { r, fromDb });
+    else if (fromDb) map.set(k, { r, fromDb: true });
+  };
+  (apiRows || []).forEach((r) => put(r, false));
+  (dbRows || []).forEach((r) => put(r, true));
+  return [...map.values()]
+    .map((x) => x.r)
+    .sort((a, b) => rowTimeMs(a) - rowTimeMs(b));
+}
+
 // Loads current weather and fills the left card.
-// Tries our DB first; falls back to the free Open-Meteo API.
+// Tries our DB first; falls back to OpenWeather via backend proxy.
+// Returns the row used (for loadHourly charts) or null.
 async function loadCurrent() {
   let d = null;
   try {
@@ -257,21 +387,23 @@ async function loadCurrent() {
 
   if (d && d.temp !== undefined) {
     renderCurrent(d.temp, d.feels_like, d.humidity, d.wind_speed, d.rain_1h ?? 0, d.dt);
-  } else {
-    try {
-      // ★ FALLBACK: Open-Meteo free public API (no key needed) ★
-      const res = await fetch(
-        'https://api.open-meteo.com/v1/forecast?latitude=53.3498&longitude=-6.2603' +
-        '&current=temperature_2m,apparent_temperature,weathercode,windspeed_10m,relativehumidity_2m,precipitation' +
-        '&timezone=Europe/Dublin'
-      ).then(r => r.json());
-      const c = res.current;
-      const label = WMO_LABELS[c.weathercode] ?? 'Cloudy';
-      document.getElementById('wx-cond-label').textContent = label;
-      renderCurrent(c.temperature_2m, c.apparent_temperature,
-                    c.relativehumidity_2m, c.windspeed_10m / 3.6, c.precipitation, c.time);
-    } catch(_) {}
+    return d;
   }
+  try {
+    const res2 = await fetch('/api/weather/openweather/current').then(r => r.json());
+    const w = res2.weather;
+    if (w && w.temp !== undefined) {
+      renderCurrent(w.temp, w.feels_like, w.humidity, w.wind_speed, w.rain_1h ?? 0, w.dt);
+      if (w.weather_desc) {
+        document.getElementById('wx-cond-label').textContent = w.weather_desc
+          .split(' ')
+          .map(s => s ? s[0].toUpperCase() + s.slice(1) : s)
+          .join(' ');
+      }
+      return w;
+    }
+  } catch(_) {}
+  return null;
 }
 
 // Fills all the stat spans in the "Current Conditions" card.
@@ -301,73 +433,152 @@ function renderCurrent(temp, feels, hum, wind, rain, dt) {
 }
 
 // Loads hourly forecast data and fills the right card + chart + ML card.
-async function loadHourly() {
+// When current weather is available, prepends a "Now" point to temp/rain charts (current + forecast).
+// Pass currentRow from loadCurrent() to avoid a duplicate API call; otherwise fetches current.
+async function loadHourly(currentRow) {
+  const current = currentRow != null ? currentRow : await fetchCurrentWeatherRow();
+
+  const HOURLY_LIMIT = 24;
+  /** If DB has fewer future rows than this after filtering, merge in OpenWeather. */
+  const MIN_HOURLY_ROWS = 16;
+
   let rows = [];
   try {
     // ★ PRIMARY: our DB ★
-    const res = await fetch('/api/weather/db/hourly?limit=40').then(r => r.json());
-    rows = (res.hourly ?? []).reverse();
-  } catch(_) {}
+    const res = await fetch(`/api/weather/db/hourly?limit=${HOURLY_LIMIT}`).then(r => r.json());
+    rows = (res.hourly ?? []);
+  } catch(e) {
+    console.error('DB hourly fetch failed', e);
+  }
 
-  if (!rows.length) return;
+  if (!rows.length) {
+    try {
+      // ★ FALLBACK: OpenWeather 3-hour forecast (backend proxy) ★
+      const res2 = await fetch(`/api/weather/openweather/forecast3h?limit=${HOURLY_LIMIT}`).then(r => r.json());
+      rows = (res2.hourly ?? []);
+      if (res2.error) console.error('OpenWeather 3-hour error', res2);
+    } catch(e) {
+      console.error('OpenWeather 3-hour fetch failed', e);
+    }
+  }
 
-  // Fill the "Next 7 Hours" strip in the right card
-  document.getElementById('hourly-list').innerHTML = rows.slice(0, 7).map(r => {
-    const rain  = r.rain_3h ?? 0;
+  if (!rows.length) {
+    const el = document.getElementById('hourly-list');
+    if (el) el.innerHTML = `<p class="loading-msg">No hourly data available (DB empty + API failed). Check console for details.</p>`;
+    return;
+  }
+
+  // Ensure we start from "now".
+  const now = Date.now();
+  const toMs = (ts) => {
+    if (ts == null) return NaN;
+    return parseInstant(ts).getTime();
+  };
+  rows = rows
+    .slice()
+    .sort((a, b) => toMs(a.dt ?? a.future_dt) - toMs(b.dt ?? b.future_dt))
+    .filter(r => {
+      const t = toMs(r.dt ?? r.future_dt);
+      return Number.isFinite(t) && t >= now - 60 * 1000; // allow slight clock skew
+    })
+    .slice(0, HOURLY_LIMIT);
+
+  if (rows.length < MIN_HOURLY_ROWS) {
+    try {
+      const res3 = await fetch(`/api/weather/openweather/forecast3h?limit=${HOURLY_LIMIT}`).then(r => r.json());
+      const apiRows = res3.hourly ?? [];
+      if (apiRows.length) {
+        rows = mergeHourlyPreferDb(rows, apiRows, now)
+          .filter((r) => {
+            const t = toMs(r.dt ?? r.future_dt);
+            return Number.isFinite(t) && t >= now - 60 * 1000;
+          })
+          .slice(0, HOURLY_LIMIT);
+      }
+    } catch (e) {
+      console.error('OpenWeather merge for sparse DB failed', e);
+    }
+  }
+
+  if (!rows.length) {
+    const el = document.getElementById('hourly-list');
+    if (el) el.innerHTML = `<p class="loading-msg">No future hourly points available.</p>`;
+    return;
+  }
+
+  const stripN = current && current.temp != null ? 6 : 7;
+  const stripForecast = rows.slice(0, stripN);
+
+  if (current && current.temp != null) {
+    const t0 = +Number(current.temp).toFixed(1);
+    buildTemp7Chart(
+      ['Now', ...stripForecast.map(r => fmtTime(r.dt ?? r.future_dt))],
+      [t0, ...stripForecast.map(r => (r.temp != null ? +(+r.temp).toFixed(1) : null))]
+    );
+  } else {
+    buildTemp7Chart(
+      rows.slice(0, 7).map(r => fmtTime(r.dt ?? r.future_dt)),
+      rows.slice(0, 7).map(r => (r.temp != null ? +(+r.temp).toFixed(1) : null))
+    );
+  }
+
+  function hourRowHtml(r) {
+    const rain = r.rain_3h ?? r.rain_1h ?? 0;
     const score = cyclingScore(r.temp, r.wind_speed, rain);
-    const cl    = cyclingLabel(score);
-    const cond  = guessCondition(r.temp, rain);
+    const cl = cyclingLabel(score);
+    const cond = guessCondition(r.temp, rain);
     return `<div class="hour-row">
       <span class="h-time">${fmtTime(r.dt ?? r.future_dt)}</span>
-      <span class="h-cond">${cond}</span>
+      ${conditionIconHtml(cond)}
       <span class="h-temp">${Math.round(r.temp)}&deg;C</span>
       <div class="h-bar-track"><div class="h-bar-fill" style="width:${score}%;background:${cl.color}"></div></div>
     </div>`;
-  }).join('');
+  }
 
-  // Draw the 40-hour temperature chart
-  buildTempChart(
-    rows.map(r => fmtTime(r.dt ?? r.future_dt)),
-    rows.map(r => r.temp        != null ? +r.temp.toFixed(1)       : null),
-    rows.map(r => r.feels_like  != null ? +r.feels_like.toFixed(1) : null)
-  );
-
-  // Fill ML placeholder
-  buildMLPlaceholder(rows);
-}
-
-// ML PLACEHOLDER
-// Expected endpoint: GET /api/ml/forecast
-// Expected response: { stations: [{ name, predicted_bikes, current_bikes }] }
-function buildMLPlaceholder(rows) {
-  // Dummy station data — replace with real API response
-  const stations = [
-    { name: 'Grafton Street',       bikes: 8,  trend: +2 },
-    { name: "St. Stephen's Green",  bikes: 3,  trend: -1 },
-    { name: 'Trinity College',      bikes: 14, trend: +1 },
-  ];
-  const nextRain = rows[1]?.rain_3h ?? 0;
-  const nextTemp = rows[1]?.temp ?? 10;
-  const delta = (nextRain > 1 ? -3 : nextRain > 0 ? -1 : 0) + (nextTemp > 14 ? 2 : 0);
-
-  document.getElementById('ml-stations').innerHTML = stations.map(s => {
-    const pred  = Math.max(0, s.bikes + s.trend + delta);
-    const diff  = pred - s.bikes;
-    const arrow = diff > 0 ? '&uarr;' : diff < 0 ? '&darr;' : '&rarr;';
-    const col   = diff > 0 ? '#007A33' : diff < 0 ? '#c0392b' : '#888';
-    const pct   = Math.round(Math.min(100, (pred / 20) * 100));
-    return `<div class="ml-row">
-      <span class="ml-name">${s.name}</span>
-      <div class="ml-bar"><div class="ml-bar-fill" style="width:${pct}%;border-left:3px solid ${col}"></div></div>
-      <span class="ml-pred" style="color:${col}">${pred} bikes ${arrow}</span>
+  let listHtml = '';
+  if (current && current.temp != null) {
+    const cr = current.rain_1h ?? 0;
+    const wsp = current.wind_speed ?? 0;
+    const cs = cyclingScore(current.temp, wsp, cr);
+    const ccl = cyclingLabel(cs);
+    const ccond = guessCondition(current.temp, cr);
+    listHtml += `<div class="hour-row hour-row-now">
+      <span class="h-time">Now</span>
+      ${conditionIconHtml(ccond)}
+      <span class="h-temp">${Math.round(current.temp)}&deg;C</span>
+      <div class="h-bar-track"><div class="h-bar-fill" style="width:${cs}%;background:${ccl.color}"></div></div>
     </div>`;
-  }).join('');
+  }
+  listHtml += stripForecast.map(hourRowHtml).join('');
+  document.getElementById('hourly-list').innerHTML = listHtml;
+
+  const lbls = rows.map(r => fmtTime(r.dt ?? r.future_dt));
+  const temps = rows.map(r => (r.temp != null ? +r.temp.toFixed(1) : null));
+  const feels = rows.map(r => (r.feels_like != null ? +r.feels_like.toFixed(1) : null));
+  const rains = rows.map(rainMmPerHFromHourlyRow);
+
+  if (current && current.temp != null) {
+    const t0 = +Number(current.temp).toFixed(1);
+    const f0 =
+      current.feels_like != null ? +Number(current.feels_like).toFixed(1) : t0;
+    const r0 =
+      current.rain_1h != null && current.rain_1h !== ''
+        ? +Number(current.rain_1h).toFixed(2)
+        : 0;
+    buildTempChart(['Now', ...lbls], [t0, ...temps], [f0, ...feels]);
+    buildRainChart(['Now', ...lbls], [r0, ...rains]);
+  } else {
+    buildTempChart(lbls, temps, feels);
+    buildRainChart(lbls, rains);
+  }
 }
 
-// RUN ON PAGE LOAD 
-loadCurrent();
-loadHourly();
-// Auto-refresh every 5 minutes (300,000 ms)
-setInterval(() => { loadCurrent(); loadHourly(); }, 5 * 60 * 1000);
+// RUN ON PAGE LOAD — current first, then hourly (reuses current for "Now" on charts)
+async function refreshWeather() {
+  const cur = await loadCurrent();
+  await loadHourly(cur);
+}
+refreshWeather();
+setInterval(refreshWeather, 5 * 60 * 1000);
 </script>
 {% endblock %}

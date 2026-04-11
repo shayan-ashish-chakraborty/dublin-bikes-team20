@@ -1,4 +1,4 @@
-from sprint1_webscrappers.webscrapping.openweather_text_to_db_current import db_connection, current_weather_to_db
+from sprint1_webscrappers.webscrapping_ec2.openweather_text_to_db_current import db_connection, current_weather_to_db
 import time
 
 engine = db_connection()

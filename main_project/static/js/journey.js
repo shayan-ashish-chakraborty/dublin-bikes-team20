@@ -8,6 +8,9 @@ const state = {
   polylines: [],
   markers: [],
   stationMarkers: [],
+  suppressMapClickClose: false,
+  routePickupMarker: null,
+  routeDropoffMarker: null,
 };
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -67,6 +70,13 @@ window.initMap = function () {
 
   state.infoWindow = new google.maps.InfoWindow();
 
+  state.map.addListener("click", () => {
+    if (state.suppressMapClickClose) return;
+    journeyDestroyMlChartsIfPresent();
+    state.infoWindow.close();
+  });
+  state.infoWindow.addListener("closeclick", journeyDestroyMlChartsIfPresent);
+
   setDefaultDateTime();
   attachEventListeners();
   fetchAndRenderStations();
@@ -77,7 +87,14 @@ function setDefaultDateTime() {
   const now = new Date();
   const dateStr = now.toISOString().slice(0, 10);
   const timeStr = now.toTimeString().slice(0, 5);
-  document.getElementById("date-input").value = dateStr;
+
+  const max48h = new Date(now.getTime() + 48 * 60 * 60 * 1000);
+  const maxDateStr = max48h.toISOString().slice(0, 10);
+
+  const dateInput = document.getElementById("date-input");
+  dateInput.value = dateStr;
+  dateInput.min = dateStr;
+  dateInput.max = maxDateStr;
   document.getElementById("time-input").value = timeStr;
 }
 
@@ -106,6 +123,11 @@ async function fetchAndRenderStations() {
   document.getElementById("start-input").value = "";
   document.getElementById("end-input").value = "";
   clearRouteLayer();
+  state.infoWindow.close();
+  const puM = document.getElementById("journey-pickup-more");
+  const doM = document.getElementById("journey-dropoff-more");
+  if (puM) puM.classList.add("hidden");
+  if (doM) doM.classList.add("hidden");
   document.getElementById("route-summary").classList.add("hidden");
   document.getElementById("station-cards").classList.add("hidden");
   document.getElementById("directions-panel").classList.add("hidden");
@@ -147,16 +169,7 @@ function renderStationMarkers(stations) {
     });
 
     marker.addListener("click", () => {
-      state.infoWindow.setContent(
-        `<div class="gm-iw">
-          <strong>${station.name}</strong>
-          <div class="iw-avail">
-            <span style="color:#16a34a">🚲 ${station.available_bikes} bikes</span>
-            <span style="color:#2563eb">🅿 ${station.available_stands} stands</span>
-          </div>
-        </div>`
-      );
-      state.infoWindow.open(state.map, marker);
+      journeyOpenStationMlInfoWindow(marker, station);
     });
 
     state.stationMarkers.push(marker);
@@ -166,29 +179,52 @@ function renderStationMarkers(stations) {
 // ── Route Flow ────────────────────────────────────────────────────────────────
 
 function handleNavigate() {
-  const start = document.getElementById("start-input").value.trim();
-  const end = document.getElementById("end-input").value.trim();
-
+  const start   = document.getElementById("start-input").value.trim();
+  const end     = document.getElementById("end-input").value.trim();
+  const dateStr = document.getElementById("date-input").value;
+  const timeStr = document.getElementById("time-input").value;
 
   if (!start || !end) {
     showError("Please enter both a start and end address.");
     return;
   }
 
+  // Validate selected time is within 48 hours
+  const selectedDt  = new Date(`${dateStr}T${timeStr}:00`);
+  const now         = new Date();
+  const diffHours   = (selectedDt - now) / (1000 * 60 * 60);
+
+  if (diffHours < -(1 / 60)) {          // allow up to 1 min in the past
+    showError("Please select a time in the future.");
+    return;
+  }
+
+  if (diffHours > 48) {
+    showError("Please select a time within the next 48 hours.");
+    return;
+  }
+
   clearError();
-  fetchRoute(start, end);
+
+  // > 1 hour in the future → use prediction endpoint
+  const usePrediction = diffHours > 1;
+  const timeForApi    = `${dateStr} ${timeStr}:00`;
+  fetchRoute(start, end, usePrediction ? timeForApi : null);
 }
 
-async function fetchRoute(start, end) {
+async function fetchRoute(start, end, timeStr = null) {
   const btn = document.getElementById("navigate-btn");
   btn.disabled = true;
   btn.textContent = "Finding route…";
   document.getElementById("map-loading").classList.remove("hidden");
 
+  const endpoint = timeStr ? "journey/api/route/predict" : "journey/api/route";
+  const body     = timeStr ? { start, end, time: timeStr } : { start, end };
+
   try {
-    const data = await apiFetch("journey/api/route", {
+    const data = await apiFetch(endpoint, {
       method: "POST",
-      body: JSON.stringify({ start, end }),
+      body: JSON.stringify(body),
     });
     state.routeData = data;
     renderRoute(data);
@@ -210,6 +246,17 @@ function renderRoute(data) {
   renderDirections(data.legs);
   fitMapToBounds(data);
 
+  // Prediction banner
+  const banner = document.getElementById("prediction-banner");
+  if (data.prediction_mode) {
+    let msg = "The journey plan is based on prediction data, not live data.";
+    if (data.weather_warning) msg += ` (${data.weather_warning})`;
+    banner.textContent = msg;
+    banner.classList.remove("hidden");
+  } else {
+    banner.classList.add("hidden");
+  }
+
   document.getElementById("route-summary").classList.remove("hidden");
   document.getElementById("station-cards").classList.remove("hidden");
   document.getElementById("directions-panel").classList.remove("hidden");
@@ -218,6 +265,9 @@ function renderRoute(data) {
 // ── Map Drawing ───────────────────────────────────────────────────────────────
 
 function clearRouteLayer() {
+  journeyDestroyMlChartsIfPresent();
+  state.routePickupMarker = null;
+  state.routeDropoffMarker = null;
   [...state.polylines, ...state.markers].forEach(item => item.setMap(null));
   state.polylines = [];
   state.markers = [];
@@ -294,15 +344,11 @@ function placeRouteMarkers(data) {
       strokeWeight: 2,
     },
   });
-  addInfoWindow(pickupMarker,
-    `<div class="gm-iw"><strong>🚲 Pickup Station</strong>${pickup_station.name}
-      <div class="iw-avail">
-        <span style="color:#16a34a">🚲 ${pickup_station.available_bikes} bikes</span>
-        <span style="color:#2563eb">🅿 ${pickup_station.available_stands} stands</span>
-      </div>
-    </div>`
-  );
+  pickupMarker.addListener("click", () => {
+    journeyOpenStationMlInfoWindow(pickupMarker, pickup_station);
+  });
   state.markers.push(pickupMarker);
+  state.routePickupMarker = pickupMarker;
 
   const dropoffMarker = new google.maps.Marker({
     position: { lat: dropoff_station.lat, lng: dropoff_station.lng },
@@ -317,15 +363,11 @@ function placeRouteMarkers(data) {
       strokeWeight: 2,
     },
   });
-  addInfoWindow(dropoffMarker,
-    `<div class="gm-iw"><strong>🚩 Dropoff Station</strong>${dropoff_station.name}
-      <div class="iw-avail">
-        <span style="color:#16a34a">🚲 ${dropoff_station.available_bikes} bikes</span>
-        <span style="color:#2563eb">🅿 ${dropoff_station.available_stands} stands</span>
-      </div>
-    </div>`
-  );
+  dropoffMarker.addListener("click", () => {
+    journeyOpenStationMlInfoWindow(dropoffMarker, dropoff_station);
+  });
   state.markers.push(dropoffMarker);
+  state.routeDropoffMarker = dropoffMarker;
 }
 
 function addInfoWindow(marker, content) {
@@ -349,13 +391,34 @@ function fitMapToBounds(data) {
 function renderStationCards(data) {
   const { pickup_station: p, dropoff_station: d } = data;
 
-  document.getElementById("pickup-name").textContent = p.name;
-  document.getElementById("pickup-bikes").textContent = `🚲 ${p.available_bikes} bikes`;
+  document.getElementById("pickup-name").textContent   = p.name;
+  document.getElementById("pickup-bikes").textContent  = `🚲 ${p.available_bikes} bikes`;
   document.getElementById("pickup-stands").textContent = `🅿 ${p.available_stands} stands`;
 
-  document.getElementById("dropoff-name").textContent = d.name;
-  document.getElementById("dropoff-bikes").textContent = `🚲 ${d.available_bikes} bikes`;
+  document.getElementById("dropoff-name").textContent   = d.name;
+  document.getElementById("dropoff-bikes").textContent  = `🚲 ${d.available_bikes} bikes`;
   document.getElementById("dropoff-stands").textContent = `🅿 ${d.available_stands} stands`;
+
+  const puMore = document.getElementById("journey-pickup-more");
+  const doMore = document.getElementById("journey-dropoff-more");
+  if (puMore) {
+    puMore.classList.remove("hidden");
+    puMore.onclick = () => {
+      if (state.routePickupMarker && typeof google !== "undefined" && google.maps) {
+        state.map.panTo(state.routePickupMarker.getPosition());
+        google.maps.event.trigger(state.routePickupMarker, "click");
+      }
+    };
+  }
+  if (doMore) {
+    doMore.classList.remove("hidden");
+    doMore.onclick = () => {
+      if (state.routeDropoffMarker && typeof google !== "undefined" && google.maps) {
+        state.map.panTo(state.routeDropoffMarker.getPosition());
+        google.maps.event.trigger(state.routeDropoffMarker, "click");
+      }
+    };
+  }
 }
 
 function renderSummary(summary) {
@@ -431,4 +494,86 @@ function showError(message) {
 
 function clearError() {
   document.getElementById("status-message").classList.add("hidden");
+}
+
+// ── Journey: InfoWindow ML (parity with Stations map — MLbikes.js) ────────────
+
+function journeyDestroyMlChartsIfPresent() {
+  if (window.StationML && typeof window.StationML.destroyIwCharts === "function") {
+    window.StationML.destroyIwCharts();
+  }
+}
+
+function journeyApplyIwLayoutFix() {
+  try {
+    const app = document.getElementById("app");
+    if (!app) return;
+    const gmIw = app.querySelector(".gm-style-iw-d .gm-iw");
+    if (!gmIw) return;
+    const iwD = gmIw.closest(".gm-style-iw-d");
+    if (iwD) {
+      iwD.style.setProperty("padding", "12px 12px 6px 12px", "important");
+    }
+    const shell = gmIw.closest(".gm-style-iw-c");
+    if (!shell) return;
+    shell.style.setProperty("padding", "0", "important");
+    const chr = shell.querySelector(".gm-style-iw-chr");
+    if (chr) {
+      chr.style.setProperty("height", "0", "important");
+      chr.style.setProperty("min-height", "0", "important");
+      chr.style.setProperty("max-height", "0", "important");
+      chr.style.setProperty("padding", "0", "important");
+      chr.style.setProperty("overflow", "visible", "important");
+    }
+    const toolbar = shell.querySelector(".gm-style-iw-t");
+    if (toolbar) {
+      toolbar.style.setProperty("min-height", "0", "important");
+      toolbar.style.setProperty("padding", "0", "important");
+    }
+    const tbc = shell.querySelector(".gm-style-iw-tc");
+    if (tbc) {
+      tbc.style.setProperty("padding-top", "0", "important");
+      tbc.style.setProperty("min-height", "0", "important");
+    }
+  } catch (err) {
+    console.warn("InfoWindow layout fix:", err);
+  }
+}
+
+function journeyStationInfoHtmlBasic(station) {
+  const bikes = station.available_bikes ?? 0;
+  const stands =
+    station.available_stands ?? station.available_bike_stands ?? 0;
+  const name = String(station.name || "").replace(/</g, "&lt;");
+  return (
+    `<div class="gm-iw"><div class="gm-iw-inner">` +
+    `<strong>${name}</strong>` +
+    `<div class="iw-avail">` +
+    `<span class="iw-tag iw-tag-bikes">🚲 ${bikes} bikes</span>` +
+    `<span class="iw-tag iw-tag-stands">🅿 ${stands} stands</span>` +
+    `</div></div></div>`
+  );
+}
+
+function journeyOpenStationMlInfoWindow(marker, station) {
+  journeyDestroyMlChartsIfPresent();
+  state.suppressMapClickClose = true;
+  const ml = window.StationML;
+  if (ml && typeof ml.stationInfoHtml === "function") {
+    state.infoWindow.setContent(ml.stationInfoHtml(station));
+    state.infoWindow.open({ map: state.map, anchor: marker });
+    google.maps.event.addListenerOnce(state.infoWindow, "domready", () => {
+      journeyApplyIwLayoutFix();
+      ml.setupInfoWindowPrediction(station);
+    });
+  } else {
+    state.infoWindow.setContent(journeyStationInfoHtmlBasic(station));
+    state.infoWindow.open({ map: state.map, anchor: marker });
+    google.maps.event.addListenerOnce(state.infoWindow, "domready", () => {
+      journeyApplyIwLayoutFix();
+    });
+  }
+  window.setTimeout(() => {
+    state.suppressMapClickClose = false;
+  }, 400);
 }

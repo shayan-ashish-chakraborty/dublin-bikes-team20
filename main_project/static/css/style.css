@@ -398,8 +398,6 @@ h1, h2, h3, h4 { font-family: var(--font-head); }
   filter: invert(26%) sepia(85%) saturate(700%) hue-rotate(120deg) brightness(85%) contrast(110%);
   flex-shrink: 0;
 }
-.card-full { width: 100%; }
-
 /* WEATHER PAGE LAYOUT */
 .page-header {
   padding: 28px 32px 0;
@@ -432,10 +430,12 @@ h1, h2, h3, h4 { font-family: var(--font-head); }
   width: 100%;
 }
 
+/* 与 .wx-row 内两列同宽：行宽 min(1100px,100%)，左右各 32px → 内容 max 1036px */
 .card-full {
-  max-width: 1100px;
+  width: 100%;
+  max-width: min(1036px, calc(100% - 64px));
   margin: 20px auto 0;
-  width: calc(100% - 64px);
+  box-sizing: border-box;
 }
 
 /* current conditions */
@@ -496,14 +496,62 @@ h1, h2, h3, h4 { font-family: var(--font-head); }
 .score-fill   { height: 100%; border-radius: 6px; transition: width 0.5s; }
 .score-text   { font-size: 13px; font-weight: 600; }
 
-/* 7-hour list */
-.hourly-list { display: flex; flex-direction: column; gap: 8px; }
-.hour-row    { display: flex; align-items: center; gap: 10px; padding: 6px 0; border-bottom: 1px solid var(--border); }
+/* 7-hour list — 4 equal columns: time | icon | °C | bar */
+.hourly-list { display: flex; flex-direction: column; gap: 4px; }
+.hour-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-items: center;
+  column-gap: 10px;
+  padding: 8px 6px;
+  border-bottom: 1px solid var(--border);
+}
 .hour-row:last-child { border-bottom: none; }
-.h-time      { font-size: 13px; color: var(--text-muted); min-width: 62px; }
-.h-cond      { font-size: 12px; color: var(--text-muted); flex: 1; }
-.h-temp      { font-size: 14px; font-weight: 700; min-width: 42px; text-align: right; font-family: var(--font-head); }
-.h-bar-track { width: 60px; background: var(--bg); border-radius: 4px; height: 6px; overflow: hidden; flex-shrink: 0; }
+.hour-row-now .h-time { font-weight: 700; color: var(--green); }
+.h-time {
+  font-size: 13px;
+  color: var(--text-muted);
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: left;
+  justify-self: stretch;
+}
+.h-cond { font-size: 12px; color: var(--text-muted); }
+.h-cond:not(.h-cond-icon) { min-width: 0; }
+.h-cond-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  justify-self: center;
+  width: 100%;
+}
+.h-cond-img {
+  display: block;
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+}
+.h-temp {
+  font-size: 14px;
+  font-weight: 700;
+  font-family: var(--font-head);
+  text-align: center;
+  justify-self: center;
+  min-width: 0;
+  font-variant-numeric: tabular-nums;
+}
+.h-bar-track {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  justify-self: stretch;
+  background: var(--bg);
+  border-radius: 4px;
+  height: 6px;
+  overflow: hidden;
+}
 .h-bar-fill  { height: 100%; border-radius: 4px; transition: width 0.4s; }
 
 /* chart */
@@ -671,8 +719,12 @@ h1, h2, h3, h4 { font-family: var(--font-head); }
   .wx-strip  { padding: 14px 20px; gap: 14px; }
   .stats-bar { padding: 20px; }
   .wx-row    { grid-template-columns: 1fr; padding: 20px 20px 0; }
-  .card-full { width: calc(100% - 40px); }
+  .card-full { max-width: calc(100% - 40px); }
   .page-header { padding: 20px 20px 0; }
   .page-header p { margin-left: 0; margin-top: 8px; }
   .chatbot-panel { width: calc(100vw - 24px); right: 12px; }
 }
+
+/* chart */
+.chart-wrap { height: 240px; }
+.chart-wrap-sm { height: 140px; }

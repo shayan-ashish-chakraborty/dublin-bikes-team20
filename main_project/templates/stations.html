@@ -13,7 +13,7 @@
   id="stations-app"
   class="stations-page"
   data-stations-api="{{ url_for('stations.stations') }}"
-  data-predict-range="/api/bikes/predict"
+  data-predict-range="/api/stations/predict"
   data-maps-key="{{ (config.get('GOOGLE_MAPS_API_KEY') or '') | e }}"
 >
   <div class="app-root">

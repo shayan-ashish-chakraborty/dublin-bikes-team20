@@ -5,11 +5,14 @@
     {{ super() }}
      <link rel="stylesheet" href="{{ url_for('static', filename='css/journey.css') }}">
     <script src="{{ url_for('static', filename='js/journey.js') }}"></script>
-    
 {% endblock %}
 
 {% block content %}
-<div id="app">
+<div
+  id="app"
+  class="journey-page"
+  data-predict-range="{{ url_for('stations.stations_predict') }}"
+>
      <!-- LEFT PANEL -->
     <aside id="sidebar">
         <section id="journey-form">
@@ -75,6 +78,9 @@
               <span class="avail-badge bikes" id="pickup-bikes"></span>
               <span class="avail-badge stands" id="pickup-stands"></span>
             </div>
+            <button type="button" class="journey-card-more-btn hidden" id="journey-pickup-more">
+              More information
+            </button>
           </div>
           <div class="station-card dropoff">
             <div class="card-label">Dropoff</div>
@@ -83,13 +89,19 @@
               <span class="avail-badge bikes" id="dropoff-bikes"></span>
               <span class="avail-badge stands" id="dropoff-stands"></span>
             </div>
+            <button type="button" class="journey-card-more-btn hidden" id="journey-dropoff-more">
+              More information
+            </button>
           </div>
         </div>
       </section>
-
+      
       <!-- Directions -->
       <section id="directions-panel" class="hidden panel-section">
         <h2 class="section-title">Directions</h2>
+        <!-- Prediction Banner -->
+        <div id="prediction-banner" class="hidden prediction-banner"></div>
+
 
         <div class="leg-section">
           <div class="leg-header walk-color">
@@ -128,7 +140,13 @@
     </main>
 
   </div>
+{% endblock %}
 
-  <script src="/static/script.js"></script>
+{% block extra_js %}
+<script
+  src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"
+  crossorigin="anonymous"
+></script>
+<script src="{{ url_for('static', filename='js/MLbikes.js') }}"></script>
 {% endblock %}
 
