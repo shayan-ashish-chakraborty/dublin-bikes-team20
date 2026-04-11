@@ -1,68 +1,119 @@
 from flask import Blueprint, jsonify, request, current_app
 import json
 import pathlib
-
+from datetime import datetime, timedelta
 
 _BASE = pathlib.Path(__file__).resolve().parent.parent.parent
 _STATIC = _BASE / "main_project" / "static"
 _TEMPLATES = _BASE / "main_project" / "templates"
 
-_SPRINT1_WEATHER_DIR = _BASE / "sprint1_webscrappers" / "openweather_api" / "weather_data"
+_FORECAST_DIR = pathlib.Path(__file__).resolve().parent.parent / "bike_forecast"
 
-# ML model paths
-_MODEL_PATH = pathlib.Path(__file__).resolve().parent.parent / "bike_forecast" / "bike_model.pkl"
-_META_PATH = _MODEL_PATH.with_name("model_meta.json")
+# Bike models
+_BIKE_MODEL_PATH  = _FORECAST_DIR / "bike_model.pkl"
+_DOCK_MODEL_PATH  = _FORECAST_DIR / "docks_model.pkl"
+
+# Weather models
+_TEMP_MODEL_PATH  = _FORECAST_DIR / "weather_temp.pkl"
+_HUM_MODEL_PATH   = _FORECAST_DIR / "weather_humidity.pkl"
+_PRES_MODEL_PATH  = _FORECAST_DIR / "weather_pressure.pkl"
+_RAIN_MODEL_PATH  = _FORECAST_DIR / "weather_rain.pkl"
+
+_META_PATH        = _FORECAST_DIR / "model_meta.json"
 
 # Lazy-loaded singletons (loaded once on first request, reused afterward)
-_model = None
-_model_features = None  # ordered list of feature names from model_meta.json
+_bike_model    = None
+_dock_model    = None
+_temp_model    = None
+_hum_model     = None
+_pres_model    = None
+_rain_model    = None
+_bike_features = None
+_wx_features   = None
+_hum_std_mean  = None   # dataset mean fallback for humidity_std feature
 
 
-def _load_model():
-    """Load the pkl model and feature list once, then cache in module globals."""
-    global _model, _model_features
-    if _model is None:
+def _load_models():
+    """Load all pkl models and meta once, then cache in module globals."""
+    global _bike_model, _dock_model, _temp_model, _hum_model, _pres_model, _rain_model, _bike_features, _wx_features, _hum_std_mean
+    if _bike_model is None:
         import pickle
-        with open(_MODEL_PATH, "rb") as fh:
-            _model = pickle.load(fh)
+
+        with open(_BIKE_MODEL_PATH,  "rb") as fh: _bike_model  = pickle.load(fh)
+        with open(_DOCK_MODEL_PATH,  "rb") as fh: _dock_model  = pickle.load(fh)
+        with open(_TEMP_MODEL_PATH,  "rb") as fh: _temp_model  = pickle.load(fh)
+        with open(_HUM_MODEL_PATH,   "rb") as fh: _hum_model   = pickle.load(fh)
+        with open(_PRES_MODEL_PATH,  "rb") as fh: _pres_model  = pickle.load(fh)
+        with open(_RAIN_MODEL_PATH,  "rb") as fh: _rain_model  = pickle.load(fh)
+
         with open(_META_PATH, encoding="utf-8") as fh:
             meta = json.load(fh)
-        _model_features = meta["features"]   # e.g. ["station_id","capacity",...]
-    return _model, _model_features
+
+        _bike_features = meta["bike_features"]
+        _wx_features   = meta["weather_features"]
+        _hum_std_mean  = meta.get("humidity_std_mean", 3.49)
+
+    return (_bike_model, _dock_model,
+            _temp_model, _hum_model, _pres_model, _rain_model,
+            _bike_features, _wx_features, _hum_std_mean)
 
 
-def _latest_sprint1_file(pattern: str):
-    """Return the most-recently-modified file matching *pattern*, or None."""
-    files = sorted(
-        _SPRINT1_WEATHER_DIR.glob(pattern),
-        key=lambda p: p.stat().st_mtime,
-        reverse=True,
-    )
-    return files[0] if files else None
-
-
-def _hourly_from_json(limit: int = 40) -> list:
+def _predict_hour(models, station_id, capacity, future_dt,
+                  wx_override=None):
     """
-    Parse the newest sprint-1 forecast JSON and return a list of dicts shaped
-    like the DB `hourly` table rows.
+    Run the full two-stage pipeline for one hour.
+
+    wx_override : dict with keys avg_temp, avg_humidity, avg_pressure,
+                  is_raining — pass live OpenWeather values here to
+                  skip the weather model for that hour.
+
+    Returns dict with all predicted values for that hour.
     """
-    path = _latest_sprint1_file("forecast_*.json")
-    if not path:
-        return []
-    with open(path, encoding="utf-8") as fh:
-        raw = json.load(fh)
-    rows = []
-    for item in raw.get("list", [])[:limit]:
-        rows.append({
-            "dt":         item.get("dt"),
-            "future_dt":  item.get("dt_txt"),
-            "temp":       item["main"]["temp"],
-            "feels_like": item["main"]["feels_like"],
-            "humidity":   item["main"]["humidity"],
-            "wind_speed": item["wind"]["speed"],
-            "rain_3h":    item.get("rain", {}).get("3h", 0),
-        })
-    return rows
+    import pandas as pd
+
+    (bike_m, dock_m, temp_m, hum_m, pres_m, rain_m,
+     bike_feat, wx_feat, hum_std) = models
+
+    h = future_dt.hour
+    m = future_dt.month
+
+    #  weather 
+    if wx_override:
+        avg_temp     = round(float(wx_override["avg_temp"]),     1)
+        avg_humidity = round(float(wx_override["avg_humidity"]), 1)
+        avg_pressure = round(float(wx_override["avg_pressure"]), 1)
+        is_raining   = int(wx_override["is_raining"])
+    else:
+        wx_row       = pd.DataFrame([{"hour": h, "month": m}])[wx_feat]
+        avg_temp     = round(float(temp_m.predict(wx_row)[0]), 1)
+        avg_humidity = round(float(hum_m.predict(wx_row)[0]),  1)
+        avg_pressure = round(float(pres_m.predict(wx_row)[0]), 1)
+        is_raining   = int(rain_m.predict(wx_row)[0])
+
+    # bikes + docks
+    bk_row = pd.DataFrame([{
+        "station_id"  : station_id,
+        "capacity"    : capacity,
+        "hour"        : h,
+        "avg_temp"    : avg_temp,
+        "avg_humidity": avg_humidity,
+        "avg_pressure": avg_pressure,
+        "is_raining"  : is_raining,
+        "humidity_std": hum_std,
+    }])[bike_feat]
+
+    bikes = round(max(0.0, min(float(capacity), float(bike_m.predict(bk_row)[0]))), 1)
+    docks = round(max(0.0, min(float(capacity), float(dock_m.predict(bk_row)[0]))), 1)
+
+    return {
+        "time"            : future_dt.strftime("%Y-%m-%d %H:%M"),
+        "predicted_bikes" : bikes,
+        "predicted_docks" : docks,
+        "predicted_temp"  : avg_temp,
+        "predicted_humidity": avg_humidity,
+        "predicted_pressure": avg_pressure,
+        "predicted_rain"  : is_raining,
+    }
 
 
 # Blueprint 
@@ -78,107 +129,136 @@ forecast_bp = Blueprint(
 
 # ROUTES 
 
-@forecast_bp.get("/")
-def ml_forecast():
+@forecast_bp.get("/station")
+def station_forecast():
     """
-    GET /
-    Run the trained RandomForest (bike_model.pkl) to predict bike availability.
+    GET /forecast/station
+    Runs the two-stage pipeline (weather model → bike model) and returns
+    hourly predictions for bikes, docks, and all weather parameters.
 
     Query parameters
 
-    stations - URL-encoded JSON array of station objects, each with:
-               { station_id: int, capacity: int, name: str }
-                Example: [{"station_id":10,"capacity":16,"name":"O'Connell St"}]
-    hour - hour of day 0-23 (default: current hour in Dublin)
-    avg_temp - temperature in °C  (default: 12.0)
-    avg_humidity - relative humidity % (default: 80.0)
-    avg_pressure -barometric pressure hPa (default: 1013.0)
+    number = station_id                        (required)
+    capacity = total docks at the station        (required)
+    hours = future hours to forecast (default 8, max 48)
+    avg_temp = override weather model °C         (optional)
+    avg_humidity = override weather model %          (optional)
+    avg_pressure = override weather model hPa        (optional)
+    is_raining = override rain flag 0/1            (optional)
 
     Response JSON
     
     {
-      "predictions": [
-        { "station_id": 10, "name": "...", "capacity": 16,
-          "predicted_bikes": 7, "pct": 44 }
-      ],
-      "hour": 9,
-      "model": "RandomForest",
-      "mae": 1.4342,
-      "r2": 0.9319
+      "number": 42,
+      "times":               ["2026-04-08 12:47", ...],
+      "predicted_bikes":     [9.8, 8.5, ...],
+      "predicted_docks":     [20.4, 21.4, ...],
+      "predicted_temp":      [9.0, 9.0, ...],
+      "predicted_humidity":  [81.3, 80.0, ...],
+      "predicted_pressure":  [1014.9, 1014.6, ...],
+      "predicted_rain":      [0, 0, ...]
     }
     """
-    import pandas as pd
-    from datetime import datetime
-
-    # Load model (cached after first call) 
     try:
-        model, features = _load_model()
+        models = _load_models()
     except Exception as exc:
-        return jsonify(error=f"Model could not be loaded: {exc}"), 500
+        return jsonify(error=f"Models could not be loaded: {exc}"), 500
 
-    #  Parse weather query params 
+    # Parse params 
     try:
-        hour         = int(request.args.get("hour", datetime.now().hour))
-        avg_temp     = float(request.args.get("avg_temp",     12.0))
-        avg_humidity = float(request.args.get("avg_humidity", 80.0))
-        avg_pressure = float(request.args.get("avg_pressure", 1013.0))
+        station_id = int(request.args.get("number",   -1))
+        capacity   = int(request.args.get("capacity", -1))
+        hours      = min(int(request.args.get("hours", 8)), 48)
     except ValueError as exc:
-        return jsonify(error=f"Invalid numeric parameter: {exc}"), 400
+        return jsonify(error=f"Invalid parameter: {exc}"), 400
 
-    # Parse station list 
-    try:
-        stations = json.loads(request.args.get("stations", "[]"))
-        if not isinstance(stations, list):
-            raise ValueError("stations must be a JSON array")
-    except (json.JSONDecodeError, ValueError) as exc:
-        return jsonify(error=f"Invalid stations JSON: {exc}"), 400
+    if station_id < 0:
+        return jsonify(error="'number' (station_id) is required"), 400
+    if capacity < 0:
+        return jsonify(error="'capacity' is required"), 400
 
-    if not stations:
-        return jsonify(error="No stations provided"), 400
-
-    # Run model for each station 
-    predictions = []
-    for st in stations:
+    # Optional live weather override 
+    wx_keys = ("avg_temp", "avg_humidity", "avg_pressure", "is_raining")
+    if all(k in request.args for k in wx_keys):
         try:
-            sid  = int(st["station_id"])
-            cap  = int(st["capacity"])
-            name = str(st.get("name", f"Station {sid}"))
-        except (KeyError, ValueError) as exc:
-            return jsonify(error=f"Bad station entry {st}: {exc}"), 400
+            wx_override = {
+                "avg_temp"    : float(request.args["avg_temp"]),
+                "avg_humidity": float(request.args["avg_humidity"]),
+                "avg_pressure": float(request.args["avg_pressure"]),
+                "is_raining"  : int(request.args["is_raining"]),
+            }
+        except ValueError as exc:
+            return jsonify(error=f"Invalid weather override param: {exc}"), 400
+    else:
+        wx_override = None   # use weather models
 
-        # Build one-row DataFrame in the exact feature order the model expects
-        row = {
-            "station_id"  : sid,
-            "capacity"    : cap,
-            "hour"        : hour,
-            "avg_temp"    : avg_temp,
-            "avg_humidity": avg_humidity,
-            "avg_pressure": avg_pressure,
-        }
-        df   = pd.DataFrame([row])[features]          # reorder to match training
-        pred = float(model.predict(df)[0])
-        pred = max(0, min(cap, round(pred)))           # clamp to [0, capacity]
-        pct  = round(pred / cap * 100) if cap > 0 else 0
-
-        predictions.append({
-            "station_id"      : sid,
-            "name"            : name,
-            "capacity"        : cap,
-            "predicted_bikes" : pred,
-            "pct"             : pct,
-        })
-
-    #  Return 
-    try:
-        with open(_META_PATH, encoding="utf-8") as fh:
-            meta = json.load(fh)
-    except Exception:
-        meta = {}
+    # Run pipeline for each future hour 
+    now    = datetime.now()
+    result = [
+        _predict_hour(models, station_id, capacity,
+                      now + timedelta(hours=offset), wx_override)
+        for offset in range(hours)
+    ]
 
     return jsonify(
-        predictions=predictions,
-        hour=hour,
-        model=meta.get("best_model", "unknown"),
-        mae=meta.get("mae"),
-        r2=meta.get("r2"),
+        number             = station_id,
+        times              = [r["time"]                for r in result],
+        predicted_bikes    = [r["predicted_bikes"]     for r in result],
+        predicted_docks    = [r["predicted_docks"]     for r in result],
+        predicted_temp     = [r["predicted_temp"]      for r in result],
+        predicted_humidity = [r["predicted_humidity"]  for r in result],
+        predicted_pressure = [r["predicted_pressure"]  for r in result],
+        predicted_rain     = [r["predicted_rain"]      for r in result],
     )
+
+
+# Local test 
+if __name__ == "__main__":
+    import pathlib, sys
+
+    # Point directly at the pkl files when running standalone
+    _FORECAST_DIR_OVERRIDE = pathlib.Path(__file__).resolve().parent
+    globals()["_FORECAST_DIR"] = _FORECAST_DIR_OVERRIDE
+
+    # Reload path constants to pick up the override
+    globals()["_BIKE_MODEL_PATH"] = _FORECAST_DIR_OVERRIDE / "bike_model.pkl"
+    globals()["_DOCK_MODEL_PATH"] = _FORECAST_DIR_OVERRIDE / "docks_model.pkl"
+    globals()["_TEMP_MODEL_PATH"] = _FORECAST_DIR_OVERRIDE / "weather_temp.pkl"
+    globals()["_HUM_MODEL_PATH"]  = _FORECAST_DIR_OVERRIDE / "weather_humidity.pkl"
+    globals()["_PRES_MODEL_PATH"] = _FORECAST_DIR_OVERRIDE / "weather_pressure.pkl"
+    globals()["_RAIN_MODEL_PATH"] = _FORECAST_DIR_OVERRIDE / "weather_rain.pkl"
+    globals()["_META_PATH"]       = _FORECAST_DIR_OVERRIDE / "model_meta.json"
+
+    # Test params — change these 
+    STATION_ID = 42
+    CAPACITY   = 30
+    HOURS      = 8
+
+    # Optional: pass live weather to override the weather models
+    # Set to None to use the built-in weather prediction
+    LIVE_WEATHER = None
+    # LIVE_WEATHER = {
+    #     "avg_temp": 9.0, "avg_humidity": 82.0,
+    #     "avg_pressure": 1010.0, "is_raining": 0
+    # }
+
+    models = _load_models()
+    now    = datetime.now()
+
+    result = [
+        _predict_hour(models, STATION_ID, CAPACITY,
+                      now + timedelta(hours=i), LIVE_WEATHER)
+        for i in range(HOURS)
+    ]
+
+    output = {
+        "number"             : STATION_ID,
+        "times"              : [r["time"]                for r in result],
+        "predicted_bikes"    : [r["predicted_bikes"]     for r in result],
+        "predicted_docks"    : [r["predicted_docks"]     for r in result],
+        "predicted_temp"     : [r["predicted_temp"]      for r in result],
+        "predicted_humidity" : [r["predicted_humidity"]  for r in result],
+        "predicted_pressure" : [r["predicted_pressure"]  for r in result],
+        "predicted_rain"     : [r["predicted_rain"]      for r in result],
+    }
+    print(json.dumps(output, indent=2))

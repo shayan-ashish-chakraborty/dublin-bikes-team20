@@ -66,9 +66,9 @@
     });
 
     return withDistance
-      .filter((s) => s.available_bikes >= 2)
+      .filter((s) => (s.available_bikes ?? 0) >= 1)  // Show stations with at least 1 bike
       .sort((a, b) => (a.distance ?? Infinity) - (b.distance ?? Infinity))
-      .slice(0, 5);
+      .slice(0, 10);  // Show top 10 instead of 5
   }
 
   /** warning if no stations within 2km radius */
@@ -82,6 +82,174 @@
       if (distanceMeters(ref, pos) <= RADIUS_2KM_M) return true;
     }
     return false;
+  }
+
+  // ML Forecast variables for sidebar predictions
+  let _wx = { temp: 12.0, humidity: 80.0, pressure: 1013.0 };
+
+  /** Get current weather for sidebar ML forecast */
+  async function getWeatherForML() {
+    try {
+      const res = await fetch('/api/weather/db/current?limit=1').then(r => r.json());
+      const d = res.weather?.[0] ?? null;
+      if (d && d.temp !== undefined) {
+        _wx = { temp: d.temp, humidity: d.humidity, pressure: d.pressure ?? 1013.0 };
+      }
+    } catch(_) {}
+  }
+
+  /** Haversine formula to calculate distance between two coordinates in km */
+  function calculateDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371; // Earth radius in km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  }
+
+  /** Load ML forecast for nearby stations */
+  async function loadNearbyMLForecast() {
+    const mlEl = document.getElementById('ml-stations');
+    if (!mlEl) return;
+    
+    if (!navigator.geolocation) {
+      const errorTemplate = document.getElementById('message-error-template');
+      if (errorTemplate) {
+        const clone = errorTemplate.content.cloneNode(true);
+        clone.querySelector('.message-text').textContent = 'Geolocation not supported';
+        mlEl.innerHTML = '';
+        mlEl.appendChild(clone);
+      } else {
+        mlEl.innerHTML = '<p style="color:#c0392b; font-size: 12px; text-align: center;">Geolocation not supported</p>';
+      }
+      return;
+    }
+
+    const loadingTemplate = document.getElementById('message-loading-template');
+    if (loadingTemplate) {
+      const clone = loadingTemplate.content.cloneNode(true);
+      clone.querySelector('.message-text').textContent = 'Detecting location...';
+      mlEl.innerHTML = '';
+      mlEl.appendChild(clone);
+    } else {
+      mlEl.innerHTML = '<p style="color: #999; font-size: 12px; text-align: center;">Detecting location&hellip;</p>';
+    }
+
+    navigator.geolocation.getCurrentPosition(async (position) => {
+      try {
+        const userLat = position.coords.latitude;
+        const userLon = position.coords.longitude;
+
+        // Fetch all stations
+        const allStations = await fetch('/api/stations').then(r => r.json());
+        
+        // Calculate distances and take top 6 nearest
+        const stationsWithDistance = allStations
+          .filter(s => s.bike_stands > 0 && s.lat && s.lng)
+          .map(s => ({
+            station_id: s.number,
+            capacity: s.bike_stands,
+            name: s.name,
+            distance: calculateDistance(userLat, userLon, s.lat, s.lng)
+          }))
+          .sort((a, b) => a.distance - b.distance)
+          .slice(0, 6);
+
+        if (stationsWithDistance.length === 0) {
+          const errorTemplate = document.getElementById('message-error-template');
+          if (errorTemplate) {
+            const clone = errorTemplate.content.cloneNode(true);
+            clone.querySelector('.message-text').textContent = 'No nearby stations';
+            mlEl.innerHTML = '';
+            mlEl.appendChild(clone);
+          } else {
+            mlEl.innerHTML = '<p style="color: #999; font-size: 12px; text-align: center;">No nearby stations</p>';
+          }
+          return;
+        }
+
+        // Get current weather
+        await getWeatherForML();
+
+        // Build query for ML endpoint
+        const params = new URLSearchParams({
+          stations: JSON.stringify(stationsWithDistance.map(s => ({
+            station_id: s.station_id,
+            capacity: s.capacity,
+            name: s.name
+          }))),
+          hour: new Date().getHours(),
+          avg_temp: _wx.temp.toFixed(1),
+          avg_humidity: _wx.humidity.toFixed(1),
+          avg_pressure: _wx.pressure.toFixed(1),
+        });
+
+        // Call ML endpoint
+        const mlData = await fetch('/api/ml/forecast?' + params).then(r => r.json());
+        if (mlData.error) throw new Error(mlData.error);
+
+        // Render nearby stations with distance info (compact sidebar format)
+        const predictions = mlData.predictions;
+        const mlTemplate = document.getElementById("ml-prediction-template");
+        if (!mlTemplate) {
+          const errorTemplate = document.getElementById('message-error-template');
+          if (errorTemplate) {
+            const clone = errorTemplate.content.cloneNode(true);
+            clone.querySelector('.message-text').textContent = 'Template not found';
+            mlEl.innerHTML = '';
+            mlEl.appendChild(clone);
+          } else {
+            mlEl.innerHTML = '<p style="color:#c0392b; font-size: 12px; text-align: center;">Template not found</p>';
+          }
+          return;
+        }
+        
+        mlEl.innerHTML = "";
+        stationsWithDistance.forEach((s, i) => {
+          const pred = predictions[i];
+          const col = pred.pct >= 60 ? '#007A33' : pred.pct >= 30 ? '#e6bc00' : '#c0392b';
+          const pctDisplay = pred.pct >= 60 ? '' : pred.pct >= 30 ? '' : '';
+          
+          const clone = mlTemplate.content.cloneNode(true);
+          const rootDiv = clone.firstElementChild;
+          
+          rootDiv.style.setProperty('--color', col);
+          rootDiv.style.setProperty('--percentage', pred.pct + '%');
+          
+          clone.querySelector("[data-station-name]").textContent = pred.name;
+          clone.querySelector("[data-distance]").textContent = (s.distance).toFixed(1);
+          clone.querySelector("[data-icon]").textContent = pctDisplay;
+          clone.querySelector("[data-bikes-pred]").textContent = pred.predicted_bikes;
+          clone.querySelector("[data-capacity]").textContent = pred.capacity;
+          
+          mlEl.appendChild(clone);
+        });
+
+      } catch (err) {
+        const errorTemplate = document.getElementById('message-error-template');
+        if (errorTemplate) {
+          const clone = errorTemplate.content.cloneNode(true);
+          clone.querySelector('.message-text').textContent = err.message;
+          mlEl.innerHTML = '';
+          mlEl.appendChild(clone);
+        } else {
+          mlEl.innerHTML = `<p style="color:#c0392b; font-size: 12px; text-align: center;">${err.message}</p>`;
+        }
+      }
+    }, (error) => {
+      const errorTemplate = document.getElementById('message-error-template');
+      if (errorTemplate) {
+        const clone = errorTemplate.content.cloneNode(true);
+        clone.querySelector('.message-text').textContent = 'Enable location for predictions';
+        mlEl.innerHTML = '';
+        mlEl.appendChild(clone);
+      } else {
+        mlEl.innerHTML = '<p style="color: #999; font-size: 12px; text-align: center;">Enable location for predictions</p>';
+      }
+    });
   }
 
   /**warning situations */
@@ -107,6 +275,8 @@
 
     if (!listEl) return;
     listEl.innerHTML = "";
+    
+    // Render stations directly without template for now
     nearby.forEach((station) => {
       const block = document.createElement("div");
       block.className = "station-block";
@@ -114,21 +284,18 @@
         station.distance != null
           ? Math.round(station.distance) + " m"
           : "Unknown";
-      /**estimate the walking time */
       const walkText =
         station.distance != null
           ? Math.round(station.distance / 80) + " min"
           : "Unknown";
       
-      /**information in the sidebar */
       block.innerHTML = `
         <div class="station-inner">
-          <div class="station-name"></div>
-          <div>Available Bikes: ${station.available_bikes}</div>
-          <div>Distance: ${distText}</div>
-          <div>Walking Time: ${walkText}</div>
-        </div>`;
-      block.querySelector(".station-name").textContent = station.name;
+          <div class="station-name" style="font-weight: 600;">${station.name}</div>
+          <div style="font-size: 13px;">Available Bikes: ${station.available_bikes}</div>
+          <div style="font-size: 13px;">Distance: ${distText}</div>
+          <div style="font-size: 13px;">Walking Time: ${walkText}</div>
+          </div>`;
       listEl.appendChild(block);
     });
   }
@@ -139,27 +306,37 @@
     }
   }
 
-  /** Basic InfoWindow when MLbikes.js is not loaded. */
+
+
+  /** Basic InfoWindow - uses template from stations.html */
   function stationInfoHtmlBasic(station) {
     const bikes = station.available_bikes ?? 0;
-    const stands =
-      station.available_stands ?? station.available_bike_stands ?? 0;
-    return (
-      `<div class="gm-iw">` +
-      `<strong>${String(station.name || "").replace(/</g, "&lt;")}</strong>` +
-      `<div class="iw-avail">` +
-      `<span style="color:#16a34a">🚲 ${bikes} bikes</span>` +
-      `<span style="color:#2563eb">🅿 ${stands} stands</span>` +
-      `</div></div>`
-    );
+    const stands = station.available_stands ?? station.available_bike_stands ?? 0;
+    
+    const template = document.getElementById('station-infowindow-template');
+    if (!template) {
+      // Fallback
+      return `<div class="gm-iw"><strong>${String(station.name || "").replace(/</g, "&lt;")}</strong><div class="iw-avail"><span style="color:#16a34a">🚲 ${bikes} bikes</span><span style="color:#2563eb">🅿 ${stands} stands</span></div></div>`;
+    }
+    
+    // Use a wrapper to handle DocumentFragment properly
+    const wrapper = document.createElement('div');
+    const clone = template.content.cloneNode(true);
+    wrapper.appendChild(clone);
+    
+    wrapper.querySelector('.iw-station-name').textContent = String(station.name || "").replace(/</g, "&lt;");
+    wrapper.querySelector('.iw-bikes-count').textContent = bikes;
+    wrapper.querySelector('.iw-stands-count').textContent = stands;
+    
+    return wrapper.innerHTML;
   }
 
-  /** Journey.js marker colours: green / amber / red by bike count. */
+  /** Map marker colours based on bike capacity: green for high, amber for medium, red for low */
   function stationMarkerFillColor(station) {
-    const bikes = station.available_bikes ?? 0;
-    if (bikes >= 5) return "#16a34a";
-    if (bikes >= 1) return "#d97706";
-    return "#dc2626";
+    const capacity = station.bike_stands ?? station.available_bike_stands ?? 0;
+    if (capacity >= 30) return "#16a34a";      // Green: High capacity
+    if (capacity >= 15) return "#d97706";      // Amber: Medium capacity
+    return "#dc2626";                           // Red: Low capacity
   }
 
   function clearStationMarkers() {
@@ -192,14 +369,28 @@
       marker.addListener("click", () => {
         destroyMlChartsIfPresent();
         const ml = window.StationML;
-        if (ml && typeof ml.stationInfoHtml === "function") {
-          infoWindow.setContent(ml.stationInfoHtml(station));
+        if (ml && typeof ml.stationInfoHtmlWithPredictions === "function") {
+          // Load predictions and show in info window
+          const loadingTemplate = document.getElementById('message-loading-template');
+          let loadingHtml = '<div style="padding: 0.5rem; min-width: 280px;"><p style="color: #999; font-size: 12px; text-align: center;">Loading predictions...</p></div>';
+          if (loadingTemplate) {
+            const clone = loadingTemplate.content.cloneNode(true);
+            const wrapper = document.createElement('div');
+            wrapper.style.padding = '0.5rem';
+            wrapper.style.minWidth = '280px';
+            wrapper.appendChild(clone);
+            loadingHtml = wrapper.innerHTML;
+          }
+          infoWindow.setContent(loadingHtml);
           infoWindow.open({ map, anchor: marker });
-          google.maps.event.addListenerOnce(infoWindow, "domready", () => {
-            ml.setupInfoWindowPrediction(station);
+          
+          ml.stationInfoHtmlWithPredictions(station).then(html => {
+            infoWindow.setContent(html);
+          }).catch(err => {
+            console.error("Error loading predictions:", err);
+            infoWindow.setContent(stationInfoHtmlBasic(station));
           });
         } else {
-          console.warn("StationML missing: load MLbikes.js after Chart.js.");
           infoWindow.setContent(stationInfoHtmlBasic(station));
           infoWindow.open({ map, anchor: marker });
         }

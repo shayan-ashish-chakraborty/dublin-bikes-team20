@@ -73,6 +73,89 @@
     </div>
   </div>
 </div>
+
+{# HTML Templates for JavaScript rendering #}
+<template id="station-item-template">
+  <div class="station-block" style="border-left: 4px solid var(--pred-color, #ddd); transition: all 0.2s;">
+    <div class="station-inner">
+      <div class="station-name" style="font-weight: 600; margin-bottom: 0.5rem;"></div>
+      <div class="station-bikes" style="font-size: 13px; margin-bottom: 0.25rem;">Available Bikes: <span data-bikes></span></div>
+      <div class="station-distance" style="font-size: 13px; margin-bottom: 0.25rem;">Distance: <span data-distance></span></div>
+      <div class="station-walking" style="font-size: 13px; margin-bottom: 0.5rem;">Walking Time: <span data-walking></span></div>
+      
+      <!-- ML Prediction info inline -->
+      <div style="margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid #e0e0e0; font-size: 12px;">
+        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+          <span style="font-weight: 600;"><span data-pred-icon></span> Predicted: <span data-pred-bikes></span>/<span data-pred-capacity></span></span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <div style="flex: 1; height: 6px; background: #e0e0e0; border-radius: 3px; overflow: hidden;">
+            <div style="height: 100%; width: var(--pred-percentage, 0%); background: var(--pred-color, #999);" data-pred-bar></div>
+          </div>
+          <span style="font-size: 11px; color: #666; min-width: 30px;" data-pred-pct></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+{# Station InfoWindow - Basic #}
+<template id="station-infowindow-template">
+  <div class="gm-iw">
+    <strong class="iw-station-name"></strong>
+    <div class="iw-avail">
+      <span style="color:#16a34a" class="iw-bikes">🚲 <span class="iw-bikes-count"></span> bikes</span>
+      <span style="color:#2563eb" class="iw-stands">🅿 <span class="iw-stands-count"></span> stands</span>
+    </div>
+    <div class="iw-status" hidden></div>
+    <button type="button" class="iw-more-btn">More information</button>
+    <div class="iw-charts" hidden>
+      <p class="iw-charts-title">Next 6 hours (predicted)</p>
+      <div class="iw-chart-wrap"><canvas class="iw-canvas-bikes" aria-label="Predicted bikes"></canvas></div>
+      <div class="iw-chart-wrap"><canvas class="iw-canvas-stands" aria-label="Predicted stands"></canvas></div>
+      <p class="iw-charts-error" hidden></p>
+    </div>
+  </div>
+</template>
+
+{# Station InfoWindow with 6-Hour Predictions #}
+<template id="station-infowindow-predictions-template">
+  <div class="gm-iw">
+    <strong class="iw-station-name"></strong>
+    <div class="iw-avail">
+      <span style="color:#16a34a">🚲 <span class="iw-bikes-count"></span> bikes</span>
+      <span style="color:#2563eb">🅿 <span class="iw-stands-count"></span> stands</span>
+    </div>
+    <div style="margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid #ddd;">
+      <strong style="font-size: 12px;">Next 6 Hours:</strong>
+      <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 0.25rem; margin-top: 0.5rem;" class="iw-predictions-grid">
+      </div>
+    </div>
+  </div>
+</template>
+
+{# Prediction Hour Cell for 6-Hour Grid #}
+<template id="prediction-hour-template">
+  <div style="text-align: center; font-size: 11px;">
+    <div style="color: #666; margin-bottom: 0.25rem;" class="pred-hour-time"></div>
+    <div style="font-weight: 600; margin-bottom: 0.25rem;" class="pred-hour-value"></div>
+  </div>
+</template>
+
+{# Loading Message #}
+<template id="message-loading-template">
+  <p style="color: #999; font-size: 12px; text-align: center;">
+    <span class="message-text">Loading predictions...</span>
+  </p>
+</template>
+
+{# Error Message #}
+<template id="message-error-template">
+  <p style="color:#c0392b; font-size: 12px; text-align: center;">
+    <span class="message-text">Error loading predictions.</span>
+  </p>
+</template>
+
 {% endblock %}
 
 {% block extra_js %}

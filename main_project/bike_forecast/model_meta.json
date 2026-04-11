@@ -1,13 +1,19 @@
 {
   "best_model": "RandomForest",
-  "features": [
+  "bike_features": [
     "station_id",
     "capacity",
+    "is_raining",
     "avg_humidity",
     "hour",
-    "avg_pressure",
-    "avg_temp"
+    "avg_pressure"
   ],
-  "mae": 1.4342,
-  "r2": 0.9319
+  "weather_features": [
+    "hour",
+    "month"
+  ],
+  "mae": 1.8224,
+  "r2": 0.893,
+  "target": "num_bikes_available",
+  "humidity_std_mean": 8.0048
 }
