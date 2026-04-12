@@ -410,16 +410,16 @@ function renderStationCards(data) {
     const card = document.querySelector(sel);
     if (!card) return;
     const existing = card.querySelector(".predicted-label");
+    if (existing) existing.remove();
+    const label = document.createElement("span");
     if (data.prediction_mode) {
-      if (!existing) {
-        const label = document.createElement("span");
-        label.className = "predicted-label";
-        label.textContent = "predicted";
-        card.appendChild(label);
-      }
-    } else if (existing) {
-      existing.remove();
+      label.className = "predicted-label";
+      label.textContent = "predicted";
+    } else {
+      label.className = "predicted-label live-label";
+      label.textContent = "live";
     }
+    card.appendChild(label);
   });
 
   const puCard = document.querySelector(".station-card.pickup");
@@ -427,14 +427,16 @@ function renderStationCards(data) {
   if (puCard) {
     puCard.onclick = () => {
       if (state.routePickupMarker && typeof google !== "undefined" && google.maps) {
-        google.maps.event.trigger(state.routePickupMarker, "click");
+        const liveStation = (state.stations || []).find(s => s.number === p.number) || p;
+        journeyOpenStationMlInfoWindow(state.routePickupMarker, liveStation);
       }
     };
   }
   if (doCard) {
     doCard.onclick = () => {
       if (state.routeDropoffMarker && typeof google !== "undefined" && google.maps) {
-        google.maps.event.trigger(state.routeDropoffMarker, "click");
+        const liveStation = (state.stations || []).find(s => s.number === d.number) || d;
+        journeyOpenStationMlInfoWindow(state.routeDropoffMarker, liveStation);
       }
     };
   }
