@@ -2,38 +2,49 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Register</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body class="login-page">
 
+  <a href="{{ url_for('frontend.home') }}" class="auth-back-btn">
+    &#8592; Back to Home
+  </a>
+
   <div class="form-wrapper">
     <div class="form-container">
+      <a href="{{ url_for('frontend.home') }}" class="auth-logo">
+        <img src="{{ url_for('static', filename='images/icons/bike.svg') }}"
+             alt="Dublin Bikes" class="auth-logo-icon">
+      </a>
+
       <h2>Create Account</h2>
 
       <!-- Flash messages inside container -->
       {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
           {% for category, message in messages %}
-            <div class="flash-message {{ category }}">
-              {{ message }}
-            </div>
+            <div class="flash-message {{ category }}">{{ message }}</div>
           {% endfor %}
         {% endif %}
       {% endwith %}
 
       <form method="POST">
-        <input type="text" name="full_name" placeholder="Full Name" required>
+        <input type="text" name="full_name" placeholder="Full Name" required autocomplete="name">
 
-        <input type="email" name="email" placeholder="Email Address" required>
+        <input type="email" name="email" placeholder="Email Address" required autocomplete="email">
 
         <input type="password" name="password"
                placeholder="6-digit Password"
-               required maxlength="6">
+               required maxlength="6" inputmode="numeric" pattern="[0-9]{6}">
 
         <input type="password" name="confirm_password"
                placeholder="Confirm Password"
-               required maxlength="6">
+               required maxlength="6" inputmode="numeric" pattern="[0-9]{6}">
 
         <button type="submit">Register</button>
       </form>

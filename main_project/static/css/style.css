@@ -786,3 +786,45 @@ h1, h2, h3, h4 { font-family: var(--font-head); }
 /* chart */
 .chart-wrap { height: 240px; }
 .chart-wrap-sm { height: 140px; }
+
+
+/* Back button of the login/register page */
+.auth-back-btn {
+  position: fixed;
+  top: 1.25rem;
+  left: 1.5rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: #000;
+  background: #fff;
+  font-size: 0.875rem;
+  font-weight: 600;
+  font-family: var(--font-head);
+  text-decoration: none;
+  padding: 6px 13px;
+  border: 1.5px solid #000;
+  border-radius: 8px;
+  transition: background 0.15s, color 0.15s;
+  z-index: 10;
+}
+
+.auth-back-btn:hover {
+  background: #000;
+  color: #fff;
+}
+ 
+/* Logo inside the form card */
+.auth-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  margin-bottom: 0.75rem;
+}
+
+.auth-logo-icon {
+  width: 26px;
+  height: 26px;
+  filter: invert(26%) sepia(85%) saturate(700%) hue-rotate(120deg) brightness(85%) contrast(110%);
+}

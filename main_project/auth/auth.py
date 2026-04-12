@@ -37,6 +37,10 @@ AuthSession = sessionmaker(bind=auth_engine)
 # ==========================
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
+
+    if session.get('user_id'):
+        return redirect(url_for('frontend.home'))
+    
     if request.method == 'POST':
         email = request.form.get('email')
         password = request.form.get('password')
@@ -63,8 +67,9 @@ def login():
 
             # Successful login
             session['user_id'] = result['id']
-            flash("Login successful!", "success")
-            return redirect(url_for('auth.login'))  # change to dashboard/home if you have one
+            session['user_name'] = result['full_name'] 
+            flash(f"Welcome, {result['full_name']}!", "success")
+            return redirect(url_for('frontend.home'))  # change to dashboard/home if you have one
 
         finally:
             db_session.close()
@@ -77,6 +82,10 @@ def login():
 # ==========================
 @auth_bp.route('/register', methods=['GET', 'POST'])
 def register():
+    # Already logged in,redirect to home
+    if session.get('user_id'):
+        return redirect(url_for('frontend.home'))
+    
     if request.method == 'POST':
         full_name = request.form.get('full_name')
         email = request.form.get('email')
@@ -128,3 +137,12 @@ def register():
             db_session.close()
 
     return render_template('register.html')
+
+# ==========================
+# LOGOUT ROUTE
+# ==========================
+@auth_bp.route('/logout')
+def logout():
+    session.clear()                         
+    flash("You've been signed out.", "success")
+    return redirect(url_for('frontend.home'))  # back to home — header shows Log In / Sign Up
