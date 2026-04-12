@@ -21,11 +21,11 @@ auth_bp = Blueprint(
 
 # Database config
 auth_db_cfg = DbConfig(
-    host="localhost",
+    host="localhost",       # replace with your RDS endpoint on EC2
     port=3306,
-    user="root",
-    password="Latha5324*",
-    db_name="dublin_bikes_auth"
+    user="app_user",            # replace with your RDS username
+    password="Strong123!",      # replace with your RDS password
+    db_name="dublin_bikes_auth_test" 
 )
 
 auth_engine = create_engine_for(auth_db_cfg)
@@ -145,4 +145,4 @@ def register():
 def logout():
     session.clear()                         
     flash("You've been signed out.", "success")
-    return redirect(url_for('frontend.home'))  # back to home — header shows Log In / Sign Up
+    return redirect(url_for('frontend.home'))  # back to home — header shows Log In / Sign Upa
