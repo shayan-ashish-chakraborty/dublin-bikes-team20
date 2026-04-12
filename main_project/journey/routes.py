@@ -28,7 +28,7 @@ journey_bp  = Blueprint(
 
 @journey_bp.route("")
 def index():
-    return render_template("journey.html")
+    return render_template("Journey.html")
 
 @journey_bp.route("/api/config")
 def api_config():
