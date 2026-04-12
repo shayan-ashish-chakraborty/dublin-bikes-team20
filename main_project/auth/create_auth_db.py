@@ -17,15 +17,22 @@ It will:
 import sys
 import pymysql
  
+import os
+from dotenv import load_dotenv
+
+if os.path.exists("var.env"):
+    load_dotenv(dotenv_path="var.env")
+
+
 # ==============================================================
 # RDS CONNECTION DETAILS
 # Update these to match your RDS instance before running
 # ==============================================================
-RDS_HOST     = "localhost"       
-RDS_PORT     = 3306
-RDS_USER     = "app_user"
-RDS_PASSWORD = "Strong123!"
-DB_NAME      = "dublin_bikes_auth"
+RDS_USER = os.getenv("DB_USER")
+RDS_PASSWORD = os.getenv("DB_PASSWORD")
+RDS_PORT = int(os.getenv("DB_PORT"))
+DB_NAME = os.getenv("DB_NAME_AUTH")
+RDS_HOST = os.getenv("DB_HOST")
 # ==============================================================
  
  

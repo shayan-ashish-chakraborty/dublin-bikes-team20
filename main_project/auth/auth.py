@@ -10,6 +10,7 @@ BASE_DIR = pathlib.Path(__file__).resolve().parent.parent.parent
 template_path = BASE_DIR / 'main_project' / 'templates'
 static_path = BASE_DIR / 'main_project' / 'static'
 
+
 # Blueprint
 auth_bp = Blueprint(
     'auth',
@@ -19,13 +20,38 @@ auth_bp = Blueprint(
     static_url_path='/static'
 )
 
+
+
+
+
+# ==============================================================
+# RDS CONNECTION DETAILS
+# Update these to match your RDS instance before running
+# ==============================================================
+import os
+from dotenv import load_dotenv
+
+if os.path.exists("var.env"):
+    load_dotenv(dotenv_path="var.env")
+
+RDS_USER = os.getenv("DB_USER")
+RDS_PASSWORD = os.getenv("DB_PASSWORD")
+RDS_PORT = int(os.getenv("DB_PORT"))
+DB_NAME = os.getenv("DB_NAME_AUTH")
+RDS_HOST = os.getenv("DB_HOST")
+# ==============================================================
+ 
+
+
+
+
 # Database config
 auth_db_cfg = DbConfig(
-    host="localhost",       # replace with your RDS endpoint on EC2
-    port=3306,
-    user="app_user",            # replace with your RDS username
-    password="Strong123!",      # replace with your RDS password
-    db_name="dublin_bikes_auth" 
+    host=RDS_HOST,       
+    port=RDS_PORT,
+    user=RDS_USER,            
+    password=RDS_PASSWORD,      
+    db_name=DB_NAME 
 )
 
 auth_engine = create_engine_for(auth_db_cfg)
