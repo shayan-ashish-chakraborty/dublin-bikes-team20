@@ -598,6 +598,50 @@ h1, h2, h3, h4 { font-family: var(--font-head); }
 /* LOADING  */
 .loading-msg { color: #aaa; font-size: 13px; }
 
+/* POWERED BY SECTION */
+.powered-by {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 32px;
+  background: linear-gradient(135deg, #f5f6f8 0%, #ffffff 100%);
+  margin: 20px auto;
+  max-width: 1100px;
+  width: 100%;
+  border-radius: var(--radius);
+}
+.powered-by h2 {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 28px;
+  color: var(--text);
+}
+.powered-by-icons {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 40px;
+  flex-wrap: wrap;
+}
+.powered-by-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.pb-icon {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+}
+.pb-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  text-align: center;
+}
+
 /*  FOOTER  */
 .footer {
   background: var(--green-dark);

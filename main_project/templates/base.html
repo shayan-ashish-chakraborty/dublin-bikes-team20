@@ -170,7 +170,7 @@
     <div class="footer-brand">
       <img src="{{ url_for('frontend.static', filename='images/icons/bike.svg') }}"
            alt="Dublin Bikes" class="footer-logo-icon">
-      <span>Dublin Bike Share</span>
+      <span>Dublin Bikes</span>
     </div>
     <div class="footer-links">
       <a href="{{ url_for('frontend.home') }}">Home</a>
@@ -179,7 +179,7 @@
       <a href="/stations">Stations</a>
       {# ADD NEW PAGE LINK HERE #}
     </div>
-    <span>&copy; <span id="footer-year"></span> Dublin Bike Share</span>
+    <span>&copy; <span id="footer-year"></span> Dublin Bikes</span>
   </div>
 </footer>
 
@@ -197,7 +197,7 @@
    - sendSuggestion() is defined in main.js — the chip buttons call it.
  #}
 <button class="chatbot-fab" id="chatbot-fab">
-  <img src="{{ url_for('frontend.static', filename='images/icons/chatbot.svg') }}"
+  <img src="{{ url_for('frontend.static', filename='images/icons/gemini-color.svg') }}"
        alt="AI" class="fab-icon">
   Ask AI
 </button>
@@ -205,11 +205,11 @@
 <div class="chatbot-panel" id="chatbot-panel">
   <div class="chat-header">
     <div class="chat-header-left">
-      <img src="{{ url_for('frontend.static', filename='images/icons/chatbot.svg') }}"
+      <img src="{{ url_for('frontend.static', filename='images/icons/gemini-color.svg') }}"
            alt="AI" class="chat-header-icon">
       <div>
         <div class="chat-title">Dublin Bikes AI</div>
-        <div class="chat-sub">Powered by Google</div>
+        <div class="chat-sub">Powered by Gemini</div>
       </div>
     </div>
     <button class="chat-close" id="chat-close">&#x2715;</button>

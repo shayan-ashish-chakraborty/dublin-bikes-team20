@@ -69,8 +69,6 @@
 <section class="stats-bar">
   <div class="stat"><span class="stat-num">116</span><span class="stat-lbl">Stations</span></div>
   <div class="stat"><span class="stat-num">1,500+</span><span class="stat-lbl">Bikes</span></div>
-  <div class="stat"><span class="stat-num">30 min</span><span class="stat-lbl">Free per Trip</span></div>
-  <div class="stat"><span class="stat-num">&euro;35</span><span class="stat-lbl">Annual Membership</span></div>
 </section>
 
 {# Feature cards
@@ -115,8 +113,30 @@
     <a href="/stations" class="fc-link">View Stations &rarr;</a>
   </div>
 
-  
+</section>
 
+{# Powered By Section
+   Shows the technologies and APIs that power Dublin Bikes.
+#}
+<section class="powered-by">
+  <h2>Powered By</h2>
+  <div class="powered-by-icons">
+    <div class="powered-by-item">
+      <img src="{{ url_for('frontend.static', filename='images/icons/gemini-color.svg') }}"
+           alt="Google Gemini" class="pb-icon">
+      <span class="pb-label">Google Gemini</span>
+    </div>
+    <div class="powered-by-item">
+      <img src="{{ url_for('frontend.static', filename='images/icons/openweather-svgrepo-com.svg') }}"
+           alt="OpenWeather" class="pb-icon">
+      <span class="pb-label">OpenWeather</span>
+    </div>
+    <div class="powered-by-item">
+      <img src="{{ url_for('frontend.static', filename='images/icons/Logo_JCDecaux.svg') }}"
+           alt="JCDecaux" class="pb-icon">
+      <span class="pb-label">JCDecaux</span>
+    </div>
+  </div>
 </section>
 
 
