@@ -25,7 +25,7 @@ RDS_HOST     = "localhost"
 RDS_PORT     = 3306
 RDS_USER     = "app_user"
 RDS_PASSWORD = "Strong123!"
-DB_NAME      = "dublin_bikes_auth_test"
+DB_NAME      = "dublin_bikes_auth"
 # ==============================================================
  
  

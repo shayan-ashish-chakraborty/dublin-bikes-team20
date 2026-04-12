@@ -25,7 +25,7 @@ auth_db_cfg = DbConfig(
     port=3306,
     user="app_user",            # replace with your RDS username
     password="Strong123!",      # replace with your RDS password
-    db_name="dublin_bikes_auth_test" 
+    db_name="dublin_bikes_auth" 
 )
 
 auth_engine = create_engine_for(auth_db_cfg)
