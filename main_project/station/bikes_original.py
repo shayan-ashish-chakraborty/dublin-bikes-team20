@@ -38,16 +38,21 @@ def stations_external():
     return jsonify(r.json()), r.status_code
 
 
+_bikes_engine_instance = None
+
 def _bikes_engine():
-    cfg = DbConfig(
-        host=current_app.config["DB_HOST"],
-        port=str(current_app.config["DB_PORT"]),
-        user=current_app.config["DB_USER"],
-        password=current_app.config["DB_PASSWORD"],
-        db_name=current_app.config["DB_NAME_JCDECAUX"],
-    )
-    echo = os.getenv("SQL_ECHO", "false").lower() == "true"
-    return create_engine_for(cfg, echo=echo)
+    global _bikes_engine_instance
+    if _bikes_engine_instance is None:
+        cfg = DbConfig(
+            host=current_app.config["DB_HOST"],
+            port=str(current_app.config["DB_PORT"]),
+            user=current_app.config["DB_USER"],
+            password=current_app.config["DB_PASSWORD"],
+            db_name=current_app.config["DB_NAME_JCDECAUX"],
+        )
+        echo = os.getenv("SQL_ECHO", "false").lower() == "true"
+        _bikes_engine_instance = create_engine_for(cfg, echo=echo)
+    return _bikes_engine_instance
 
 
 @bikes_bp.get("/db/stations")

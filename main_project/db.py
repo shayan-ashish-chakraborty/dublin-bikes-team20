@@ -18,5 +18,12 @@ class DbConfig:
 
 
 def create_engine_for(cfg: DbConfig, *, echo: bool = False) -> Engine:
-    return create_engine(cfg.connection_string(), echo=echo, pool_pre_ping=True, future=True)
+    return create_engine(
+        cfg.connection_string(),
+        echo=echo,
+        pool_pre_ping=True,   # detect stale connections before use
+        pool_recycle=1800,    # recycle connections every 30 min (before MySQL wait_timeout)
+        pool_timeout=10,      # raise after 10s if no connection available
+        future=True,
+    )
 
