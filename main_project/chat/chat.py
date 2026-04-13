@@ -2,9 +2,35 @@ from flask import Blueprint, current_app, jsonify, request
 import os
 import requests
 import logging
+import time
 
 chat_bp = Blueprint("chat", __name__)
 logger = logging.getLogger(__name__)
+
+
+def call_gemini_with_retry(endpoint, payload, max_retries=3):
+    for attempt in range(max_retries):
+        response = requests.post(endpoint, json=payload, timeout=30)
+        if response.status_code == 200:
+            return response
+        elif response.status_code == 503:
+            if attempt < max_retries - 1:
+                wait = 2 ** attempt  # 1s, 2s, 4s
+                logger.warning(f"503 received, retrying in {wait}s (attempt {attempt + 1}/{max_retries})...")
+                time.sleep(wait)
+            else:
+                return response
+        elif response.status_code == 429:
+            if attempt < max_retries - 1:
+                retry_after = response.headers.get("Retry-After")
+                wait = int(retry_after) if retry_after else (5 * (attempt + 1))  # 5s, 10s, 15s
+                logger.warning(f"429 rate limit, retrying in {wait}s (attempt {attempt + 1}/{max_retries})...")
+                time.sleep(wait)
+            else:
+                return response
+        else:
+            return response
+    return response
 
 
 @chat_bp.post("")
@@ -43,26 +69,25 @@ def chat():
         }
 
         endpoint = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={gemini_api_key}"
-        response = requests.post(endpoint, json=payload, timeout=30)
+        response = call_gemini_with_retry(endpoint, payload)
 
         if response.status_code == 200:
             result = response.json()
             reply = result.get("candidates", [{}])[0].get("content", {}).get("parts", [{}])[0].get("text", "")
             return jsonify({"reply": reply})
-        
+
         elif response.status_code == 429:
             retry_after = response.headers.get("Retry-After")
             detail = response.json() if response.headers.get("Content-Type", "").startswith("application/json") else {}
             message = detail.get("error", {}).get("message") if isinstance(detail, dict) else None
-            payload = {
+            resp_payload = {
                 "error": "API quota exceeded",
                 "message": message or "Too many requests; you are being rate-limited by Gemini.",
             }
             if retry_after:
-                payload["retry_after_seconds"] = int(retry_after)
+                resp_payload["retry_after_seconds"] = int(retry_after)
+            return jsonify(resp_payload), 429
 
-            return jsonify(payload), 429
-        
         else:
             logger.error(f"Gemini API error {response.status_code}: {response.text[:200]}")
             return jsonify({"error": "Service temporarily unavailable", "gemini_status": response.status_code}), 500

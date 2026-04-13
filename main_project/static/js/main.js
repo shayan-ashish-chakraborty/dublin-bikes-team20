@@ -50,66 +50,42 @@ const el_yr = document.getElementById('footer-year');
 if (el_yr) el_yr.textContent = _d.getFullYear();
  
  
-//  2. NAVBAR WEATHER CHIP 
-// Updates the temperature shown in the top-right weather chip on
-// every page. Fails silently if the chip element isn't found.
+// NAVBAR WEATHER CHIP + HOME PAGE WEATHER STRIP
+// Single shared fetch for /api/weather/openweather/current so the home page
+// only makes ONE call instead of two (navbar chip + home strip both need it).
 (async function () {
   const chip = document.getElementById('hdr-temp');
-  if (!chip) return;
- 
+  const homeStrip = document.getElementById('hw-temp');
+  if (!chip && !homeStrip) return; // neither element present — skip
+
+  let w = null;
+
   try {
-    // live API via backend proxy (freshest reading)
-    const res2 = await fetch('/api/weather/openweather/current').then(r => r.json());
-    const w = res2.weather;
-    if (w?.temp !== undefined) {
-      chip.textContent = Math.round(w.temp) + '°C';
-      return;
-    }
+    // PRIMARY: live API via backend proxy (freshest reading)
+    const res = await fetch('/api/weather/openweather/current').then(r => r.json());
+    w = res.weather;
   } catch (_) {}
- 
-  try {
-    // fallback: our own database
-    const res = await fetch('/api/weather/db/current?limit=1').then(r => r.json());
-    const row = res.weather?.[0];
-    if (row?.temp !== undefined) {
-      chip.textContent = Math.round(row.temp) + '°C';
-      return;
-    }
-  } catch (_) {}
-})();
- 
- 
-// 3. HOME PAGE WEATHER STRIP 
-// Only runs on index.html (checks for #hw-temp first).
-// Fills the four weather stat values in the weather strip section.
-// If we want add more stat IDs to index.html, fill them here. 
-(async function () {
-  const el = document.getElementById('hw-temp');
-  if (!el) return; // not on the home page — skip
- 
-  try {
-    const res2 = await fetch('/api/weather/openweather/current').then(r => r.json());
-    const w = res2.weather;
-    if (w?.temp !== undefined) {
-      document.getElementById('hw-temp').textContent   = Math.round(w.temp)        + '°C';
-      document.getElementById('hw-feels').textContent  = Math.round(w.feels_like)  + '°C';
-      document.getElementById('hw-hum').textContent    = Math.round(w.humidity)    + '%';
-      document.getElementById('hw-wind').textContent   = (+w.wind_speed).toFixed(1) + ' m/s';
-      return;
-    }
-  } catch (_) {}
- 
-  try {
-    const res = await fetch('/api/weather/db/current?limit=1').then(r => r.json());
-    const row = res.weather?.[0];
-    if (row?.temp !== undefined) {
-      document.getElementById('hw-temp').textContent   = Math.round(row.temp)         + '°C';
-      document.getElementById('hw-feels').textContent  = Math.round(row.feels_like)   + '°C';
-      document.getElementById('hw-hum').textContent    = row.humidity                 + '%';
-      document.getElementById('hw-wind').textContent   = (+row.wind_speed).toFixed(1) + ' m/s';
-      return;
-    }
-  } catch (_) {}
+
+  // Fallback to DB if live API failed or returned no data
+  if (!w?.temp) {
+    try {
+      const res = await fetch('/api/weather/db/current?limit=1').then(r => r.json());
+      w = res.weather?.[0] ?? null;
+    } catch (_) {}
+  }
+
+  if (!w?.temp) return;
+
+  // 2. Update navbar chip (present on every page)
+  if (chip) chip.textContent = Math.round(w.temp) + '°C';
+
+  // 3. Update home page weather strip (only present on index.html)
+  if (homeStrip) {
+    document.getElementById('hw-temp').textContent   = Math.round(w.temp)         + '°C';
+    document.getElementById('hw-feels').textContent  = Math.round(w.feels_like)   + '°C';
+    document.getElementById('hw-hum').textContent    = Math.round(w.humidity)     + '%';
+    document.getElementById('hw-wind').textContent   = (+w.wind_speed).toFixed(1) + ' m/s';
+  }
 })();
  
  
@@ -137,14 +113,19 @@ if (el_yr) el_yr.textContent = _d.getFullYear();
   input.addEventListener('keydown', e => { if (e.key === 'Enter') sendMsg(); });
   send.addEventListener('click', sendMsg);
  
-  // Conversation history — sent with each message so Claude has context.
+  // Conversation history — sent with each message so Gemini has context.
   // Grows throughout the session (cleared on page refresh).
   const history = [];
+
+  // Rate limit cooldown — prevents hammering the API when quota is low.
+  // After each send, the button is locked for SEND_COOLDOWN_MS milliseconds.
+  const SEND_COOLDOWN_MS = 3000;
+  let lastSentAt = 0;
  
   // System prompt — defines the chatbot's persona and knowledge scope.
   const SYSTEM =
     'You are a helpful assistant for Dublin Bike Share. ' +
-    'Help with finding stations, cycling routes, weather tips, and pricing (€35/year, first 30 min free). ' +
+    'Help with finding stations, cycling routes, weather and tips. ' +
     'Keep replies short and friendly. Use emojis occasionally.';
  
   /**
@@ -154,6 +135,11 @@ if (el_yr) el_yr.textContent = _d.getFullYear();
   async function sendMsg(text) {
     const msg = (text || input.value).trim();
     if (!msg) return;
+
+    // Enforce client-side cooldown to avoid hammering the API
+    const now = Date.now();
+    if (now - lastSentAt < SEND_COOLDOWN_MS) return;
+    lastSentAt = now;
  
     input.value = '';
     document.getElementById('chat-chips').style.display = 'none'; // hide suggestion chips after first message
@@ -280,8 +266,7 @@ window.addEventListener('load', function () {
   let rainChart  = null;
   let temp7Chart = null;
  
-  // ── UTILITY FUNCTIONS ────────────────────────────────────────────────────
- 
+  // UTILITY FUNCTIONS 
   // Parses DB ISO strings (Europe/Dublin offset from API), unix seconds, or legacy GMT strings.
   function parseInstant(ts) {
     if (ts == null || ts === '') return new Date(NaN);
@@ -356,8 +341,7 @@ window.addEventListener('load', function () {
     </span>`;
   }
  
-  // ── CHART BUILDERS ───────────────────────────────────────────────────────
- 
+  //  CHART BUILDERS 
   // Draws (or redraws) the 40-hour temperature line chart.
   // labels = array of time strings, temps/feels = arrays of °C values.
   function buildTempChart(labels, temps, feels) {
@@ -427,8 +411,7 @@ window.addEventListener('load', function () {
     });
   }
  
-  // ── DATA HELPERS ─────────────────────────────────────────────────────────
- 
+  //  DATA HELPERS 
   /** Same sources as loadCurrent — used to prepend a "Now" point on forecast charts. */
   async function fetchCurrentWeatherRow() {
     try {
@@ -486,8 +469,7 @@ window.addEventListener('load', function () {
       .sort((a, b) => rowTimeMs(a) - rowTimeMs(b));
   }
  
-  // ── DATA LOADING ─────────────────────────────────────────────────────────
- 
+  // DATA LOADING 
   // Loads current weather and fills the left card.
   // Tries live OpenWeather API first; falls back to our DB.
   // Returns the row used (for loadHourly charts) or null.
@@ -690,7 +672,7 @@ window.addEventListener('load', function () {
     }
   }
  
-  // ── AUTO-REFRESH ─────────────────────────────────────────────────────────
+  // AUTO-REFRESH 
   // RUN ON PAGE LOAD — current first, then hourly (reuses current for "Now" on charts)
   async function refreshWeather() {
     const cur = await loadCurrent();
