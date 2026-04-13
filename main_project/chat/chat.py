@@ -2,6 +2,7 @@ from flask import Blueprint, current_app, jsonify, request
 import os
 import requests
 import logging
+from ..config import Config
 
 chat_bp = Blueprint("chat", __name__)
 logger = logging.getLogger(__name__)
@@ -17,7 +18,7 @@ def chat():
 
         messages = data.get("messages", [])
         system_instruction = data.get("systemInstruction", "")
-        gemini_api_key = current_app.config.get("GEMINI_API_KEY") or os.getenv("GEMINI_API_KEY")
+        gemini_api_key = Config.GEMINI_API_KEY or os.getenv("GEMINI_API_KEY")
 
         if not gemini_api_key:
             return jsonify({"error": "API key not configured"}), 500
