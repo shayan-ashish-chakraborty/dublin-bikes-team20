@@ -556,26 +556,27 @@ window.addEventListener('load', function () {
     const current = currentRow != null ? currentRow : await fetchCurrentWeatherRow();
  
     const HOURLY_LIMIT = 24;
-    /** If DB has fewer future rows than this after filtering, merge in OpenWeather. */
+    /** If DB has fewer future rows than this after filtering, supplement from OpenWeather. */
     const MIN_HOURLY_ROWS = 16;
  
     let rows = [];
+ 
+    //  PRIMARY: our DB 
     try {
-      //  PRIMARY: live OpenWeather 3-hour forecast 
-      const res2 = await fetch(`/api/weather/openweather/forecast3h?limit=${HOURLY_LIMIT}`).then(r => r.json());
-      rows = (res2.hourly ?? []);
-      if (res2.error) console.error('OpenWeather 3-hour error', res2);
+      const res = await fetch(`/api/weather/db/hourly?limit=${HOURLY_LIMIT}`).then(r => r.json());
+      rows = (res.hourly ?? []);
     } catch(e) {
-      console.error('OpenWeather 3-hour fetch failed', e);
+      console.error('DB hourly fetch failed', e);
     }
  
+    //  FALLBACK: live OpenWeather 3-hour forecast 
     if (!rows.length) {
       try {
-        //  FALLBACK: our DB 
-        const res = await fetch(`/api/weather/db/hourly?limit=${HOURLY_LIMIT}`).then(r => r.json());
-        rows = (res.hourly ?? []);
+        const res2 = await fetch(`/api/weather/openweather/forecast3h?limit=${HOURLY_LIMIT}`).then(r => r.json());
+        rows = (res2.hourly ?? []);
+        if (res2.error) console.error('OpenWeather 3-hour error', res2);
       } catch(e) {
-        console.error('DB hourly fetch failed', e);
+        console.error('OpenWeather 3-hour fetch failed', e);
       }
     }
  
