@@ -7,15 +7,20 @@
    WHAT THIS PAGE CONTAINS:
      Row 1 (side-by-side cards):
        - Current Conditions  (temp, feels-like, humidity, wind, rain,
-                              + cycling score 0--100)
+                             + cycling score 0--100)
        - Upcoming forecast   (7 × 3-hour steps)
      Row 2 (full-width card):
        - Temperature Forecast chart (next 40 hours) via Chart.js
      Row 3 (full-width card):
-       - ML Availability Forecast placeholder
+       - Rain Forecast chart (next 40 hours) via Chart.js
 
-   ALL Data is loaded asynchronously in {% block extra_js %} below.
-   Priority: our DB.
+   ALL Data is loaded asynchronously via the weatherPage IIFE in main.js.
+   Priority: live OpenWeather API → our DB.
+
+   ICON PATHS:
+     Jinja url_for() paths for condition icons are injected into
+     #wx-icon-map data-* attributes so that plain main.js can read them
+     without needing Jinja templating.
  #}
 
 {% extends "base.html" %}
@@ -23,6 +28,21 @@
 
 
 {% block content %}
+
+{# 
+   ICON PATH MAP
+   A hidden element that carries Jinja-rendered static URLs into JS.
+   main.js reads these via dataset inside the weatherPage IIFE.
+   DO NOT remove — main.js depends on this element.
+#}
+<div id="wx-icon-map" hidden
+  data-heavy-rain="{{ url_for('frontend.static', filename='images/icons/weather-rain-heavy.svg') }}"
+  data-light-rain="{{ url_for('frontend.static', filename='images/icons/weather-rain.svg') }}"
+  data-freezing="{{ url_for('frontend.static', filename='images/icons/weather-snow.svg') }}"
+  data-cold="{{ url_for('frontend.static', filename='images/icons/weather-cloud.svg') }}"
+  data-warm-sunny="{{ url_for('frontend.static', filename='images/icons/weather-sun.svg') }}"
+  data-partly-cloudy="{{ url_for('frontend.static', filename='images/icons/weather-partly.svg') }}"
+></div>
 
 {# Page header — title + "last updated" timestamp (#wx-updated filled by JS) #}
 <div class="page-header">
@@ -99,8 +119,7 @@
 
 {# ROW 2: TEMPERATURE CHART (full width)
    Chart.js draws a line chart on the <canvas> element.
-   buildTempChart() prepends "Now" when current data exists.
-   Chart.js is loaded via {% block extra_js %} at the bottom.
+   buildTempChart() in main.js prepends "Now" when current data exists.
  #}
 <div class="card card-full">
   <h3>
@@ -124,459 +143,11 @@
 {% endblock %}{# end content block #}
 
 
-{# JS Block — weather page scripts
-   
-   Chart.js is loaded from CDN first, then our inline weather logic.
-   This block runs AFTER main.js (which is in base.html).
-
-   Function Map:
-  
-   fmtTime(ts)            → formats a timestamp to "HH:MM AM/PM"
-   fmtDT(ts)              → formats to "Mon 31 Mar HH:MM AM/PM"
-   cyclingScore(t,w,r)    → returns 0--100 score from temp/wind/rain
-   cyclingLabel(score)    → returns { label, color } for the score
-   guessCondition(t,r)    → returns a text condition label
-   buildTempChart(...)    → draws/redraws the Chart.js line chart
-   loadCurrent()          → fetches current weather, calls renderCurrent()
-   renderCurrent(...)     → fills all the stat spans in the left card
-   loadHourly()           → fetches hourly forecast, fills right card +
-                            chart + ML placeholder
-   buildMLPlaceholder()   → fills #ml-stations with dummy prediction rows
-                            ★ REPLACE THIS with a real ML fetch ★
-
-   DATA SOURCES (in order of priority):
-     1. /api/weather/db/current   (local DB, via weather.py route)
-     2. /api/weather/db/hourly    (local DB)
-     
-
-   AUTO-REFRESH: refreshWeather() runs every 5 minutes (current then hourly).
- #}
+{# JS Block — loads Chart.js from CDN.
+   All weather page logic (data fetching, rendering, charts, auto-refresh)
+   lives in the weatherPage IIFE at the bottom of main.js.
+   main.js wraps it in window.addEventListener('load') so Chart.js is
+   guaranteed to be available before any weather code runs. #}
 {% block extra_js %}
-{# Chart.js from CDN — needed for the temperature line chart #}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-<script>
-// UTILITY FUNCTIONS 
-
-// Parses DB ISO strings (Europe/Dublin offset from API), unix seconds, or legacy GMT strings.
-function parseInstant(ts) {
-  if (ts == null || ts === '') return new Date(NaN);
-  if (typeof ts === 'number' && Number.isFinite(ts)) return new Date(ts * 1000);
-  return new Date(ts);
-}
-
-// Converts a timestamp (Unix seconds or ISO string) to "HH:MM AM/PM" in Europe/Dublin
-function fmtTime(ts) {
-  const d = parseInstant(ts);
-  return d.toLocaleTimeString('en-IE', {
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: true,
-    timeZone: 'Europe/Dublin',
-  });
-}
-
-// Converts a timestamp to "Mon 31 Mar HH:MM AM/PM" (Dublin)
-function fmtDT(ts) {
-  const d = parseInstant(ts);
-  return (
-    d.toLocaleDateString('en-IE', {
-      weekday: 'short',
-      day: 'numeric',
-      month: 'short',
-      timeZone: 'Europe/Dublin',
-    }) +
-    ' ' +
-    fmtTime(ts)
-  );
-}
-
-// Calculates a cycling suitability score (0–100) from weather values.
-// Deductions: cold temps, high wind, rain.
-// ★ Adjust the thresholds here if you want to tune the scoring. ★
-function cyclingScore(temp, wind, rain) {
-  let s = 100;
-  if (temp < 5) s -= 40; else if (temp < 10) s -= 20; else if (temp < 15) s -= 5;
-  if (temp > 28) s -= 20;
-  if (wind > 10) s -= 20; else if (wind > 7) s -= 10; else if (wind > 5) s -= 5;
-  if (rain > 2) s -= 40; else if (rain > 0.5) s -= 25; else if (rain > 0) s -= 10;
-  return Math.max(0, Math.min(100, s));
-}
-
-// Returns a label + colour for the cycling score band.
-function cyclingLabel(score) {
-  if (score >= 80) return { label: 'Excellent', color: '#007A33' };
-  if (score >= 60) return { label: 'Good',      color: '#5a9e00' };
-  if (score >= 40) return { label: 'Fair',       color: '#e6bc00' };
-  if (score >= 20) return { label: 'Poor',       color: '#e07b00' };
-  return                  { label: 'Bad',        color: '#c0392b' };
-}
-
-// Returns a plain-text weather condition label from temp + rain.
-function guessCondition(temp, rain) {
-  if (rain > 2)   return 'Heavy Rain';
-  if (rain > 0.5) return 'Light Rain';
-  if (temp < 2)   return 'Freezing';
-  if (temp < 8)   return 'Cold';
-  if (temp > 22)  return 'Warm & Sunny';
-  return                 'Partly Cloudy';
-}
-
-// Icon per guessCondition() label (img src from static/icons)
-const WX_COND_ICON_SRC = {
-  'Heavy Rain': "{{ url_for('frontend.static', filename='images/icons/weather-rain-heavy.svg') }}",
-  'Light Rain': "{{ url_for('frontend.static', filename='images/icons/weather-rain.svg') }}",
-  'Freezing': "{{ url_for('frontend.static', filename='images/icons/weather-snow.svg') }}",
-  'Cold': "{{ url_for('frontend.static', filename='images/icons/weather-cloud.svg') }}",
-  'Warm & Sunny': "{{ url_for('frontend.static', filename='images/icons/weather-sun.svg') }}",
-  'Partly Cloudy': "{{ url_for('frontend.static', filename='images/icons/weather-partly.svg') }}",
-};
-
-function conditionIconHtml(cond) {
-  const src = WX_COND_ICON_SRC[cond] || WX_COND_ICON_SRC['Partly Cloudy'];
-  const esc = String(cond).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
-  return `<span class="h-cond h-cond-icon" title="${esc}" aria-label="${esc}">
-    <img src="${src}" alt="" width="24" height="24" class="h-cond-img" decoding="async" role="presentation">
-  </span>`;
-}
-
-// CHART.JS TEMPERATURE CHART
-
-// Holds the Chart.js instance so we can destroy + recreate on refresh.
-let tempChart = null;
-let rainChart = null;
-let temp7Chart = null;
-
-// Draws (or redraws) the 40-hour temperature line chart.
-// labels = array of time strings, temps/feels = arrays of °C values.
-function buildTempChart(labels, temps, feels) {
-  const ctx = document.getElementById('tempChart').getContext('2d');
-  if (tempChart) tempChart.destroy(); // destroy old chart before redrawing
-  tempChart = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels,
-      datasets: [
-        { label: 'Temp (°C)',       data: temps, borderColor: '#007A33', backgroundColor: 'rgba(0,122,51,0.08)', borderWidth: 2, fill: true, tension: 0.4, pointRadius: 2 },
-        { label: 'Feels Like (°C)', data: feels, borderColor: '#FFD100', borderWidth: 2, borderDash: [5,4], tension: 0.4, pointRadius: 0 }
-      ]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: true } },
-      scales: { y: { ticks: { callback: v => v + '°C' } } }
-    }
-  });
-}
-
-function buildRainChart(labels, rainMmPerH) {
-  const el = document.getElementById('rainChart');
-  if (!el) return;
-  const ctx = el.getContext('2d');
-  if (rainChart) rainChart.destroy();
-  rainChart = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [
-        { label: 'Rain (mm/h)', data: rainMmPerH, backgroundColor: 'rgba(0,122,51,0.25)', borderColor: '#007A33', borderWidth: 1 }
-      ]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: true } },
-      scales: {
-        y: { beginAtZero: true, ticks: { callback: v => v + ' mm' } }
-      }
-    }
-  });
-}
-
-function buildTemp7Chart(labels, temps) {
-  const el = document.getElementById('temp7Chart');
-  if (!el) return;
-  const ctx = el.getContext('2d');
-  if (temp7Chart) temp7Chart.destroy();
-  temp7Chart = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels,
-      datasets: [
-        { label: 'Temp (°C)', data: temps, borderColor: '#007A33', backgroundColor: 'rgba(0,122,51,0.08)', borderWidth: 2, fill: true, tension: 0.35, pointRadius: 2 }
-      ]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
-      scales: {
-        x: { ticks: { maxRotation: 0, autoSkip: true } },
-        y: { ticks: { callback: v => v + '°C' } }
-      }
-    }
-  });
-}
-
-// DATA LOADING 
-
-/** Same sources as loadCurrent — used to prepend a "Now" point on forecast charts. */
-async function fetchCurrentWeatherRow() {
-  try {
-    const res = await fetch('/api/weather/db/current?limit=1').then(r => r.json());
-    const d = res.weather?.[0] ?? null;
-    if (d && d.temp !== undefined) return d;
-  } catch (_) {}
-  try {
-    const res2 = await fetch('/api/weather/openweather/current').then(r => r.json());
-    const w = res2.weather;
-    if (w && w.temp !== undefined) return w;
-  } catch (_) {}
-  return null;
-}
-
-function rainMmPerHFromHourlyRow(r) {
-  const v3 = r.rain_3h;
-  const v1 = r.rain_1h;
-  if (v1 != null) return +(+v1).toFixed(2);
-  if (v3 != null) return +((+v3) / 3).toFixed(2);
-  return 0;
-}
-
-/** ms for a forecast row (OpenWeather + DB hourly shapes). */
-function rowTimeMs(r) {
-  return parseInstant(r.dt ?? r.future_dt).getTime();
-}
-
-/** Align to ~OpenWeather 3h steps so DB hourly rows merge with API rows. */
-function forecastSlotKey(tMs) {
-  return Math.floor(tMs / (3 * 60 * 60 * 1000));
-}
-
-/**
- * DB may return fewer than requested rows (ETL partial / stale). Merge with API:
- * same 3h slot → keep DB row; other slots → fill from API.
- */
-function mergeHourlyPreferDb(dbRows, apiRows, nowMs) {
-  const skew = 60 * 1000;
-  const map = new Map();
-  const put = (r, fromDb) => {
-    const t = rowTimeMs(r);
-    if (!Number.isFinite(t) || t < nowMs - skew) return;
-    const k = forecastSlotKey(t);
-    const prev = map.get(k);
-    if (!prev) map.set(k, { r, fromDb });
-    else if (fromDb) map.set(k, { r, fromDb: true });
-  };
-  (apiRows || []).forEach((r) => put(r, false));
-  (dbRows || []).forEach((r) => put(r, true));
-  return [...map.values()]
-    .map((x) => x.r)
-    .sort((a, b) => rowTimeMs(a) - rowTimeMs(b));
-}
-
-// Loads current weather and fills the left card.
-// Tries our DB first; falls back to OpenWeather via backend proxy.
-// Returns the row used (for loadHourly charts) or null.
-async function loadCurrent() {
-  let d = null;
-  try {
-    // ★ PRIMARY: our own MySQL DB via the weather blueprint ★
-    const res = await fetch('/api/weather/db/current?limit=1').then(r => r.json());
-    d = res.weather?.[0] ?? null;
-  } catch(_) {}
-
-  if (d && d.temp !== undefined) {
-    renderCurrent(d.temp, d.feels_like, d.humidity, d.wind_speed, d.rain_1h ?? 0, d.dt);
-    return d;
-  }
-  try {
-    const res2 = await fetch('/api/weather/openweather/current').then(r => r.json());
-    const w = res2.weather;
-    if (w && w.temp !== undefined) {
-      renderCurrent(w.temp, w.feels_like, w.humidity, w.wind_speed, w.rain_1h ?? 0, w.dt);
-      if (w.weather_desc) {
-        document.getElementById('wx-cond-label').textContent = w.weather_desc
-          .split(' ')
-          .map(s => s ? s[0].toUpperCase() + s.slice(1) : s)
-          .join(' ');
-      }
-      return w;
-    }
-  } catch(_) {}
-  return null;
-}
-
-// Fills all the stat spans in the "Current Conditions" card.
-function renderCurrent(temp, feels, hum, wind, rain, dt) {
-  const condLabel = guessCondition(temp, rain);
-  const score = cyclingScore(temp, wind, rain);
-  const cl    = cyclingLabel(score);
-
-  document.getElementById('wx-temp').textContent       = Math.round(temp) + '°C';
-  document.getElementById('wx-cond-label').textContent  = condLabel;
-  document.getElementById('wx-feels').textContent      = Math.round(feels) + '°C';
-  document.getElementById('wx-hum').textContent        = Math.round(hum) + '%';
-  document.getElementById('wx-wind').textContent       = (+wind).toFixed(1) + ' m/s';
-  document.getElementById('wx-rain').textContent       = (+rain).toFixed(2) + ' mm';
-  document.getElementById('wx-updated').textContent    = fmtDT(dt);
-
-  // Cycling score elements
-  document.getElementById('score-circle').textContent         = score;
-  document.getElementById('score-fill').style.width           = score + '%';
-  document.getElementById('score-fill').style.backgroundColor  = cl.color;
-  document.getElementById('score-text').textContent           = cl.label;
-  document.getElementById('score-text').style.color           = cl.color;
-
-  // Also update the navbar weather chip (defined in base.html)
-  const chip = document.getElementById('hdr-temp');
-  if (chip) chip.textContent = Math.round(temp) + '°C';
-}
-
-// Loads hourly forecast data and fills the right card + chart + ML card.
-// When current weather is available, prepends a "Now" point to temp/rain charts (current + forecast).
-// Pass currentRow from loadCurrent() to avoid a duplicate API call; otherwise fetches current.
-async function loadHourly(currentRow) {
-  const current = currentRow != null ? currentRow : await fetchCurrentWeatherRow();
-
-  const HOURLY_LIMIT = 24;
-  /** If DB has fewer future rows than this after filtering, merge in OpenWeather. */
-  const MIN_HOURLY_ROWS = 16;
-
-  let rows = [];
-  try {
-    // ★ PRIMARY: our DB ★
-    const res = await fetch(`/api/weather/db/hourly?limit=${HOURLY_LIMIT}`).then(r => r.json());
-    rows = (res.hourly ?? []);
-  } catch(e) {
-    console.error('DB hourly fetch failed', e);
-  }
-
-  if (!rows.length) {
-    try {
-      // ★ FALLBACK: OpenWeather 3-hour forecast (backend proxy) ★
-      const res2 = await fetch(`/api/weather/openweather/forecast3h?limit=${HOURLY_LIMIT}`).then(r => r.json());
-      rows = (res2.hourly ?? []);
-      if (res2.error) console.error('OpenWeather 3-hour error', res2);
-    } catch(e) {
-      console.error('OpenWeather 3-hour fetch failed', e);
-    }
-  }
-
-  if (!rows.length) {
-    const el = document.getElementById('hourly-list');
-    if (el) el.innerHTML = `<p class="loading-msg">No hourly data available (DB empty + API failed). Check console for details.</p>`;
-    return;
-  }
-
-  // Ensure we start from "now".
-  const now = Date.now();
-  const toMs = (ts) => {
-    if (ts == null) return NaN;
-    return parseInstant(ts).getTime();
-  };
-  rows = rows
-    .slice()
-    .sort((a, b) => toMs(a.dt ?? a.future_dt) - toMs(b.dt ?? b.future_dt))
-    .filter(r => {
-      const t = toMs(r.dt ?? r.future_dt);
-      return Number.isFinite(t) && t >= now - 60 * 1000; // allow slight clock skew
-    })
-    .slice(0, HOURLY_LIMIT);
-
-  if (rows.length < MIN_HOURLY_ROWS) {
-    try {
-      const res3 = await fetch(`/api/weather/openweather/forecast3h?limit=${HOURLY_LIMIT}`).then(r => r.json());
-      const apiRows = res3.hourly ?? [];
-      if (apiRows.length) {
-        rows = mergeHourlyPreferDb(rows, apiRows, now)
-          .filter((r) => {
-            const t = toMs(r.dt ?? r.future_dt);
-            return Number.isFinite(t) && t >= now - 60 * 1000;
-          })
-          .slice(0, HOURLY_LIMIT);
-      }
-    } catch (e) {
-      console.error('OpenWeather merge for sparse DB failed', e);
-    }
-  }
-
-  if (!rows.length) {
-    const el = document.getElementById('hourly-list');
-    if (el) el.innerHTML = `<p class="loading-msg">No future hourly points available.</p>`;
-    return;
-  }
-
-  const stripN = current && current.temp != null ? 6 : 7;
-  const stripForecast = rows.slice(0, stripN);
-
-  if (current && current.temp != null) {
-    const t0 = +Number(current.temp).toFixed(1);
-    buildTemp7Chart(
-      ['Now', ...stripForecast.map(r => fmtTime(r.dt ?? r.future_dt))],
-      [t0, ...stripForecast.map(r => (r.temp != null ? +(+r.temp).toFixed(1) : null))]
-    );
-  } else {
-    buildTemp7Chart(
-      rows.slice(0, 7).map(r => fmtTime(r.dt ?? r.future_dt)),
-      rows.slice(0, 7).map(r => (r.temp != null ? +(+r.temp).toFixed(1) : null))
-    );
-  }
-
-  function hourRowHtml(r) {
-    const rain = r.rain_3h ?? r.rain_1h ?? 0;
-    const score = cyclingScore(r.temp, r.wind_speed, rain);
-    const cl = cyclingLabel(score);
-    const cond = guessCondition(r.temp, rain);
-    return `<div class="hour-row">
-      <span class="h-time">${fmtTime(r.dt ?? r.future_dt)}</span>
-      ${conditionIconHtml(cond)}
-      <span class="h-temp">${Math.round(r.temp)}&deg;C</span>
-      <div class="h-bar-track"><div class="h-bar-fill" style="width:${score}%;background:${cl.color}"></div></div>
-    </div>`;
-  }
-
-  let listHtml = '';
-  if (current && current.temp != null) {
-    const cr = current.rain_1h ?? 0;
-    const wsp = current.wind_speed ?? 0;
-    const cs = cyclingScore(current.temp, wsp, cr);
-    const ccl = cyclingLabel(cs);
-    const ccond = guessCondition(current.temp, cr);
-    listHtml += `<div class="hour-row hour-row-now">
-      <span class="h-time">Now</span>
-      ${conditionIconHtml(ccond)}
-      <span class="h-temp">${Math.round(current.temp)}&deg;C</span>
-      <div class="h-bar-track"><div class="h-bar-fill" style="width:${cs}%;background:${ccl.color}"></div></div>
-    </div>`;
-  }
-  listHtml += stripForecast.map(hourRowHtml).join('');
-  document.getElementById('hourly-list').innerHTML = listHtml;
-
-  const lbls = rows.map(r => fmtTime(r.dt ?? r.future_dt));
-  const temps = rows.map(r => (r.temp != null ? +r.temp.toFixed(1) : null));
-  const feels = rows.map(r => (r.feels_like != null ? +r.feels_like.toFixed(1) : null));
-  const rains = rows.map(rainMmPerHFromHourlyRow);
-
-  if (current && current.temp != null) {
-    const t0 = +Number(current.temp).toFixed(1);
-    const f0 =
-      current.feels_like != null ? +Number(current.feels_like).toFixed(1) : t0;
-    const r0 =
-      current.rain_1h != null && current.rain_1h !== ''
-        ? +Number(current.rain_1h).toFixed(2)
-        : 0;
-    buildTempChart(['Now', ...lbls], [t0, ...temps], [f0, ...feels]);
-    buildRainChart(['Now', ...lbls], [r0, ...rains]);
-  } else {
-    buildTempChart(lbls, temps, feels);
-    buildRainChart(lbls, rains);
-  }
-}
-
-// RUN ON PAGE LOAD — current first, then hourly (reuses current for "Now" on charts)
-async function refreshWeather() {
-  const cur = await loadCurrent();
-  await loadHourly(cur);
-}
-refreshWeather();
-setInterval(refreshWeather, 5 * 60 * 1000);
-</script>
 {% endblock %}
