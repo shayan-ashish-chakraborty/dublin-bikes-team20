@@ -39,3 +39,6 @@ main_project/notebooks/final_merged_data.csv
 main_project/bike_forecast/models/*.pkl
 
 >>>>>>> origin/dev
+
+# ec2 instructions
+ec2_connect.txt
