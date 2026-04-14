@@ -3,6 +3,8 @@ import os
 import requests
 import logging
 import time
+from ..config import Config
+
 
 chat_bp = Blueprint("chat", __name__)
 logger = logging.getLogger(__name__)
@@ -10,7 +12,14 @@ logger = logging.getLogger(__name__)
 
 def call_gemini_with_retry(endpoint, payload, max_retries=3):
     for attempt in range(max_retries):
-        response = requests.post(endpoint, json=payload, timeout=30)
+        try:
+            response = requests.post(endpoint, json=payload, timeout=(5, 25))
+        except requests.exceptions.ConnectTimeout:
+            logger.warning(f"Connection timeout (attempt {attempt + 1}/{max_retries})")
+            if attempt < max_retries - 1:
+                time.sleep(2 ** attempt)
+                continue
+            raise
         if response.status_code == 200:
             return response
         elif response.status_code == 503:
@@ -61,14 +70,14 @@ def chat():
         if not contents:
             return jsonify({"error": "No valid messages"}), 400
 
-        # Call Gemini API
         payload = {
             "systemInstruction": {"parts": [{"text": system_instruction}]},
             "contents": contents,
             "generationConfig": {"maxOutputTokens": 400, "temperature": 1.0},
         }
 
-        endpoint = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={gemini_api_key}"
+        # gemini-2.0-flash: stable release, higher free-tier reliability than 2.5-flash
+        endpoint = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={gemini_api_key}"
         response = call_gemini_with_retry(endpoint, payload)
 
         if response.status_code == 200:

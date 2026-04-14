@@ -1,12 +1,11 @@
 from flask import Flask
-
-  
 from .config import Config
 # from .station.bikes_original import bikes_bp
 from .weather.routes import weather_bp
 from .auth.auth import auth_bp
 from .home.home import home_bp
-from .chat.chat import chat_bp
+#from .chat.chat import chat_bp
+from .chat.chat_grok import chat_bp
 from .journey.routes import journey_bp
 from .station.routes import stations_bp
 from .bike_forecast.routes import forecast_bp

@@ -20,12 +20,11 @@
  *
  * 4. AI CHATBOT
  *    Opens/closes the chatbot panel, sends messages to the
- *    Google Gemini API, and renders replies as chat bubbles.
- *    API KEY: The chatbot calls the Google API directly
- *      from the browser. You need to configure an API key
- *      on the Google side (or a proxy). Currently uses
- *      'google-dangerous-direct-browser-access' header for
- *      direct browser access (acceptable for prototyping only).
+ *    backend /api/chat endpoint (powered by Groq / LLaMA),
+ *    and renders replies as chat bubbles.
+ *    API KEY: Calls go to the Flask backend — the GROQ_API_KEY
+ *      is stored server-side only. No API key is exposed in
+ *      the browser.
  *
  * 5. WEATHER PAGE  (#wx-temp)
  *    All logic for weather.html: utility helpers, Chart.js chart
@@ -113,7 +112,7 @@ if (el_yr) el_yr.textContent = _d.getFullYear();
   input.addEventListener('keydown', e => { if (e.key === 'Enter') sendMsg(); });
   send.addEventListener('click', sendMsg);
  
-  // Conversation history — sent with each message so Gemini has context.
+  // Conversation history — sent with each message so Groq has context.
   // Grows throughout the session (cleared on page refresh).
   const history = [];
 
@@ -124,12 +123,13 @@ if (el_yr) el_yr.textContent = _d.getFullYear();
  
   // System prompt — defines the chatbot's persona and knowledge scope.
   const SYSTEM =
-    'You are a helpful assistant for Dublin Bike Share. ' +
-    'Help with finding stations, cycling routes, weather and tips. ' +
-    'Keep replies short and friendly. Use emojis occasionally.';
- 
+    "You are a helpful assistant for Dublin Bikes." +
+    "Help users find stations, plan cycling routes, check weather, and give tips. " +
+    "Keep replies short and friendly." +
+    "When answering about bike availability, use ONLY the live station data " +
+    "provided below — never guess or make up numbers.\n\n"
   /**
-   * Sends a message to the Gemini API and renders the reply.
+   * Sends a message to the Groq API (via /api/chat) and renders the reply.
    * @param {string} [text] - optional text override (used by chip buttons)
    */
   async function sendMsg(text) {
@@ -150,14 +150,13 @@ if (el_yr) el_yr.textContent = _d.getFullYear();
     const typing = addTyping(); // show "..." animation while waiting
  
     try {
-      // POST to our backend proxy endpoint (no API key in browser)
+      // POST to backend — GROQ_API_KEY is stored server-side only
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          systemInstruction: SYSTEM,
           messages: history,
         }),
       });
@@ -175,7 +174,7 @@ if (el_yr) el_yr.textContent = _d.getFullYear();
     } catch (error) {
       typing.remove();
       console.error('Chatbot error:', error);
-      addBubble('bot', 'Chatbot not connected. Check server logs and GEMINI_API_KEY.');
+      addBubble('bot', 'Chatbot not connected. Check server logs and GROQ_API_KEY.');
     }
  
     send.disabled = input.disabled = false;

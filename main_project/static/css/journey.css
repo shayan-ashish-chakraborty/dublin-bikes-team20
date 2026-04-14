@@ -343,7 +343,7 @@ header h1 {
 .live-label {
   color: #16a34a;
 }
-}
+
 
 .station-card::before {
   content: '';

@@ -42,8 +42,9 @@ class Config:
         "STATIONS_URI", "https://api.jcdecaux.com/vls/v1/stations"
     )
 
-    # Gemini AI chatbot (create a key in Google AI Studio)
+    # AI chatbot 
     GEMINI_API_KEY: str | None = os.getenv("GEMINI_API_KEY")
+    GROQ_API_KEY: str | None = os.getenv("GROQ_API_KEY")
 
     # Database
     DB_HOST: str = os.getenv("DB_HOST", "127.0.0.1")

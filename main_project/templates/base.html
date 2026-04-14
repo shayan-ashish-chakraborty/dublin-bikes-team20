@@ -197,7 +197,7 @@
    - sendSuggestion() is defined in main.js — the chip buttons call it.
  #}
 <button class="chatbot-fab" id="chatbot-fab">
-  <img src="{{ url_for('frontend.static', filename='images/icons/gemini-color.svg') }}"
+  <img src="{{ url_for('frontend.static', filename='images/icons/grok-color.svg') }}"
        alt="AI" class="fab-icon">
   Ask AI
 </button>
@@ -205,11 +205,10 @@
 <div class="chatbot-panel" id="chatbot-panel">
   <div class="chat-header">
     <div class="chat-header-left">
-      <img src="{{ url_for('frontend.static', filename='images/icons/gemini-color.svg') }}"
+      <img src="{{ url_for('frontend.static', filename='images/icons/grok-color.svg') }}"
            alt="AI" class="chat-header-icon">
       <div>
         <div class="chat-title">Dublin Bikes AI</div>
-        <div class="chat-sub">Powered by Gemini</div>
       </div>
     </div>
     <button class="chat-close" id="chat-close">&#x2715;</button>
@@ -223,7 +222,6 @@
     {# Quick-reply suggestion chips — clicking one sends it as a message via main.js #}
     <button class="chip" onclick="sendSuggestion(this)">Best time to cycle?</button>
     <button class="chip" onclick="sendSuggestion(this)">Find a station?</button>
-    <button class="chip" onclick="sendSuggestion(this)">How much does it cost?</button>
   </div>
   <div class="chat-input-row">
     <input id="chat-input" class="chat-input" placeholder="Ask about bikes..." maxlength="500" autocomplete="off">
