@@ -24,6 +24,7 @@ A full-stack web application that integrates real-time Dublin Bikes station data
 
 ## Project Structure
 
+```
 dublin-bikes-team20/
 ├── app.py
 ├── var.env                                          ✗ ignore
@@ -117,7 +118,7 @@ dublin-bikes-team20/
 ├── sprint1_webscrappers/
 ├── sprint2_flask_cd/
 └── sprint3_frontend_react_wjl/
-
+```
 
 
 ### Clone the repository
