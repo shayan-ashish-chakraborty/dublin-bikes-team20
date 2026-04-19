@@ -135,6 +135,7 @@ pip install -r requirements.txt
 
 ### Configure environment variables
 
+```
 JCDECAUX_API_KEY=your_key
 OPENWEATHER_API_KEY=your_key
 GOOGLE_MAPS_API_KEY=your_key
@@ -144,6 +145,7 @@ DB_PORT=3306
 DB_USER=your_db_user
 DB_PASSWORD=your_db_password
 DB_NAME=your_db_name
+```
 
 ### Run the application
 
