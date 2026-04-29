@@ -41,7 +41,7 @@ os.environ.setdefault("SECRET_KEY", "test_secret")
 # SCENARIO 1 — Station Data Formatting
 #
 # WHAT WE ARE TESTING:
-#   format_station() takes a raw response object from the JCDecaux API
+#   format_station() takes a raw response object from the JCDecaux API 
 #   and converts it into a clean, consistent dictionary that the rest
 #   of the app uses. This function is called every time the map loads,
 #   so it is critical that it works correctly.
