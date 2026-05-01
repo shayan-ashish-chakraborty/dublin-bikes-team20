@@ -178,7 +178,7 @@ dublin-bikes-team20/
 The application reads configuration from `main_project/var.env`. **Never commit real credentials to version control**.
  
 ```env
-# ─── DATABASE CONFIG ──────────────────────────────────────────────────────────
+#  DATABASE CONFIG 
 DB_USER=root
 DB_PASSWORD=your_mysql_password
 DB_HOST=127.0.0.1
@@ -186,31 +186,28 @@ DB_PORT=3306
 DB_NAME_JCDECAUX=local_databasejcdecaux
 DB_NAME_WEATHER=local_databaseopenweather
  
-# ─── EXTERNAL API KEYS ────────────────────────────────────────────────────────
+#  EXTERNAL API KEYS 
 JCDECAUX_API_KEY=your_jcdecaux_api_key
 OPENWEATHER_API_KEY=your_openweather_api_key
 GOOGLE_MAPS_API_KEY=your_google_maps_api_key
  
-# ─── JCDECAUX ENDPOINTS ───────────────────────────────────────────────────────
+#  JCDECAUX ENDPOINTS 
 STATIONS_URI=https://api.jcdecaux.com/vls/v1/stations
  
-# ─── OPENWEATHERMAP ENDPOINTS ─────────────────────────────────────────────────
+#  OPENWEATHERMAP ENDPOINTS 
 CITY=Dublin
 LAT=53.3498
 LON=-6.2603
 CURRENT_WEATHER_URI=https://api.openweathermap.org/data/2.5/weather
 FORECAST_WEATHER_URI=https://api.openweathermap.org/data/2.5/forecast
  
-# ─── FLASK ────────────────────────────────────────────────────────────────────
+#  FLASK 
 FLASK_SECRET_KEY=your_random_secret_key
 FLASK_ENV=development          # set to "production" on EC2
  
-# ─── AI CHATBOT ───────────────────────────────────────────────────────────────
+# AI CHATBOT 
 GEMINI_API_KEY=your_gemini_api_key
 GROQ_API_KEY=your_groq_api_key
- 
-# ─── CORS (optional) ──────────────────────────────────────────────────────────
-# CORS_ORIGINS=http://localhost:3000,https://your-domain.com
 ```
  
 | Variable | Description |
