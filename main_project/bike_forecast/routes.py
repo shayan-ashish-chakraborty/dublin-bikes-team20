@@ -1,4 +1,3 @@
-
 from flask import Blueprint, jsonify, request, current_app
 import pathlib
 from .models.forecast import _load_models, _predict_hour
@@ -12,7 +11,6 @@ _FORECAST_DIR = _BASE / "main_project" / "bike_forecast" / "models"
 
 
 # Blueprint 
-
 forecast_bp = Blueprint(
     "bike_forecast",
     __name__,
@@ -23,7 +21,6 @@ forecast_bp = Blueprint(
 
 
 # ROUTES 
-
 @forecast_bp.get("/station")
 def station_forecast():
     """``GET /forecast/station`` — Return multi-hour bike and dock predictions for a station.

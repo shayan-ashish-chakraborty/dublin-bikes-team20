@@ -326,7 +326,7 @@ h1, h2, h3, h4 { font-family: var(--font-head); }
 .wx-val         { font-size: 20px; font-weight: 800; font-family: var(--font-head); }
 .wx-key         { font-size: 11px; opacity: 0.75; text-transform: uppercase; letter-spacing: 0.5px; }
 
-/* ── STATS BAR ───────────────────────────────────────────────── */
+/* STATS BAR */
 .stats-bar {
   background: var(--card-bg);
   border-bottom: 1px solid var(--border);
@@ -571,7 +571,7 @@ h1, h2, h3, h4 { font-family: var(--font-head); }
 /* chart */
 .chart-wrap { height: 240px; }
 
-/* ── ML CARD ─────────────────────────────────────────────────── */
+/* ML CARD */
 .ml-card { border-top: 3px solid var(--green); margin-bottom: 32px; }
 .ml-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
 .ml-header h3 { border: none; padding: 0; margin: 0; }

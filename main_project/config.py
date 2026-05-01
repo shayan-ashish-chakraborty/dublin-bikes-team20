@@ -10,7 +10,6 @@ def _load_dotenv_if_present() -> None:
     Checks for `.env` first (recommended), then falls back to the legacy
     `var.env` name used in this repo. Has no effect if neither file is found.
     """
-    # Support both .env (recommended) and legacy var.env used in this repo.
     if os.path.exists(".env"):
         load_dotenv(dotenv_path=".env")
     elif os.path.exists("var.env"):

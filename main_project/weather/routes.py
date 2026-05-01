@@ -48,9 +48,7 @@ weather_bp = Blueprint(
 
 # WeatherSession is imported from .services
 
-
 # ROUTES 
-
 @weather_bp.get("/")
 def weather_page():
     """``GET /api/weather/`` — Render the weather dashboard page.

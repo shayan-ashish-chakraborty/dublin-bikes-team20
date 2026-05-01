@@ -14,7 +14,6 @@ home_bp = Blueprint(
 )
 
 
-
 @home_bp.get("/")
 def home():
     """Render the home page.

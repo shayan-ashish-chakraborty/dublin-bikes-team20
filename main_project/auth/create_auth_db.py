@@ -24,16 +24,14 @@ if os.path.exists("var.env"):
     load_dotenv(dotenv_path="var.env")
 
 
-# ==============================================================
+
 # RDS CONNECTION DETAILS
 # Update these to match your RDS instance before running
-# ==============================================================
 RDS_USER = os.getenv("DB_USER")
 RDS_PASSWORD = os.getenv("DB_PASSWORD")
 RDS_PORT = int(os.getenv("DB_PORT"))
 DB_NAME = os.getenv("DB_NAME_AUTH")
 RDS_HOST = os.getenv("DB_HOST")
-# ==============================================================
  
  
 def get_connection(database=None):

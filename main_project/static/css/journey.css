@@ -37,7 +37,7 @@ body {
   display: none !important;
 }
 
-/* ── Viewport lock — height = 100vh - nav - footer ── */
+/* Viewport lock — height = 100vh - nav - footer */
 :root {
   --nav-h: 64px;
   --footer-h: 56px;
@@ -66,7 +66,7 @@ main:has(#app) + .footer {
   height: var(--footer-h);
 }
 
-/* ── Layout ──────────────────────────────────────── */
+/* Layout */
 
 #app {
   display: flex;
@@ -99,7 +99,7 @@ main:has(#app) + .footer {
   height: 100%;
 }
 
-/* ── Header ──────────────────────────────────────── */
+/* Header */
 
 header {
   background: var(--color-primary);
@@ -131,7 +131,7 @@ header h1 {
   margin-top: 2px;
 }
 
-/* ── Journey Form ────────────────────────────────── */
+/* Journey Form */
 
 #journey-form {
   padding: 16px 20px;
@@ -187,7 +187,7 @@ header h1 {
   margin-top: 4px;
 }
 
-/* ── Buttons ─────────────────────────────────────── */
+/* Buttons*/
 
 .btn {
   padding: 9px 16px;
@@ -241,7 +241,7 @@ header h1 {
   line-height: 1.5;
 }
 
-/* ── Status / Error ──────────────────────────────── */
+/* Status / Error */
 
 #status-message {
   margin: 12px 20px;
@@ -253,7 +253,7 @@ header h1 {
   border: 1px solid #fecaca;
 }
 
-/* ── Panel Sections ──────────────────────────────── */
+/* Panel Sections */
 
 .panel-section {
   padding: 16px 20px;
@@ -269,7 +269,7 @@ header h1 {
   margin-bottom: 12px;
 }
 
-/* ── Route Summary ───────────────────────────────── */
+/* Route Summary */
 
 .summary-stats {
   display: flex;
@@ -304,7 +304,7 @@ header h1 {
   color: var(--color-primary);
 }
 
-/* ── Station Cards ───────────────────────────────── */
+/* Station Cards */
 
 .cards-row {
   display: flex;
@@ -398,7 +398,7 @@ header h1 {
   color: var(--color-stands);
 }
 
-/* ── Directions ──────────────────────────────────── */
+/* Directions */
 
 .leg-section {
   margin-bottom: 14px;
@@ -479,7 +479,7 @@ header h1 {
   margin-top: 2px;
 }
 
-/* ── Map Loading Overlay ─────────────────────────── */
+/* Map Loading Overlay */
 
 #map-loading {
   position: absolute;
@@ -510,7 +510,7 @@ header h1 {
   to { transform: rotate(360deg); }
 }
 
-/* ── Responsive ──────────────────────────────────── */
+/* Responsive */
 
 @media (max-width: 768px) {
   #app {
@@ -531,7 +531,7 @@ header h1 {
   }
 }
 
-/* ── Google Maps InfoWindow ──────────────────────── */
+/* Google Maps InfoWindow */
 
 .gm-iw {
   font-family: 'Segoe UI', system-ui, sans-serif;
@@ -557,7 +557,7 @@ header h1 {
   margin-top: auto;
 }
 
-/* ── Prediction Banner ─────────────────────────────────────────────────────── */
+/* Prediction Banner */
 .prediction-banner {
   display: flex;
   align-items: flex-start;
@@ -573,7 +573,7 @@ header h1 {
   line-height: 1.45;
 }
 
-/* ── Journey: sidebar “More information” (opens same ML InfoWindow as Stations) ─ */
+/* Journey: sidebar “More information” (opens same ML InfoWindow as Stations) */
 .journey-card-more-btn {
   display: block;
   width: 100%;
@@ -594,7 +594,7 @@ header h1 {
   background: var(--color-primary-dark);
 }
 
-/* ── Journey: InfoWindow ML charts (same rules as static/css/ml.css, scoped to #app) ─ */
+/* Journey: InfoWindow ML charts (same rules as static/css/ml.css, scoped to #app) */
 #app .gm-iw .iw-more-btn {
   display: block;
   width: 100%;
@@ -670,7 +670,7 @@ header h1 {
   color: #b91c1c;
 }
 
-/* ── Journey: InfoWindow card layout (mirror stations.css — same as Stations map) ─
+/* Journey: InfoWindow card layout (mirror stations.css — same as Stations map)
    Without .gm-iw-inner { flex; gap } the status line can overlap the green button. */
 #app .gm-style-iw-d {
   padding: 12px !important;

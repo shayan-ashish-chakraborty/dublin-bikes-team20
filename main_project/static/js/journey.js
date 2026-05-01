@@ -1,4 +1,4 @@
-// ── State ─────────────────────────────────────────────────────────────────────
+// State 
 
 const state = {
   map: null,
@@ -13,7 +13,7 @@ const state = {
   routeDropoffMarker: null,
 };
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
+// Helpers 
 
 async function apiFetch(path, options = {}) {
   const res = await fetch(path, {
@@ -40,7 +40,7 @@ function formatDuration(seconds) {
   return m > 0 ? `${h}h ${m}min` : `${h}h`;
 }
 
-// ── Initialisation ────────────────────────────────────────────────────────────
+// Initialisation 
 
 (async function bootstrap() {
   try {
@@ -109,7 +109,7 @@ function attachEventListeners() {
   });
 }
 
-// ── Station Layer ─────────────────────────────────────────────────────────────
+// Station Layer 
 
 async function fetchAndRenderStations() {
   setDefaultDateTime();
@@ -179,7 +179,7 @@ function renderStationMarkers(stations) {
   });
 }
 
-// ── Route Flow ────────────────────────────────────────────────────────────────
+// Route Flow 
 
 function handleNavigate() {
   const start   = document.getElementById("start-input").value.trim();
@@ -269,7 +269,7 @@ function renderRoute(data) {
   if (hint) hint.classList.add("hidden");
 }
 
-// ── Map Drawing ───────────────────────────────────────────────────────────────
+// Map Drawing 
 
 function clearRouteLayer() {
   journeyDestroyMlChartsIfPresent();
@@ -393,7 +393,7 @@ function fitMapToBounds(data) {
   state.map.fitBounds(bounds, { top: 40, right: 40, bottom: 40, left: 40 });
 }
 
-// ── UI Rendering ──────────────────────────────────────────────────────────────
+// UI Rendering 
 
 function renderStationCards(data) {
   const { pickup_station: p, dropoff_station: d } = data;
@@ -471,7 +471,7 @@ function renderDirections(legs) {
     });
   });
 }
-// ── Google Auto Refill ────────────────────────────────────────────────────────────
+// Google Auto Refill 
 function googleAutoRefill() {
   
   const dublinBounds = new google.maps.LatLngBounds(
@@ -505,7 +505,7 @@ function googleAutoRefill() {
 
 
 
-// ── Error / Status ────────────────────────────────────────────────────────────
+// Error / Status 
 
 function showError(message) {
   const el = document.getElementById("status-message");
@@ -517,7 +517,7 @@ function clearError() {
   document.getElementById("status-message").classList.add("hidden");
 }
 
-// ── Journey: InfoWindow ML (parity with Stations map — MLbikes.js) ────────────
+// Journey: InfoWindow ML (parity with Stations map — MLbikes.js) 
 
 function journeyDestroyMlChartsIfPresent() {
   if (window.StationML && typeof window.StationML.destroyIwCharts === "function") {

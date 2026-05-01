@@ -21,13 +21,8 @@ auth_bp = Blueprint(
 )
 
 
-
-
-
-# ==============================================================
 # RDS CONNECTION DETAILS
 # Update these to match your RDS instance before running
-# ==============================================================
 import os
 from dotenv import load_dotenv
 
@@ -39,10 +34,7 @@ RDS_PASSWORD = os.getenv("DB_PASSWORD")
 RDS_PORT = int(os.getenv("DB_PORT"))
 DB_NAME = os.getenv("DB_NAME_AUTH")
 RDS_HOST = os.getenv("DB_HOST")
-# ==============================================================
  
-
-
 
 
 # Database config
@@ -61,9 +53,8 @@ except Exception:
     AuthSession = None
 
 
-# ==========================
+
 # LOGIN ROUTE
-# ==========================
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
     """Render the login page and handle login form submission.
@@ -120,9 +111,8 @@ def login():
     return render_template('login.html')
 
 
-# ==========================
+
 # REGISTER ROUTE
-# ==========================
 @auth_bp.route('/register', methods=['GET', 'POST'])
 def register():
     """Render the registration page and handle new account creation.
@@ -197,9 +187,8 @@ def register():
 
     return render_template('register.html')
 
-# ==========================
+
 # LOGOUT ROUTE
-# ==========================
 @auth_bp.route('/logout')
 def logout():
     """Clear the user session and redirect to the home page.
