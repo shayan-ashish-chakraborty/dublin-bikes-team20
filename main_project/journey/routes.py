@@ -39,6 +39,21 @@ def api_config():
 
 @journey_bp.route("/api/availability")
 def availability():
+    """``GET /journey/api/availability`` — Return live availability for all Dublin Bikes stations.
+
+    Fetches raw station data from the JCDecaux API and normalises each entry.
+    Date/time query parameters are accepted but currently unused — this route
+    always returns live data. ML-based availability is handled by
+    :func:`predict_availability` instead.
+
+    Uses:
+        - :func:`~main_project.station.services.get_all_stations` — fetches all stations from JCDecaux.
+        - :func:`~main_project.station.services.format_station` — normalises each raw station dict.
+
+    Returns:
+        JSON list of formatted station dicts with live ``available_bikes``
+        and ``available_stands``.
+    """
     # date and time params are accepted for future ML/prediction use;
     # currently returns live data from the JCDecaux API
     raw = get_all_stations()
@@ -48,6 +63,32 @@ def availability():
 
 @journey_bp.route("/api/route", methods=["POST"])
 def route():
+    """``POST /journey/api/route`` — Plan a live cycling route between two addresses using current station availability.
+
+    Logic:
+
+    1. Geocode ``start`` and ``end`` addresses to coordinates.
+    2. Fetch all live stations from JCDecaux.
+    3. Find the nearest pickup station with available bikes.
+    4. Find the nearest dropoff station with available docks.
+    5. Fetch three route legs from Google Directions API.
+
+    Uses:
+        - :func:`~main_project.journey.services.geocode_address` — converts addresses to coordinates.
+        - :func:`~main_project.station.services.get_all_stations` — fetches live station data.
+        - :func:`~main_project.station.services.format_station` — normalises station dicts.
+        - :func:`~main_project.journey.services.find_nearest_station` — finds closest stations with availability filters.
+        - :func:`~main_project.journey.services.get_directions` — fetches walking and cycling legs.
+
+    Args:
+        start: Origin address string (JSON body, required).
+        end: Destination address string (JSON body, required).
+
+    Returns:
+        JSON with ``start``, ``end``, ``pickup_station``, ``dropoff_station``,
+        ``legs`` (walk_to_bike, cycle, walk_from_bike), and ``summary``
+        (total distance and duration).
+    """
     body = request.get_json()
     start = body.get("start")
     end = body.get("end")
@@ -103,23 +144,27 @@ def route():
 
 @journey_bp.route("/api/predict/availability")
 def predict_availability():
-    """
-    GET /journey/api/predict/availability?stand_no=42&time=2026-04-09+12:31:11
-    Predicts available bikes and docks at a station for a given datetime.
+    """``GET /journey/api/predict/availability`` — Predict bike and dock availability at a single station for a future datetime.
 
-    Query parameters:
-      stand_no  = station number  (required)
-      time      = datetime string (required, e.g. "2026-04-09 12:31:11")
+    Logic:
 
-    Response:
-      {
-        "stand_no": 42,
-        "time": "2026-04-09 12:00",
-        "predicted_bikes": 9.8,
-        "predicted_docks": 20.4,
-        "weather_warning": null
-      }
-    weather_warning is null on success, or a message if weather data was unavailable.
+    1. Validate ``stand_no`` and ``time`` query parameters.
+    2. Fetch live station data to obtain capacity (``total_stands``).
+    3. Run the ML pipeline for the single station at the requested time.
+
+    Uses:
+        - :func:`~main_project.station.services.get_station` — fetches live station data from JCDecaux.
+        - :func:`~main_project.station.services.format_station` — normalises the station dict.
+        - :func:`~main_project.journey.services.predict_stations_availability` — runs the two-stage ML pipeline (weather + bike model).
+
+    Args:
+        stand_no: JCDecaux station number (query param, required).
+        time: Target datetime as ``"YYYY-MM-DD HH:MM:SS"`` (query param, required).
+
+    Returns:
+        JSON with keys ``stand_no``, ``time``, ``predicted_bikes``,
+        ``predicted_docks``, and ``weather_warning`` (``null`` on success,
+        or a message string if weather data was unavailable).
     """
     if _models is None:
         return jsonify(error="Prediction models could not be loaded"), 500
@@ -161,18 +206,35 @@ def predict_availability():
 
 @journey_bp.route("/api/route/predict", methods=["POST"])
 def route_predict():
-    """
-    POST /journey/api/route/predict
-    Plans a route using predicted station availability at a given future time.
+    """``POST /journey/api/route/predict`` — Plan a cycling route using predicted station availability at a future time.
 
-    Request JSON:
-      { "start": "...", "end": "...", "time": "2026-04-09 15:00:00" }
-      time may also be "now" to use current datetime.
+    Logic:
 
-    Response: same shape as /api/route, plus:
-      "prediction_mode": true
-      "weather_warning": null | "<reason>"
-      available_bikes / available_stands in stations are predicted values.
+    1. Geocode ``start`` and ``end`` addresses to coordinates.
+    2. Fetch all live stations for coordinates and capacity data.
+    3. Find the 5 nearest candidate stations for pickup and dropoff.
+    4. Deduplicate candidates and run the ML pipeline **once** for all of them
+       (weather is fetched only once and reused across all stations).
+    5. Filter to stations with predicted bikes/docks available.
+    6. Fetch three route legs from Google Directions API.
+
+    Uses:
+        - :func:`~main_project.journey.services.geocode_address` — converts addresses to coordinates.
+        - :func:`~main_project.station.services.get_all_stations` — fetches live station data.
+        - :func:`~main_project.station.services.format_station` — normalises station dicts.
+        - :func:`~main_project.journey.services.find_nearest_station` — finds nearest candidate stations.
+        - :func:`~main_project.journey.services.predict_stations_availability` — runs batch ML prediction (weather fetched once).
+        - :func:`~main_project.journey.services.get_directions` — fetches walking and cycling route legs.
+
+    Args:
+        start: Origin address string (JSON body, required).
+        end: Destination address string (JSON body, required).
+        time: Target datetime as ``"YYYY-MM-DD HH:MM:SS"``, or ``"now"`` (JSON body, required).
+
+    Returns:
+        JSON with the same shape as ``/api/route``, plus ``prediction_mode: true``
+        and ``weather_warning`` (``null`` on success, or a message string).
+        ``available_bikes`` and ``available_stands`` reflect predicted values.
     """
     if _models is None:
         return jsonify({"error": "Prediction models could not be loaded"}), 500

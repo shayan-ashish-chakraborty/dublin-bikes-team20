@@ -34,8 +34,17 @@ _wx_features   = None
 _hum_std_mean  = None   # dataset mean fallback for humidity_std feature
 
 
-def _load_models():
-    """Load all pkl models and meta once, then cache in module globals."""
+def _load_models() -> tuple:
+    """Load all ML models and feature metadata, caching them in module globals.
+
+    On first call, reads 6 pickle files (bike, dock, temp, humidity, pressure,
+    rain models) and ``model_meta.json`` from the same directory. Subsequent
+    calls return the cached tuple immediately.
+
+    Returns:
+        A tuple of ``(bike_model, dock_model, temp_model, hum_model, pres_model,
+        rain_model, bike_features, wx_features, hum_std_mean)``.
+    """
     global _bike_model, _dock_model, _temp_model, _hum_model, _pres_model, _rain_model, _bike_features, _wx_features, _hum_std_mean
     if _bike_model is None:
         import pickle
@@ -60,15 +69,26 @@ def _load_models():
 
 
 def _predict_hour(models, station_id, capacity, future_dt,
-                  wx_override=None):
-    """
-    Run the full two-stage pipeline for one hour.
+                  wx_override=None) -> dict:
+    """Run the two-stage ML pipeline for a single future hour.
 
-    wx_override : dict with keys avg_temp, avg_humidity, avg_pressure,
-                  is_raining — pass live OpenWeather values here to
-                  skip the weather model for that hour.
+    Stage 1 predicts weather (temp, humidity, pressure, rain) from the hour
+    and month unless ``wx_override`` is supplied. Stage 2 uses the weather
+    values to predict bike and dock availability.
 
-    Returns dict with all predicted values for that hour.
+    Args:
+        models: Tuple returned by ``_load_models()``.
+        station_id: JCDecaux station ID.
+        capacity: Total dock capacity of the station.
+        future_dt: The target datetime to predict for.
+        wx_override: Optional dict with keys ``avg_temp``, ``avg_humidity``,
+            ``avg_pressure``, and ``is_raining`` to bypass the weather models.
+            Defaults to ``None``.
+
+    Returns:
+        A dict with keys: ``time`` (``"YYYY-MM-DD HH:MM"``),
+        ``predicted_bikes``, ``predicted_docks``, ``predicted_temp``,
+        ``predicted_humidity``, ``predicted_pressure``, ``predicted_rain``.
     """
     import pandas as pd
 
@@ -117,12 +137,27 @@ def _predict_hour(models, station_id, capacity, future_dt,
     }
 
 #create a function to predict bike and dock for a batch of future dates
-def _predict_bike_dock_batch(models, station_id, capacity, future_dts, wx_overrides):
-    """
-    Same bike/dock outputs as _predict_hour(..., wx_override=...), but one matrix
-    predict per model (faster than N separate sklearn calls).
-    future_dts and wx_overrides must have equal length; each wx dict matches
-    _predict_hour wx_override keys.
+def _predict_bike_dock_batch(models, station_id, capacity, future_dts, wx_overrides) -> tuple:
+    """Predict bike and dock availability for multiple hours in a single batch.
+
+    Builds one feature matrix and calls ``model.predict`` once per model,
+    which is faster than calling ``_predict_hour`` N times individually.
+
+    Args:
+        models: Tuple returned by ``_load_models()``.
+        station_id: JCDecaux station ID.
+        capacity: Total dock capacity of the station.
+        future_dts: List of target datetimes, one per forecast step.
+        wx_overrides: List of weather dicts (same length as ``future_dts``),
+            each with keys ``avg_temp``, ``avg_humidity``, ``avg_pressure``,
+            and ``is_raining``.
+
+    Returns:
+        A tuple ``(predicted_bikes, predicted_docks)`` — each a list of floats
+        clamped to ``[0, capacity]``, one entry per input timestep.
+
+    Raises:
+        ValueError: If ``future_dts`` and ``wx_overrides`` have different lengths.
     """
     import numpy as np
     import pandas as pd
@@ -175,7 +210,7 @@ def station_forecast():
     is_raining = override rain flag 0/1            (optional)
 
     Response JSON
-    
+
     {
       "number": 42,
       "times":               ["2026-04-08 12:47", ...],

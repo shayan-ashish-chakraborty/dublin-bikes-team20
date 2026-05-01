@@ -26,33 +26,24 @@ forecast_bp = Blueprint(
 
 @forecast_bp.get("/station")
 def station_forecast():
-    """
-    GET /forecast/station
-    Runs the two-stage pipeline (weather model → bike model) and returns
-    hourly predictions for bikes, docks, and all weather parameters.
+    """Return multi-hour bike and dock predictions for a station.
 
-    Query parameters
+    Runs the two-stage ML pipeline (weather model → bike model) for each
+    requested future hour.
 
-    number = station_id                        (required)
-    capacity = total docks at the station        (required)
-    hours = future hours to forecast (default 8, max 48)
-    avg_temp = override weather model °C         (optional)
-    avg_humidity = override weather model %          (optional)
-    avg_pressure = override weather model hPa        (optional)
-    is_raining = override rain flag 0/1            (optional)
+    Args (query parameters):
+        number: Station ID (required).
+        capacity: Total docks at the station (required).
+        hours: Future hours to forecast, max 48. Defaults to 8.
+        avg_temp: Override weather model temperature in °C (optional).
+        avg_humidity: Override weather model humidity in % (optional).
+        avg_pressure: Override weather model pressure in hPa (optional).
+        is_raining: Override rain flag, ``0`` or ``1`` (optional).
 
-    Response JSON
-    
-    {
-      "number": 42,
-      "times":               ["2026-04-08 12:47", ...],
-      "predicted_bikes":     [9.8, 8.5, ...],
-      "predicted_docks":     [20.4, 21.4, ...],
-      "predicted_temp":      [9.0, 9.0, ...],
-      "predicted_humidity":  [81.3, 80.0, ...],
-      "predicted_pressure":  [1014.9, 1014.6, ...],
-      "predicted_rain":      [0, 0, ...]
-    }
+    Returns:
+        JSON with keys ``number``, ``times``, ``predicted_bikes``,
+        ``predicted_docks``, ``predicted_temp``, ``predicted_humidity``,
+        ``predicted_pressure``, ``predicted_rain``.
     """
     try:
         models = _load_models()
@@ -109,26 +100,21 @@ def station_forecast():
 # for hourly prediction purpose
 @forecast_bp.get("/station/hourly")
 def hourly_station_forecast():
-    """
-    GET /forecast/station/hourly
-    Predict bikes and docks for a single specific hour.
-    Weather params are optional — if omitted, the weather model predicts them.
+    """Predict bike and dock availability for a single future hour.
 
-    Query parameters
-    number       = station_id                  (required)
-    capacity     = total docks at the station  (required)
-    time         = datetime string             (required, e.g. "2026-04-09 12:31:11")
-    avg_temp     = temperature °C              (optional)
-    avg_humidity = humidity %                  (optional)
-    avg_pressure = pressure hPa               (optional)
-    is_raining   = rain flag 0 or 1           (optional)
+    Weather parameters are optional — if omitted, the weather model predicts them.
 
-    Response JSON
-    {
-      "time":             "2026-04-09 14:00",
-      "predicted_bikes":  9.8,
-      "predicted_docks":  20.4
-    }
+    Args (query parameters):
+        number: Station ID (required).
+        capacity: Total docks at the station (required).
+        time: Target datetime string, e.g. ``"2026-04-09 12:31:11"`` (required).
+        avg_temp: Temperature in °C (optional).
+        avg_humidity: Humidity in % (optional).
+        avg_pressure: Pressure in hPa (optional).
+        is_raining: Rain flag, ``0`` or ``1`` (optional).
+
+    Returns:
+        JSON with keys ``time``, ``predicted_bikes``, ``predicted_docks``.
     """
     try:
         models = _load_models()

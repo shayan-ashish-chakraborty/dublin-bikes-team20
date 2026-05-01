@@ -23,10 +23,19 @@ BASE_SYSTEM = (
 
 
 def fetch_station_context(base_url: str) -> str:
-    """
-    Calls the internal /api/stations endpoint and returns a compact
-    plain-text summary to inject into the system prompt.
-    Falls back to an empty string if the call fails so chat still works.
+    """Fetch a live station summary to inject into the chatbot system prompt.
+
+    Calls the internal ``/api/stations`` endpoint and formats up to 50 stations
+    as a compact plain-text block. Falls back to an empty string on any error
+    so the chat endpoint continues to work without station context.
+
+    Args:
+        base_url: The application's base URL (e.g. ``"http://127.0.0.1:8000"``).
+
+    Returns:
+        A plain-text summary string listing station names, available bikes,
+        available spaces, and status. Returns an empty string if the endpoint
+        is unreachable or returns no data.
     """
     try:
         res = requests.get(f"{base_url}/api/stations", timeout=5)
@@ -56,7 +65,25 @@ def fetch_station_context(base_url: str) -> str:
         return ""
 
 
-def call_groq_with_retry(messages: list, api_key: str, max_retries: int = 3):
+def call_groq_with_retry(messages: list, api_key: str, max_retries: int = 3) -> requests.Response:
+    """Send a chat completion request to the Groq API with retry logic.
+
+    Retries on connection timeouts, 429 rate-limit responses (honouring
+    ``Retry-After`` headers), and 503 service-unavailable responses using
+    exponential back-off.
+
+    Args:
+        messages: List of OpenAI-format message dicts (``role`` + ``content``).
+        api_key: Groq API key for the ``Authorization`` header.
+        max_retries: Maximum number of attempts before giving up. Defaults to ``3``.
+
+    Returns:
+        The final ``requests.Response`` object (successful or not). The caller
+        is responsible for checking ``response.status_code``.
+
+    Raises:
+        requests.exceptions.ConnectTimeout: If all retry attempts time out.
+    """
     headers = {
         "Authorization": f"Bearer {api_key}",
         "Content-Type": "application/json",
@@ -102,8 +129,17 @@ def call_groq_with_retry(messages: list, api_key: str, max_retries: int = 3):
 
 
 @chat_bp.post("")
-def chat():
-    """Chat endpoint — calls Groq API with live Dublin Bikes context."""
+def chat() -> tuple:
+    """Handle a chat completion request using the Groq LLM API.
+
+    Injects live Dublin Bikes station data into the system prompt, then
+    forwards the conversation history to Groq and returns the assistant reply.
+
+    Returns:
+        A Flask JSON response tuple. On success: ``{"reply": str}``, 200.
+        On rate limit: ``{"error": ..., "message": ..., "retry_after_seconds": int}``, 429.
+        On other errors: ``{"error": str}``, 400/500.
+    """
     try:
         data = request.get_json(silent=True)
         if not data or not data.get("messages"):

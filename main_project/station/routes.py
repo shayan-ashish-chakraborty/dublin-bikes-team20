@@ -17,10 +17,15 @@ def stations():
 
 @stations_bp.route("/api/stations/predict")
 def stations_predict():
-    """
-    GET /api/stations/predict?number=<id>&hours=48
+    """Run a multi-hour bike and dock prediction for one station.
 
-    Query parsing + ML in station_predict_from_request (weather list, then _predict_hour per hour).
+    Args:
+        number: JCDecaux station ID (query param, required).
+        hours: Forecast horizon in hours, max 48. Defaults to 48 (query param).
+
+    Returns:
+        JSON prediction dict from ``station_predict_from_request``, or an
+        error JSON with status 400/503.
     """
     try:
         return jsonify(station_predict_from_request(request))
@@ -32,5 +37,10 @@ def stations_predict():
 
 @stations_bp.route("/stations")
 def stations_page():
-    """HTML map page; live data from GET /api/stations (stations.stations)."""
+    """Render the stations map page.
+
+    Returns:
+        Rendered ``stations.html`` template. Live station data is fetched
+        client-side from ``GET /api/stations``.
+    """
     return render_template("stations.html")

@@ -46,16 +46,19 @@ RDS_HOST = os.getenv("DB_HOST")
 
 
 # Database config
-auth_db_cfg = DbConfig(
-    host=RDS_HOST,       
-    port=RDS_PORT,
-    user=RDS_USER,            
-    password=RDS_PASSWORD,      
-    db_name=DB_NAME 
-)
-
-auth_engine = create_engine_for(auth_db_cfg)
-AuthSession = sessionmaker(bind=auth_engine)
+try:
+    auth_db_cfg = DbConfig(
+        host=RDS_HOST,
+        port=RDS_PORT,
+        user=RDS_USER,
+        password=RDS_PASSWORD,
+        db_name=DB_NAME
+    )
+    auth_engine = create_engine_for(auth_db_cfg)
+    AuthSession = sessionmaker(bind=auth_engine)
+except Exception:
+    auth_engine = None
+    AuthSession = None
 
 
 # ==========================
@@ -63,7 +66,21 @@ AuthSession = sessionmaker(bind=auth_engine)
 # ==========================
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
+    """Render the login page and handle login form submission.
 
+    GET: Redirects to home if already logged in, otherwise renders ``login.html``.
+
+    POST: Validates the email and 6-digit PIN, checks credentials against the
+    ``users`` table, and sets ``session["user_id"]`` and ``session["user_name"]``
+    on success.
+
+    Args:
+        email: Registered user email address (from POST form).
+        password: 6-digit numeric PIN (from POST form).
+
+    Returns:
+        A Flask response — either a redirect or a rendered ``login.html`` template.
+    """
     if session.get('user_id'):
         return redirect(url_for('frontend.home'))
     
@@ -108,6 +125,22 @@ def login():
 # ==========================
 @auth_bp.route('/register', methods=['GET', 'POST'])
 def register():
+    """Render the registration page and handle new account creation.
+
+    GET: Redirects to home if already logged in, otherwise renders ``register.html``.
+
+    POST: Validates all fields, enforces a 6-digit numeric PIN, checks for
+    duplicate email, hashes the password, and inserts the new user.
+
+    Args:
+        full_name: User's full name (from POST form).
+        email: Email address, must be unique (from POST form).
+        password: 6-digit numeric PIN (from POST form).
+        confirm_password: Must match ``password`` (from POST form).
+
+    Returns:
+        A Flask response — either a redirect or a rendered ``register.html`` template.
+    """
     # Already logged in,redirect to home
     if session.get('user_id'):
         return redirect(url_for('frontend.home'))
@@ -169,6 +202,11 @@ def register():
 # ==========================
 @auth_bp.route('/logout')
 def logout():
+    """Clear the user session and redirect to the home page.
+
+    Returns:
+        A redirect response to the home page.
+    """
     session.clear()                         
     flash("You've been signed out.", "success")
     return redirect(url_for('frontend.home'))  # back to home — header shows Log In / Sign Upa

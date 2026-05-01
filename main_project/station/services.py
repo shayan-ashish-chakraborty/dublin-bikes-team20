@@ -145,8 +145,15 @@ def _weather_forecast_list_from_openweather(
     return out
 
 
-def get_all_stations():
-    """Fetch all Dublin Bike stations with live availability."""
+def get_all_stations() -> list:
+    """Fetch all Dublin Bikes stations with live availability from the JCDecaux API.
+
+    Returns:
+        A list of raw station dicts as returned by the JCDecaux VLS v1 API.
+
+    Raises:
+        requests.HTTPError: If the API returns a non-2xx status code.
+    """
     url = f"{JCDECAUX_BASE_URL}/stations"
     params = {
         "contract": JCDECAUX_CONTRACT,
@@ -157,8 +164,18 @@ def get_all_stations():
     return response.json()
 
 
-def get_station(station_number):
-    """Fetch a single station by number."""
+def get_station(station_number) -> dict:
+    """Fetch a single Dublin Bikes station by its station number.
+
+    Args:
+        station_number: The integer station identifier used by JCDecaux.
+
+    Returns:
+        A raw station dict as returned by the JCDecaux VLS v1 API.
+
+    Raises:
+        requests.HTTPError: If the API returns a non-2xx status code.
+    """
     url = f"{JCDECAUX_BASE_URL}/stations/{station_number}"
     params = {
         "contract": JCDECAUX_CONTRACT,
@@ -169,8 +186,17 @@ def get_station(station_number):
     return response.json()
 
 
-def format_station(raw):
-    """Normalize a raw JCDecaux station object."""
+def format_station(raw) -> dict:
+    """Normalise a raw JCDecaux station dict into the app's station schema.
+
+    Args:
+        raw: A station dict as returned directly by the JCDecaux API,
+             including a nested ``position`` key with ``lat`` and ``lng``.
+
+    Returns:
+        A dict with keys: ``number``, ``name``, ``address``, ``lat``, ``lng``,
+        ``status``, ``available_bikes``, ``available_stands``, ``total_stands``.
+    """
     return {
         "number": raw.get("number"),
         "name": raw.get("name"),
@@ -184,9 +210,35 @@ def format_station(raw):
     }
 
 def station_predict_from_request(request: Request) -> dict:
-    """
-    GET /api/stations/predict: weather from hourly_forecast_list_like_weather_page,
-    then bike/dock batch predict with the same wx_override rows (one matrix per model).
+    """Run a multi-hour bike and dock availability prediction for one station.
+
+    Reads query parameters from the Flask request, fetches live station data,
+    builds an hourly weather series, and runs the two-stage ML pipeline in
+    batch mode.
+
+    Args:
+        request: The Flask ``Request`` object. Expected query parameters:
+
+            - ``number`` (int, required): JCDecaux station ID.
+            - ``hours`` (int, optional): Forecast horizon in hours.
+              Clamped to ``[1, 48]``. Defaults to ``48``.
+
+    Returns:
+        A dict with keys:
+
+        - ``number`` (int): Station ID.
+        - ``times`` (list[str]): ISO-formatted forecast timestamps.
+        - ``predicted_bikes`` (list[float]): Predicted available bikes per hour.
+        - ``predicted_docks`` (list[float]): Predicted available docks per hour.
+        - ``predicted_temp`` (list[float]): Predicted temperature (°C).
+        - ``predicted_humidity`` (list[float]): Predicted relative humidity (%).
+        - ``predicted_pressure`` (list[float]): Predicted pressure (hPa).
+        - ``predicted_rain`` (list[int]): Binary rain flag per hour.
+
+    Raises:
+        ValueError: If ``number`` is missing or invalid, station capacity is
+            unavailable, ML models cannot be loaded, or weather data is
+            unavailable.
     """
     from ..bike_forecast.models.forecast import _load_models, _predict_bike_dock_batch
 

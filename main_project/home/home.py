@@ -17,10 +17,11 @@ home_bp = Blueprint(
 
 @home_bp.get("/")
 def home():
-    """
-    GET /
-    Home page — hero section, live weather strip, stats bar,
-    and feature cards. See index.html for all the detail.
+    """Render the home page.
+
+    Returns:
+        Rendered ``index.html`` template containing the hero section,
+        live weather strip, stats bar, and feature cards.
     """
     return render_template("index.html")
 

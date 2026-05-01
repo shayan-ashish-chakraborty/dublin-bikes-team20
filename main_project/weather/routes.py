@@ -53,22 +53,26 @@ weather_bp = Blueprint(
 
 @weather_bp.get("/")
 def weather_page():
-    """
-    GET /weather
-    Weather page — current conditions card, 7-hour hourly strip,
-    40-hour temperature Chart.js graph, ML availability placeholder.
-    All data is fetched client-side (in the page's JS), not here.
-    See weather.html for full details.
+    """Render the weather dashboard page.
+
+    All data (current conditions, hourly strip, temperature chart) is fetched
+    client-side by the page's JavaScript. This route only serves the HTML shell.
+
+    Returns:
+        Rendered ``weather.html`` template.
     """
     return render_template("weather.html")
 
 
 @weather_bp.get("/db/current")
 def get_current_weather():
-    """
-    GET /api/weather/db/current
-    Returns current weather data from the local database.
-    Query parameter: limit (default 1, max 10)
+    """Return the most recent current weather record from the local database.
+
+    Args:
+        limit: Maximum number of records to return. Defaults to ``1``, max ``10``.
+
+    Returns:
+        JSON with key ``weather`` containing a list of current weather dicts.
     """
     try:
         limit = min(int(request.args.get('limit', 1)), 10)
@@ -86,11 +90,16 @@ def get_current_weather():
 
 @weather_bp.get("/db/hourly/nearest")
 def get_nearest_hourly_weather():
-    """
-    GET /api/weather/db/hourly/nearest?dt=YYYY-MM-DD HH:MM:SS
-    Returns the single hourly forecast record whose future_dt is closest to
-    the requested datetime, within a ±3-hour window.
-    Tries the local DB first; falls back to the OpenWeather forecast API.
+    """Return the hourly forecast record closest to a requested datetime.
+
+    Searches within a ±3-hour window. Tries the local DB first, then falls
+    back to the OpenWeather forecast API.
+
+    Args:
+        dt: Target datetime string in ``"YYYY-MM-DD HH:MM:SS"`` format (query param, required).
+
+    Returns:
+        JSON weather row dict, or a 404 error if no match is found.
     """
     dt_str = request.args.get("dt")
     if not dt_str:
@@ -106,10 +115,13 @@ def get_nearest_hourly_weather():
 
 @weather_bp.get("/db/hourly")
 def db_hourly_weather():
-    """
-    GET /api/weather/db/hourly
-    Returns hourly weather forecast from the local database.
-    Query parameter: limit (default 40, max 100)
+    """Return hourly weather forecast rows from the local database.
+
+    Args:
+        limit: Maximum number of rows to return. Defaults to ``40``, max ``100``.
+
+    Returns:
+        JSON with key ``hourly`` containing a list of forecast row dicts.
     """
     try:
         limit = min(int(request.args.get("limit", 40)), 100)
@@ -133,12 +145,14 @@ def _jsonify_openweather_http_error(exc: requests.HTTPError):
 
 @weather_bp.get("/openweather/current")
 def api_current_weather():
-    """
-    GET /api/weather/openweather/current
-    Free current conditions via OpenWeather /data/2.5/weather (API key required).
-    Query params:
-      - lat (default Dublin)
-      - lon (default Dublin)
+    """Fetch current weather conditions via the OpenWeatherMap API.
+
+    Args:
+        lat: Latitude of the target location. Defaults to Dublin (``53.3498``).
+        lon: Longitude of the target location. Defaults to Dublin (``-6.2603``).
+
+    Returns:
+        JSON with keys ``source`` and ``weather`` (current conditions dict).
     """
     try:
         lat = float(request.args.get("lat", 53.3498))
@@ -156,14 +170,17 @@ def api_current_weather():
 @weather_bp.get("/openweather/hourly")
 @weather_bp.get("/openweather/forecast3h")
 def api_forecast_weather():
-    """
-    GET /api/weather/openweather/hourly
-    GET /api/weather/openweather/forecast3h
-    Free /data/2.5/forecast (3-hour steps). Path /hourly is legacy naming.
-    Query params:
-      - lat (default Dublin)
-      - lon (default Dublin)
-      - limit (default 40, max 48)
+    """Fetch a 3-hour interval weather forecast from the OpenWeatherMap API.
+
+    Available at both ``/openweather/hourly`` (legacy) and ``/openweather/forecast3h``.
+
+    Args:
+        lat: Latitude of the target location. Defaults to Dublin (``53.3498``).
+        lon: Longitude of the target location. Defaults to Dublin (``-6.2603``).
+        limit: Maximum number of timesteps to return. Defaults to ``40``, max ``48``.
+
+    Returns:
+        JSON with keys ``source`` and ``hourly`` (list of forecast row dicts).
     """
     try:
         lat = float(request.args.get("lat", 53.3498))

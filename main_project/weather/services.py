@@ -23,10 +23,16 @@ _CACHE_TTL_SECONDS = 300
 _last_api_call_time: float = 0.0
  
 def hourly_forecast_rows_from_db(limit: int = 40) -> list[dict]:
-    """
-    Same data as GET /api/weather/db/hourly: future rows from MySQL `hourly`.
-    Each dict has future_dt (usually naive datetime), temp, humidity, pressure, rain_3h, pop, …
-    Returns [] on error or no rows.
+    """Fetch future hourly weather rows directly from the MySQL ``hourly`` table.
+
+    Args:
+        limit: Maximum number of rows to return. Clamped to ``[1, 100]``.
+            Defaults to ``40``.
+
+    Returns:
+        A list of row dicts with keys: ``future_dt``, ``temp``, ``humidity``,
+        ``pressure``, ``rain_3h``, ``pop``, and others from the ``hourly`` table.
+        Returns an empty list on any database error or if no future rows exist.
     """
     limit = min(max(int(limit), 1), 100)
     try:
@@ -56,10 +62,18 @@ def hourly_forecast_rows_from_db(limit: int = 40) -> list[dict]:
  
  
 def _fetch_nearest_weather(dt_str: str) -> dict | None:
-    """
-    DB-first, OpenWeather API fallback.
-    Returns the nearest hourly weather record within ±3 h of dt_str, or None.
-    dt_str must be "YYYY-MM-DD HH:MM:SS".
+    """Find the nearest hourly weather record to a given datetime.
+
+    Queries the DB ``hourly`` table first (within ±3 hours of ``dt_str``),
+    then falls back to the live OpenWeatherMap forecast API if no DB row is found.
+
+    Args:
+        dt_str: Target datetime string in ``"YYYY-MM-DD HH:MM:SS"`` format
+            (Irish local time).
+
+    Returns:
+        A weather row dict, or ``None`` if no match is found within ±3 hours
+        and the API fallback also fails.
     """
     try:
         request_dt = datetime.strptime(dt_str, "%Y-%m-%d %H:%M:%S")
@@ -133,8 +147,8 @@ def _fetch_nearest_weather(dt_str: str) -> dict | None:
  
 # Weather forecast
 def _openweather_session() -> requests.Session:
-    """
-    Make a requests session that ignores proxy env vars.
+    """Make a requests session that ignores proxy env vars.
+
     This avoids surprising failures on localhost dev setups.
     """
     s = requests.Session()
@@ -143,10 +157,22 @@ def _openweather_session() -> requests.Session:
  
  
 def openweather_current(lat: float, lon: float) -> dict:
-    """
-    Fetch current conditions.
-    Primary: live OpenWeather /data/2.5/weather API.
-    Fallback: nearest hourly row from DB (Irish time).
+    """Fetch current weather conditions for a given location.
+
+    Tries the live OpenWeatherMap ``/data/2.5/weather`` API first. Falls back
+    to the nearest row in the DB ``hourly`` table (Irish time) if the API key
+    is missing or the request fails.
+
+    Args:
+        lat: Latitude of the target location.
+        lon: Longitude of the target location.
+
+    Returns:
+        A dict with keys: ``dt``, ``temp``, ``feels_like``, ``humidity``,
+        ``pressure``, ``wind_speed``, ``wind_gust``, ``rain_1h``, ``weather_desc``.
+
+    Raises:
+        RuntimeError: If both the API and the DB fallback are unavailable.
     """
     cfg = Config()
  
@@ -191,9 +217,23 @@ def openweather_current(lat: float, lon: float) -> dict:
  
  
 def openweather_forecast_3h_list(lat: float, lon: float, limit: int) -> list[dict]:
-    """
-    Free tier: GET /data/2.5/forecast (3-hour timesteps).
-    Returns normalized rows.
+    """Fetch a 3-hour interval weather forecast from the OpenWeatherMap API.
+
+    Uses the free-tier ``/data/2.5/forecast`` endpoint (up to 40 timesteps).
+
+    Args:
+        lat: Latitude of the target location.
+        lon: Longitude of the target location.
+        limit: Maximum number of timesteps to return (capped at 48).
+
+    Returns:
+        A list of row dicts with keys: ``dt``, ``future_dt``, ``temp``,
+        ``feels_like``, ``humidity``, ``pressure``, ``wind_speed``,
+        ``wind_gust``, ``pop``, ``rain_1h``, ``rain_3h``, ``snow_3h``.
+
+    Raises:
+        ValueError: If ``OPENWEATHER_API_KEY`` is not set.
+        requests.HTTPError: If the API returns a non-2xx status code.
     """
     cfg = Config()
     if not cfg.OPENWEATHER_API_KEY:
@@ -241,9 +281,17 @@ _MIN_HOURLY_ROWS = 16
  
  
 def hourly_row_time_ms(row: dict) -> float | None:
-    """
-    Milliseconds since epoch for one forecast row (DB future_dt, OpenWeather unix dt, ISO).
-    Same semantics as weather.html rowTimeMs / parseInstant.
+    """Extract the timestamp from a forecast row as milliseconds since epoch.
+
+    Handles Unix int/float (seconds), naive ``datetime`` objects (assumed Dublin
+    time), and ISO 8601 strings. Checks ``dt`` first, then ``future_dt``.
+
+    Args:
+        row: A forecast row dict.
+
+    Returns:
+        Milliseconds since the Unix epoch as a float, or ``None`` if no
+        parseable timestamp field is found.
     """
     ts = row.get("dt")
     if ts is None:
@@ -317,16 +365,25 @@ def _merge_hourly_prefer_db(db_rows: list[dict], api_rows: list[dict], now_ms: f
  
  
 def hourly_forecast_list_like_weather_page(limit: int = 24) -> list[dict]:
-    """
-    Single entry point: same pipeline as templates/weather.html loadHourly() —
- 
-      1) MySQL `hourly` (DB primary),
-      2) else OpenWeather 3h forecast (live API fallback, subject to cooldown),
-      3) filter to future times,
-      4) if fewer than 16 rows, supplement gaps from API (DB rows win per 3h slot).
- 
-    Returns a list of row dicts (temp, humidity, pressure, rain_3h, pop, dt/future_dt, …).
-    Use this anywhere you need the same series the weather UI uses (e.g. bike forecast).
+    """Return an hourly weather forecast using the same pipeline as the weather UI.
+
+    Pipeline:
+
+    1. Query MySQL ``hourly`` table (primary).
+    2. If empty, fall back to live OpenWeatherMap 3-hour forecast API
+       (subject to a 5-minute cooldown).
+    3. Filter to future-only rows.
+    4. If fewer than 16 rows remain, supplement with API rows;
+       DB rows take precedence within each 3-hour slot.
+
+    Args:
+        limit: Maximum number of rows to return. Clamped to ``[1, 100]``.
+            Defaults to ``24``.
+
+    Returns:
+        A list of row dicts with keys: ``temp``, ``humidity``, ``pressure``,
+        ``rain_3h``, ``pop``, and a timestamp (``dt`` or ``future_dt``).
+        Returns an empty list if both the DB and API are unavailable.
     """
     global _last_api_call_time
  

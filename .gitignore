@@ -42,3 +42,4 @@ main_project/bike_forecast/models/*.pkl
 
 # ec2 instructions
 ec2_connect.txt
+/docs
