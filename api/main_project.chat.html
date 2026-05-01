@@ -112,7 +112,7 @@ is unreachable or returns no data.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="main_project.chat.chat_grok.call_groq_with_retry">
 <span class="sig-prename descclassname"><span class="pre">main_project.chat.chat_grok.</span></span><span class="sig-name descname"><span class="pre">call_groq_with_retry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">messages</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">api_key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_retries</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Response</span></span></span><a class="reference internal" href="../_modules/main_project/chat/chat_grok.html#call_groq_with_retry"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main_project.chat.chat_grok.call_groq_with_retry" title="Link to this definition"></a></dt>
-<dd><p>Send a chat completion request to the Groq API with retry logic.</p>
+<dd><p>Send a chat completion request to the Grok API with retry logic.</p>
 <p>Retries on connection timeouts, 429 rate-limit responses (honouring
 <code class="docutils literal notranslate"><span class="pre">Retry-After</span></code> headers), and 503 service-unavailable responses using
 exponential back-off.</p>
@@ -120,7 +120,7 @@ exponential back-off.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>messages</strong> – List of OpenAI-format message dicts (<code class="docutils literal notranslate"><span class="pre">role</span></code> + <code class="docutils literal notranslate"><span class="pre">content</span></code>).</p></li>
-<li><p><strong>api_key</strong> – Groq API key for the <code class="docutils literal notranslate"><span class="pre">Authorization</span></code> header.</p></li>
+<li><p><strong>api_key</strong> – Grok API key for the <code class="docutils literal notranslate"><span class="pre">Authorization</span></code> header.</p></li>
 <li><p><strong>max_retries</strong> – Maximum number of attempts before giving up. Defaults to <code class="docutils literal notranslate"><span class="pre">3</span></code>.</p></li>
 </ul>
 </dd>
@@ -137,14 +137,14 @@ is responsible for checking <code class="docutils literal notranslate"><span cla
 <dl class="py function">
 <dt class="sig sig-object py" id="main_project.chat.chat_grok.chat">
 <span class="sig-prename descclassname"><span class="pre">main_project.chat.chat_grok.</span></span><span class="sig-name descname"><span class="pre">chat</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="headerlink" href="#main_project.chat.chat_grok.chat" title="Link to this definition"></a></dt>
-<dd><p><code class="docutils literal notranslate"><span class="pre">POST</span> <span class="pre">/api/chat</span></code> — Handle a chat completion request using the Groq LLM API.</p>
+<dd><p><code class="docutils literal notranslate"><span class="pre">POST</span> <span class="pre">/api/chat</span></code> — Handle a chat completion request using the Grok LLM API.</p>
 <p>Injects live Dublin Bikes station data into the system prompt, then
-forwards the conversation history to Groq and returns the assistant reply.</p>
+forwards the conversation history to Grok and returns the assistant reply.</p>
 <dl class="simple">
 <dt>Uses:</dt><dd><ul class="simple">
 <li><p><a class="reference internal" href="#main_project.chat.chat_grok.fetch_station_context" title="main_project.chat.chat_grok.fetch_station_context"><code class="xref py py-func docutils literal notranslate"><span class="pre">fetch_station_context()</span></code></a> — fetches live station data from <code class="docutils literal notranslate"><span class="pre">GET</span> <span class="pre">/api/stations</span></code>
 and formats it as a plain-text block for the system prompt.</p></li>
-<li><p><a class="reference internal" href="#main_project.chat.chat_grok.call_groq_with_retry" title="main_project.chat.chat_grok.call_groq_with_retry"><code class="xref py py-func docutils literal notranslate"><span class="pre">call_groq_with_retry()</span></code></a> — sends the message list to the Groq API with
+<li><p><a class="reference internal" href="#main_project.chat.chat_grok.call_groq_with_retry" title="main_project.chat.chat_grok.call_groq_with_retry"><code class="xref py py-func docutils literal notranslate"><span class="pre">call_groq_with_retry()</span></code></a> — sends the message list to the Grok API with
 automatic retry on rate-limit and service errors.</p></li>
 </ul>
 </dd>
