@@ -66,7 +66,7 @@ def fetch_station_context(base_url: str) -> str:
 
 
 def call_groq_with_retry(messages: list, api_key: str, max_retries: int = 3) -> requests.Response:
-    """Send a chat completion request to the Groq API with retry logic.
+    """Send a chat completion request to the Grok API with retry logic.
 
     Retries on connection timeouts, 429 rate-limit responses (honouring
     ``Retry-After`` headers), and 503 service-unavailable responses using
@@ -74,7 +74,7 @@ def call_groq_with_retry(messages: list, api_key: str, max_retries: int = 3) -> 
 
     Args:
         messages: List of OpenAI-format message dicts (``role`` + ``content``).
-        api_key: Groq API key for the ``Authorization`` header.
+        api_key: Grok API key for the ``Authorization`` header.
         max_retries: Maximum number of attempts before giving up. Defaults to ``3``.
 
     Returns:
@@ -130,15 +130,15 @@ def call_groq_with_retry(messages: list, api_key: str, max_retries: int = 3) -> 
 
 @chat_bp.post("")
 def chat() -> tuple:
-    """``POST /api/chat`` — Handle a chat completion request using the Groq LLM API.
+    """``POST /api/chat`` — Handle a chat completion request using the Grok LLM API.
 
     Injects live Dublin Bikes station data into the system prompt, then
-    forwards the conversation history to Groq and returns the assistant reply.
+    forwards the conversation history to Grok and returns the assistant reply.
 
     Uses:
         - :func:`fetch_station_context` — fetches live station data from ``GET /api/stations``
           and formats it as a plain-text block for the system prompt.
-        - :func:`call_groq_with_retry` — sends the message list to the Groq API with
+        - :func:`call_groq_with_retry` — sends the message list to the Grok API with
           automatic retry on rate-limit and service errors.
 
     Example request::
