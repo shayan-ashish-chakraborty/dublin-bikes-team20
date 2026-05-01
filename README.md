@@ -8,10 +8,10 @@ A full-stack web application for real-time Dublin Bikes station data, journey pl
  
 | Resource | Link |
 |---|---|
-| 🌐 Live Application | [https://18.201.183.91/](https://18.201.183.91/) |
-| 🎨 Figma Mockup | [Initial Project Mockup](https://www.figma.com/design/hTWVkDQys1NVg8Z7n2yyXK/Software-Engineering?node-id=0-1&p=f&t=4nAaHxQFGe30qwF2-0) |
-| 📁 Project Documents | [User Personas, Interviews, PRD & Backlog](https://drive.google.com/drive/folders/1maMOySvNugMCGIAmODOntPJsiAVLn2Hl?usp=sharing) |
-| 📚 Sphinx Documentation | [https://shayan-ashish-chakraborty.github.io/dublin-bikes-team20/](https://shayan-ashish-chakraborty.github.io/dublin-bikes-team20/) |
+|  Live Application | [https://18.201.183.91/](https://18.201.183.91/) |
+|  Figma Mockup | [Initial Project Mockup](https://www.figma.com/design/hTWVkDQys1NVg8Z7n2yyXK/Software-Engineering?node-id=0-1&p=f&t=4nAaHxQFGe30qwF2-0) |
+|  Project Documents | [User Personas, Interviews, PRD & Backlog](https://drive.google.com/drive/folders/1maMOySvNugMCGIAmODOntPJsiAVLn2Hl?usp=sharing) |
+|  Sphinx Documentation | [https://shayan-ashish-chakraborty.github.io/dublin-bikes-team20/](https://shayan-ashish-chakraborty.github.io/dublin-bikes-team20/) |
  
 ---
  
