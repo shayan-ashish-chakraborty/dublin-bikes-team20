@@ -163,6 +163,10 @@ def openweather_current(lat: float, lon: float) -> dict:
     to the nearest row in the DB ``hourly`` table (Irish time) if the API key
     is missing or the request fails.
 
+    Uses:
+        - :func:`~main_project.weather.services._fetch_nearest_weather` — DB fallback when
+          the live API key is absent or the request fails.
+
     Args:
         lat: Latitude of the target location.
         lon: Longitude of the target location.
@@ -375,6 +379,12 @@ def hourly_forecast_list_like_weather_page(limit: int = 24) -> list[dict]:
     3. Filter to future-only rows.
     4. If fewer than 16 rows remain, supplement with API rows;
        DB rows take precedence within each 3-hour slot.
+
+    Uses:
+        - :func:`~main_project.weather.services.hourly_forecast_rows_from_db` — primary source;
+          queries the ``hourly`` MySQL table.
+        - :func:`~main_project.weather.services.openweather_forecast_3h_list` — fallback and
+          supplement source; calls the OpenWeatherMap 5-day/3-hour forecast API.
 
     Args:
         limit: Maximum number of rows to return. Clamped to ``[1, 100]``.

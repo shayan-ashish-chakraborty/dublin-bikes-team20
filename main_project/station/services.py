@@ -21,9 +21,17 @@ def _forecast_row_unix_ts(row: Dict[str, Any]) -> Optional[float]:
 
 
 def _forecast_series_start_on_the_hour(now: datetime) -> datetime:
-    """
-    First timestep on a clock hour. If local time is already past :00
-    (e.g. 16:14), start at the next hour (17:00), not the current hour floor (16:00).
+    """Return the first forecast timestep aligned to the next full clock hour.
+
+    If the current time is already exactly on the hour it is returned as-is;
+    otherwise the next hour boundary is returned (e.g. 16:14 → 17:00).
+
+    Args:
+        now: The current local datetime.
+
+    Returns:
+        A ``datetime`` with ``minute``, ``second``, and ``microsecond`` set to
+        zero, advanced by one hour if ``now`` is past the floor of the current hour.
     """
     base = now.replace(minute=0, second=0, microsecond=0)
     if now > base:
@@ -122,9 +130,22 @@ def _pick_nearest_forecast_row(
 def _weather_forecast_list_from_openweather(
     hours: int, now: datetime
 ) -> Optional[List[Dict[str, Any]]]:
-    """
-    Uses hourly_forecast_list_like_weather_page() — same list as the weather UI loadHourly().
-    Timesteps are clock hours: from next :00 if past the hour, then +1h each.
+    """Build a per-hour weather series for the station forecast pipeline.
+
+    Uses the same hourly rows as the weather UI (via
+    :func:`~main_project.weather.services.hourly_forecast_list_like_weather_page`).
+    Timesteps are clock-hour aligned: starting from the next full hour if ``now``
+    is already past ``HH:00``, then ``+1 h`` per step.
+
+    Args:
+        hours: Number of forecast steps to build (one per hour).
+        now: The current local datetime used to anchor the series start.
+
+    Returns:
+        A list of ``hours`` weather dicts, each with keys ``avg_temp``,
+        ``avg_humidity``, ``avg_pressure``, ``is_raining``, and ``time``
+        (``"YYYY-MM-DD HH:MM"``). Returns ``None`` if the weather source
+        (DB and OpenWeather API) is unavailable or returns no rows.
     """
     limit = min(100, max(24, hours))
     rows = hourly_forecast_list_like_weather_page(limit=limit)
@@ -215,6 +236,14 @@ def station_predict_from_request(request: Request) -> dict:
     Reads query parameters from the Flask request, fetches live station data,
     builds an hourly weather series, and runs the two-stage ML pipeline in
     batch mode.
+
+    Uses:
+        - :func:`~main_project.station.services.get_station` — fetches live station data and capacity from JCDecaux.
+        - :func:`~main_project.station.services.format_station` — normalises the raw station dict.
+        - :func:`~main_project.station.services._forecast_series_start_on_the_hour` — computes the first forecast timestep aligned to the next full clock hour.
+        - :func:`~main_project.station.services._weather_forecast_list_from_openweather` — builds the per-hour weather series (DB → OpenWeather fallback) used as ``wx_override`` for each forecast step.
+        - :func:`~main_project.bike_forecast.models.forecast._load_models` — loads the trained ML model tuple from disk.
+        - :func:`~main_project.bike_forecast.models.forecast._predict_bike_dock_batch` — runs the bike/dock models across all forecast hours in one batch call.
 
     Args:
         request: The Flask ``Request`` object. Expected query parameters:

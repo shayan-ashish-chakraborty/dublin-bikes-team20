@@ -130,10 +130,31 @@ def call_groq_with_retry(messages: list, api_key: str, max_retries: int = 3) -> 
 
 @chat_bp.post("")
 def chat() -> tuple:
-    """Handle a chat completion request using the Groq LLM API.
+    """``POST /api/chat`` — Handle a chat completion request using the Groq LLM API.
 
     Injects live Dublin Bikes station data into the system prompt, then
     forwards the conversation history to Groq and returns the assistant reply.
+
+    Uses:
+        - :func:`fetch_station_context` — fetches live station data from ``GET /api/stations``
+          and formats it as a plain-text block for the system prompt.
+        - :func:`call_groq_with_retry` — sends the message list to the Groq API with
+          automatic retry on rate-limit and service errors.
+
+    Example request::
+
+        POST /api/chat
+        Content-Type: application/json
+
+        {
+            "messages": [
+                {"role": "user", "content": "Which station has the most bikes right now?"}
+            ]
+        }
+
+    Args:
+        messages: List of OpenAI-format message dicts (JSON body, required).
+            Each dict must have ``role`` (``"user"`` or ``"assistant"``) and ``content``.
 
     Returns:
         A Flask JSON response tuple. On success: ``{"reply": str}``, 200.

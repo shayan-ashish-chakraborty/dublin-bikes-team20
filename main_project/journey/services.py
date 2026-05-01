@@ -62,6 +62,10 @@ def haversine(lat1, lng1, lat2, lng2) -> float:
 def find_nearest_station(lat, lng, stations, require_bikes=False, require_stands=False, limit=3) -> list:
     """Find the nearest bike stations to a point, with optional availability filters.
 
+    Uses:
+        - :func:`~main_project.journey.services.haversine` — computes the great-circle distance
+          between the reference point and each candidate station.
+
     Args:
         lat: Latitude of the reference point.
         lng: Longitude of the reference point.

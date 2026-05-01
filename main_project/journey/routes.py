@@ -80,6 +80,16 @@ def route():
         - :func:`~main_project.journey.services.find_nearest_station` — finds closest stations with availability filters.
         - :func:`~main_project.journey.services.get_directions` — fetches walking and cycling legs.
 
+    Example request::
+
+        POST /journey/api/route
+        Content-Type: application/json
+
+        {
+            "start": "O'Connell Street",
+            "end": "Grand Canal Dock"
+        }
+
     Args:
         start: Origin address string (JSON body, required).
         end: Destination address string (JSON body, required).
@@ -157,6 +167,10 @@ def predict_availability():
         - :func:`~main_project.station.services.format_station` — normalises the station dict.
         - :func:`~main_project.journey.services.predict_stations_availability` — runs the two-stage ML pipeline (weather + bike model).
 
+    Example request::
+
+        GET /journey/api/predict/availability?stand_no=42&time=2026-04-09+12:00:00
+
     Args:
         stand_no: JCDecaux station number (query param, required).
         time: Target datetime as ``"YYYY-MM-DD HH:MM:SS"`` (query param, required).
@@ -225,6 +239,17 @@ def route_predict():
         - :func:`~main_project.journey.services.find_nearest_station` — finds nearest candidate stations.
         - :func:`~main_project.journey.services.predict_stations_availability` — runs batch ML prediction (weather fetched once).
         - :func:`~main_project.journey.services.get_directions` — fetches walking and cycling route legs.
+
+    Example request::
+
+        POST /journey/api/route/predict
+        Content-Type: application/json
+
+        {
+            "start": "O'Connell Street",
+            "end": "Grand Canal Dock",
+            "time": "2026-04-09 15:00:00"
+        }
 
     Args:
         start: Origin address string (JSON body, required).

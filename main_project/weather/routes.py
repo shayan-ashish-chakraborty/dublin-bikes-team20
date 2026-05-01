@@ -53,7 +53,7 @@ weather_bp = Blueprint(
 
 @weather_bp.get("/")
 def weather_page():
-    """Render the weather dashboard page.
+    """``GET /api/weather/`` — Render the weather dashboard page.
 
     All data (current conditions, hourly strip, temperature chart) is fetched
     client-side by the page's JavaScript. This route only serves the HTML shell.
@@ -66,7 +66,11 @@ def weather_page():
 
 @weather_bp.get("/db/current")
 def get_current_weather():
-    """Return the most recent current weather record from the local database.
+    """``GET /api/weather/db/current`` — Return the most recent current weather record from the local database.
+
+    Example request::
+
+        GET /api/weather/db/current?limit=1
 
     Args:
         limit: Maximum number of records to return. Defaults to ``1``, max ``10``.
@@ -90,10 +94,18 @@ def get_current_weather():
 
 @weather_bp.get("/db/hourly/nearest")
 def get_nearest_hourly_weather():
-    """Return the hourly forecast record closest to a requested datetime.
+    """``GET /api/weather/db/hourly/nearest`` — Return the hourly forecast record closest to a requested datetime.
 
     Searches within a ±3-hour window. Tries the local DB first, then falls
     back to the OpenWeather forecast API.
+
+    Uses:
+        - :func:`~main_project.weather.services._fetch_nearest_weather` — queries the DB and
+          falls back to the OpenWeather API if needed.
+
+    Example request::
+
+        GET /api/weather/db/hourly/nearest?dt=2026-04-09+12:00:00
 
     Args:
         dt: Target datetime string in ``"YYYY-MM-DD HH:MM:SS"`` format (query param, required).
@@ -115,7 +127,15 @@ def get_nearest_hourly_weather():
 
 @weather_bp.get("/db/hourly")
 def db_hourly_weather():
-    """Return hourly weather forecast rows from the local database.
+    """``GET /api/weather/db/hourly`` — Return hourly weather forecast rows from the local database.
+
+    Uses:
+        - :func:`~main_project.weather.services.hourly_forecast_rows_from_db` — queries the DB
+          for hourly forecast rows.
+
+    Example request::
+
+        GET /api/weather/db/hourly?limit=40
 
     Args:
         limit: Maximum number of rows to return. Defaults to ``40``, max ``100``.
@@ -145,7 +165,15 @@ def _jsonify_openweather_http_error(exc: requests.HTTPError):
 
 @weather_bp.get("/openweather/current")
 def api_current_weather():
-    """Fetch current weather conditions via the OpenWeatherMap API.
+    """``GET /api/weather/openweather/current`` — Fetch current weather conditions via the OpenWeatherMap API.
+
+    Uses:
+        - :func:`~main_project.weather.services.openweather_current` — calls the OpenWeatherMap
+          current weather endpoint and returns a normalised dict.
+
+    Example request::
+
+        GET /api/weather/openweather/current?lat=53.3498&lon=-6.2603
 
     Args:
         lat: Latitude of the target location. Defaults to Dublin (``53.3498``).
@@ -170,9 +198,18 @@ def api_current_weather():
 @weather_bp.get("/openweather/hourly")
 @weather_bp.get("/openweather/forecast3h")
 def api_forecast_weather():
-    """Fetch a 3-hour interval weather forecast from the OpenWeatherMap API.
+    """``GET /api/weather/openweather/hourly`` | ``GET /api/weather/openweather/forecast3h`` — Fetch a 3-hour interval weather forecast from the OpenWeatherMap API.
 
-    Available at both ``/openweather/hourly`` (legacy) and ``/openweather/forecast3h``.
+    Available at both ``/api/weather/openweather/hourly`` (legacy alias) and
+    ``/api/weather/openweather/forecast3h``.
+
+    Uses:
+        - :func:`~main_project.weather.services.openweather_forecast_3h_list` — calls the
+          OpenWeatherMap 5-day/3-hour forecast endpoint and returns a normalised list.
+
+    Example request::
+
+        GET /api/weather/openweather/forecast3h?lat=53.3498&lon=-6.2603&limit=40
 
     Args:
         lat: Latitude of the target location. Defaults to Dublin (``53.3498``).

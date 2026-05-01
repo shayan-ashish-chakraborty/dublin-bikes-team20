@@ -26,19 +26,29 @@ forecast_bp = Blueprint(
 
 @forecast_bp.get("/station")
 def station_forecast():
-    """Return multi-hour bike and dock predictions for a station.
+    """``GET /forecast/station`` — Return multi-hour bike and dock predictions for a station.
 
     Runs the two-stage ML pipeline (weather model → bike model) for each
     requested future hour.
 
-    Args (query parameters):
-        number: Station ID (required).
-        capacity: Total docks at the station (required).
-        hours: Future hours to forecast, max 48. Defaults to 8.
-        avg_temp: Override weather model temperature in °C (optional).
-        avg_humidity: Override weather model humidity in % (optional).
-        avg_pressure: Override weather model pressure in hPa (optional).
-        is_raining: Override rain flag, ``0`` or ``1`` (optional).
+    Uses:
+        - :func:`~main_project.bike_forecast.models.forecast._load_models` — loads the
+          trained ML model tuple from disk.
+        - :func:`~main_project.bike_forecast.models.forecast._predict_hour` — runs the
+          two-stage pipeline for a single target hour.
+
+    Example request::
+
+        GET /forecast/station?number=42&capacity=40&hours=8
+
+    Args:
+        number: Station ID (query param, required).
+        capacity: Total docks at the station (query param, required).
+        hours: Future hours to forecast, max 48. Defaults to 8 (query param).
+        avg_temp: Override weather model temperature in °C (query param, optional).
+        avg_humidity: Override weather model humidity in % (query param, optional).
+        avg_pressure: Override weather model pressure in hPa (query param, optional).
+        is_raining: Override rain flag, ``0`` or ``1`` (query param, optional).
 
     Returns:
         JSON with keys ``number``, ``times``, ``predicted_bikes``,
@@ -100,18 +110,28 @@ def station_forecast():
 # for hourly prediction purpose
 @forecast_bp.get("/station/hourly")
 def hourly_station_forecast():
-    """Predict bike and dock availability for a single future hour.
+    """``GET /forecast/station/hourly`` — Predict bike and dock availability for a single future hour.
 
     Weather parameters are optional — if omitted, the weather model predicts them.
 
-    Args (query parameters):
-        number: Station ID (required).
-        capacity: Total docks at the station (required).
-        time: Target datetime string, e.g. ``"2026-04-09 12:31:11"`` (required).
-        avg_temp: Temperature in °C (optional).
-        avg_humidity: Humidity in % (optional).
-        avg_pressure: Pressure in hPa (optional).
-        is_raining: Rain flag, ``0`` or ``1`` (optional).
+    Uses:
+        - :func:`~main_project.bike_forecast.models.forecast._load_models` — loads the
+          trained ML model tuple from disk.
+        - :func:`~main_project.bike_forecast.models.forecast._predict_hour` — runs the
+          two-stage pipeline for the requested target hour.
+
+    Example request::
+
+        GET /forecast/station/hourly?number=42&capacity=40&time=2026-04-09+12:00:00
+
+    Args:
+        number: Station ID (query param, required).
+        capacity: Total docks at the station (query param, required).
+        time: Target datetime string, e.g. ``"2026-04-09 12:31:11"`` (query param, required).
+        avg_temp: Temperature in °C (query param, optional).
+        avg_humidity: Humidity in % (query param, optional).
+        avg_pressure: Pressure in hPa (query param, optional).
+        is_raining: Rain flag, ``0`` or ``1`` (query param, optional).
 
     Returns:
         JSON with keys ``time``, ``predicted_bikes``, ``predicted_docks``.
