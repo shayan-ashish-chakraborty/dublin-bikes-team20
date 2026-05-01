@@ -1,0 +1,439 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>main_project.bike_forecast.models.forecast &mdash; Dublin Bikes 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=f2a433a1"></script>
+      <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            Dublin Bikes
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/modules.html">main_project</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">Dublin Bikes</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">main_project.bike_forecast.models.forecast</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for main_project.bike_forecast.models.forecast</h1><div class="highlight"><pre>
+<span></span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">flask</span><span class="w"> </span><span class="kn">import</span> <span class="n">jsonify</span><span class="p">,</span> <span class="n">request</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pathlib</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
+
+
+<span class="n">_FORECAST_DIR</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span><span class="o">.</span><span class="n">parent</span>
+<span class="n">_BASE</span>         <span class="o">=</span> <span class="n">_FORECAST_DIR</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span>   
+<span class="n">_STATIC</span>       <span class="o">=</span> <span class="n">_BASE</span> <span class="o">/</span> <span class="s2">&quot;main_project&quot;</span> <span class="o">/</span> <span class="s2">&quot;static&quot;</span>
+<span class="n">_TEMPLATES</span>    <span class="o">=</span> <span class="n">_BASE</span> <span class="o">/</span> <span class="s2">&quot;main_project&quot;</span> <span class="o">/</span> <span class="s2">&quot;templates&quot;</span>
+
+<span class="c1"># Bike models</span>
+<span class="n">_BIKE_MODEL_PATH</span>  <span class="o">=</span> <span class="n">_FORECAST_DIR</span> <span class="o">/</span> <span class="s2">&quot;bike_model.pkl&quot;</span>
+<span class="n">_DOCK_MODEL_PATH</span>  <span class="o">=</span> <span class="n">_FORECAST_DIR</span> <span class="o">/</span> <span class="s2">&quot;docks_model.pkl&quot;</span>
+
+<span class="c1"># Weather models</span>
+<span class="n">_TEMP_MODEL_PATH</span>  <span class="o">=</span> <span class="n">_FORECAST_DIR</span> <span class="o">/</span> <span class="s2">&quot;weather_temp.pkl&quot;</span>
+<span class="n">_HUM_MODEL_PATH</span>   <span class="o">=</span> <span class="n">_FORECAST_DIR</span> <span class="o">/</span> <span class="s2">&quot;weather_humidity.pkl&quot;</span>
+<span class="n">_PRES_MODEL_PATH</span>  <span class="o">=</span> <span class="n">_FORECAST_DIR</span> <span class="o">/</span> <span class="s2">&quot;weather_pressure.pkl&quot;</span>
+<span class="n">_RAIN_MODEL_PATH</span>  <span class="o">=</span> <span class="n">_FORECAST_DIR</span> <span class="o">/</span> <span class="s2">&quot;weather_rain.pkl&quot;</span>
+
+<span class="n">_META_PATH</span>        <span class="o">=</span> <span class="n">_FORECAST_DIR</span> <span class="o">/</span> <span class="s2">&quot;model_meta.json&quot;</span>
+
+<span class="c1"># Lazy-loaded singletons (loaded once on first request, reused afterward)</span>
+<span class="n">_bike_model</span>    <span class="o">=</span> <span class="kc">None</span>
+<span class="n">_dock_model</span>    <span class="o">=</span> <span class="kc">None</span>
+<span class="n">_temp_model</span>    <span class="o">=</span> <span class="kc">None</span>
+<span class="n">_hum_model</span>     <span class="o">=</span> <span class="kc">None</span>
+<span class="n">_pres_model</span>    <span class="o">=</span> <span class="kc">None</span>
+<span class="n">_rain_model</span>    <span class="o">=</span> <span class="kc">None</span>
+<span class="n">_bike_features</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="n">_wx_features</span>   <span class="o">=</span> <span class="kc">None</span>
+<span class="n">_hum_std_mean</span>  <span class="o">=</span> <span class="kc">None</span>   <span class="c1"># dataset mean fallback for humidity_std feature</span>
+
+
+<div class="viewcode-block" id="_load_models">
+<a class="viewcode-back" href="../../../../api/main_project.bike_forecast.html#main_project.bike_forecast.models.forecast._load_models">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">_load_models</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Load all ML models and feature metadata, caching them in module globals.</span>
+
+<span class="sd">    On first call, reads 6 pickle files (bike, dock, temp, humidity, pressure,</span>
+<span class="sd">    rain models) and ``model_meta.json`` from the same directory. Subsequent</span>
+<span class="sd">    calls return the cached tuple immediately.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A tuple of ``(bike_model, dock_model, temp_model, hum_model, pres_model,</span>
+<span class="sd">        rain_model, bike_features, wx_features, hum_std_mean)``.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">global</span> <span class="n">_bike_model</span><span class="p">,</span> <span class="n">_dock_model</span><span class="p">,</span> <span class="n">_temp_model</span><span class="p">,</span> <span class="n">_hum_model</span><span class="p">,</span> <span class="n">_pres_model</span><span class="p">,</span> <span class="n">_rain_model</span><span class="p">,</span> <span class="n">_bike_features</span><span class="p">,</span> <span class="n">_wx_features</span><span class="p">,</span> <span class="n">_hum_std_mean</span>
+    <span class="k">if</span> <span class="n">_bike_model</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">pickle</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">_BIKE_MODEL_PATH</span><span class="p">,</span>  <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span> <span class="n">_bike_model</span>  <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">fh</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">_DOCK_MODEL_PATH</span><span class="p">,</span>  <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span> <span class="n">_dock_model</span>  <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">fh</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">_TEMP_MODEL_PATH</span><span class="p">,</span>  <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span> <span class="n">_temp_model</span>  <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">fh</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">_HUM_MODEL_PATH</span><span class="p">,</span>   <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span> <span class="n">_hum_model</span>   <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">fh</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">_PRES_MODEL_PATH</span><span class="p">,</span>  <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span> <span class="n">_pres_model</span>  <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">fh</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">_RAIN_MODEL_PATH</span><span class="p">,</span>  <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span> <span class="n">_rain_model</span>  <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">fh</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">_META_PATH</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
+            <span class="n">meta</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">fh</span><span class="p">)</span>
+
+        <span class="n">_bike_features</span> <span class="o">=</span> <span class="n">meta</span><span class="p">[</span><span class="s2">&quot;bike_features&quot;</span><span class="p">]</span>
+        <span class="n">_wx_features</span>   <span class="o">=</span> <span class="n">meta</span><span class="p">[</span><span class="s2">&quot;weather_features&quot;</span><span class="p">]</span>
+        <span class="n">_hum_std_mean</span>  <span class="o">=</span> <span class="n">meta</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;humidity_std_mean&quot;</span><span class="p">,</span> <span class="mf">3.49</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">_bike_model</span><span class="p">,</span> <span class="n">_dock_model</span><span class="p">,</span>
+            <span class="n">_temp_model</span><span class="p">,</span> <span class="n">_hum_model</span><span class="p">,</span> <span class="n">_pres_model</span><span class="p">,</span> <span class="n">_rain_model</span><span class="p">,</span>
+            <span class="n">_bike_features</span><span class="p">,</span> <span class="n">_wx_features</span><span class="p">,</span> <span class="n">_hum_std_mean</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="_predict_hour">
+<a class="viewcode-back" href="../../../../api/main_project.bike_forecast.html#main_project.bike_forecast.models.forecast._predict_hour">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">_predict_hour</span><span class="p">(</span><span class="n">models</span><span class="p">,</span> <span class="n">station_id</span><span class="p">,</span> <span class="n">capacity</span><span class="p">,</span> <span class="n">future_dt</span><span class="p">,</span>
+                  <span class="n">wx_override</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Run the two-stage ML pipeline for a single future hour.</span>
+
+<span class="sd">    Stage 1 predicts weather (temp, humidity, pressure, rain) from the hour</span>
+<span class="sd">    and month unless ``wx_override`` is supplied. Stage 2 uses the weather</span>
+<span class="sd">    values to predict bike and dock availability.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        models: Tuple returned by ``_load_models()``.</span>
+<span class="sd">        station_id: JCDecaux station ID.</span>
+<span class="sd">        capacity: Total dock capacity of the station.</span>
+<span class="sd">        future_dt: The target datetime to predict for.</span>
+<span class="sd">        wx_override: Optional dict with keys ``avg_temp``, ``avg_humidity``,</span>
+<span class="sd">            ``avg_pressure``, and ``is_raining`` to bypass the weather models.</span>
+<span class="sd">            Defaults to ``None``.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A dict with keys: ``time`` (``&quot;YYYY-MM-DD HH:MM&quot;``),</span>
+<span class="sd">        ``predicted_bikes``, ``predicted_docks``, ``predicted_temp``,</span>
+<span class="sd">        ``predicted_humidity``, ``predicted_pressure``, ``predicted_rain``.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+
+    <span class="p">(</span><span class="n">bike_m</span><span class="p">,</span> <span class="n">dock_m</span><span class="p">,</span> <span class="n">temp_m</span><span class="p">,</span> <span class="n">hum_m</span><span class="p">,</span> <span class="n">pres_m</span><span class="p">,</span> <span class="n">rain_m</span><span class="p">,</span>
+     <span class="n">bike_feat</span><span class="p">,</span> <span class="n">wx_feat</span><span class="p">,</span> <span class="n">hum_std</span><span class="p">)</span> <span class="o">=</span> <span class="n">models</span>
+
+    <span class="n">h</span> <span class="o">=</span> <span class="n">future_dt</span><span class="o">.</span><span class="n">hour</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="n">future_dt</span><span class="o">.</span><span class="n">month</span>
+
+    <span class="c1">#  weather </span>
+    <span class="k">if</span> <span class="n">wx_override</span><span class="p">:</span>
+        <span class="n">avg_temp</span>     <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">wx_override</span><span class="p">[</span><span class="s2">&quot;avg_temp&quot;</span><span class="p">]),</span>     <span class="mi">1</span><span class="p">)</span>
+        <span class="n">avg_humidity</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">wx_override</span><span class="p">[</span><span class="s2">&quot;avg_humidity&quot;</span><span class="p">]),</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">avg_pressure</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">wx_override</span><span class="p">[</span><span class="s2">&quot;avg_pressure&quot;</span><span class="p">]),</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">is_raining</span>   <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">wx_override</span><span class="p">[</span><span class="s2">&quot;is_raining&quot;</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">wx_row</span>       <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">([{</span><span class="s2">&quot;hour&quot;</span><span class="p">:</span> <span class="n">h</span><span class="p">,</span> <span class="s2">&quot;month&quot;</span><span class="p">:</span> <span class="n">m</span><span class="p">}])[</span><span class="n">wx_feat</span><span class="p">]</span>
+        <span class="n">avg_temp</span>     <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">temp_m</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">wx_row</span><span class="p">)[</span><span class="mi">0</span><span class="p">]),</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">avg_humidity</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">hum_m</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">wx_row</span><span class="p">)[</span><span class="mi">0</span><span class="p">]),</span>  <span class="mi">1</span><span class="p">)</span>
+        <span class="n">avg_pressure</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">pres_m</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">wx_row</span><span class="p">)[</span><span class="mi">0</span><span class="p">]),</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">is_raining</span>   <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">rain_m</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">wx_row</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="c1"># bikes + docks</span>
+    <span class="n">bk_row</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">([{</span>
+        <span class="s2">&quot;station_id&quot;</span>  <span class="p">:</span> <span class="n">station_id</span><span class="p">,</span>
+        <span class="s2">&quot;capacity&quot;</span>    <span class="p">:</span> <span class="n">capacity</span><span class="p">,</span>
+        <span class="s2">&quot;hour&quot;</span>        <span class="p">:</span> <span class="n">h</span><span class="p">,</span>
+        <span class="s2">&quot;avg_temp&quot;</span>    <span class="p">:</span> <span class="n">avg_temp</span><span class="p">,</span>
+        <span class="s2">&quot;avg_humidity&quot;</span><span class="p">:</span> <span class="n">avg_humidity</span><span class="p">,</span>
+        <span class="s2">&quot;avg_pressure&quot;</span><span class="p">:</span> <span class="n">avg_pressure</span><span class="p">,</span>
+        <span class="s2">&quot;is_raining&quot;</span>  <span class="p">:</span> <span class="n">is_raining</span><span class="p">,</span>
+        <span class="s2">&quot;humidity_std&quot;</span><span class="p">:</span> <span class="n">hum_std</span><span class="p">,</span>
+    <span class="p">}])[</span><span class="n">bike_feat</span><span class="p">]</span>
+
+    <span class="n">bikes</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">capacity</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">bike_m</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">bk_row</span><span class="p">)[</span><span class="mi">0</span><span class="p">]))),</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">docks</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">capacity</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">dock_m</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">bk_row</span><span class="p">)[</span><span class="mi">0</span><span class="p">]))),</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">&quot;time&quot;</span>            <span class="p">:</span> <span class="n">future_dt</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;predicted_bikes&quot;</span> <span class="p">:</span> <span class="n">bikes</span><span class="p">,</span>
+        <span class="s2">&quot;predicted_docks&quot;</span> <span class="p">:</span> <span class="n">docks</span><span class="p">,</span>
+        <span class="s2">&quot;predicted_temp&quot;</span>  <span class="p">:</span> <span class="n">avg_temp</span><span class="p">,</span>
+        <span class="s2">&quot;predicted_humidity&quot;</span><span class="p">:</span> <span class="n">avg_humidity</span><span class="p">,</span>
+        <span class="s2">&quot;predicted_pressure&quot;</span><span class="p">:</span> <span class="n">avg_pressure</span><span class="p">,</span>
+        <span class="s2">&quot;predicted_rain&quot;</span>  <span class="p">:</span> <span class="n">is_raining</span><span class="p">,</span>
+    <span class="p">}</span></div>
+
+
+<span class="c1">#create a function to predict bike and dock for a batch of future dates</span>
+<div class="viewcode-block" id="_predict_bike_dock_batch">
+<a class="viewcode-back" href="../../../../api/main_project.bike_forecast.html#main_project.bike_forecast.models.forecast._predict_bike_dock_batch">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">_predict_bike_dock_batch</span><span class="p">(</span><span class="n">models</span><span class="p">,</span> <span class="n">station_id</span><span class="p">,</span> <span class="n">capacity</span><span class="p">,</span> <span class="n">future_dts</span><span class="p">,</span> <span class="n">wx_overrides</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Predict bike and dock availability for multiple hours in a single batch.</span>
+
+<span class="sd">    Builds one feature matrix and calls ``model.predict`` once per model,</span>
+<span class="sd">    which is faster than calling ``_predict_hour`` N times individually.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        models: Tuple returned by ``_load_models()``.</span>
+<span class="sd">        station_id: JCDecaux station ID.</span>
+<span class="sd">        capacity: Total dock capacity of the station.</span>
+<span class="sd">        future_dts: List of target datetimes, one per forecast step.</span>
+<span class="sd">        wx_overrides: List of weather dicts (same length as ``future_dts``),</span>
+<span class="sd">            each with keys ``avg_temp``, ``avg_humidity``, ``avg_pressure``,</span>
+<span class="sd">            and ``is_raining``.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A tuple ``(predicted_bikes, predicted_docks)`` — each a list of floats</span>
+<span class="sd">        clamped to ``[0, capacity]``, one entry per input timestep.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: If ``future_dts`` and ``wx_overrides`` have different lengths.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+
+    <span class="p">(</span><span class="n">bike_m</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">bike_feat</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">hum_std</span><span class="p">)</span> <span class="o">=</span> <span class="n">models</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">future_dts</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">n</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">wx_overrides</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;future_dts and wx_overrides must have the same length&quot;</span><span class="p">)</span>
+    <span class="n">cap</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">capacity</span><span class="p">)</span>
+    <span class="n">rows</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">future_dt</span><span class="p">,</span> <span class="n">wx</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">future_dts</span><span class="p">,</span> <span class="n">wx_overrides</span><span class="p">):</span>
+        <span class="n">avg_temp</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">wx</span><span class="p">[</span><span class="s2">&quot;avg_temp&quot;</span><span class="p">]),</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">avg_humidity</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">wx</span><span class="p">[</span><span class="s2">&quot;avg_humidity&quot;</span><span class="p">]),</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">avg_pressure</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">wx</span><span class="p">[</span><span class="s2">&quot;avg_pressure&quot;</span><span class="p">]),</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">is_raining</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">wx</span><span class="p">[</span><span class="s2">&quot;is_raining&quot;</span><span class="p">])</span>
+        <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+            <span class="s2">&quot;station_id&quot;</span><span class="p">:</span> <span class="n">station_id</span><span class="p">,</span>
+            <span class="s2">&quot;capacity&quot;</span><span class="p">:</span> <span class="n">capacity</span><span class="p">,</span>
+            <span class="s2">&quot;hour&quot;</span><span class="p">:</span> <span class="n">future_dt</span><span class="o">.</span><span class="n">hour</span><span class="p">,</span>
+            <span class="s2">&quot;avg_temp&quot;</span><span class="p">:</span> <span class="n">avg_temp</span><span class="p">,</span>
+            <span class="s2">&quot;avg_humidity&quot;</span><span class="p">:</span> <span class="n">avg_humidity</span><span class="p">,</span>
+            <span class="s2">&quot;avg_pressure&quot;</span><span class="p">:</span> <span class="n">avg_pressure</span><span class="p">,</span>
+            <span class="s2">&quot;is_raining&quot;</span><span class="p">:</span> <span class="n">is_raining</span><span class="p">,</span>
+            <span class="s2">&quot;humidity_std&quot;</span><span class="p">:</span> <span class="n">hum_std</span><span class="p">,</span>
+        <span class="p">})</span>
+    <span class="n">bk_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">rows</span><span class="p">)[</span><span class="n">bike_feat</span><span class="p">]</span>
+    <span class="n">bikes_raw</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">bike_m</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">bk_df</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+    <span class="n">predicted_bikes</span> <span class="o">=</span> <span class="p">[</span><span class="nb">round</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="n">cap</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">b</span><span class="p">))),</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">bikes_raw</span><span class="p">]</span>
+    <span class="c1"># docks = capacity − bikes so the pair sums to capacity (dock model not used here)</span>
+    <span class="n">predicted_docks</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="nb">round</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="n">cap</span><span class="p">,</span> <span class="n">cap</span> <span class="o">-</span> <span class="n">pb</span><span class="p">)),</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">pb</span> <span class="ow">in</span> <span class="n">predicted_bikes</span>
+    <span class="p">]</span>
+    <span class="k">return</span> <span class="n">predicted_bikes</span><span class="p">,</span> <span class="n">predicted_docks</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">station_forecast</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    GET /forecast/station</span>
+<span class="sd">    Runs the two-stage pipeline (weather model → bike model) and returns</span>
+<span class="sd">    hourly predictions for bikes, docks, and all weather parameters.</span>
+
+<span class="sd">    Query parameters</span>
+
+<span class="sd">    number = station_id                        (required)</span>
+<span class="sd">    capacity = total docks at the station        (required)</span>
+<span class="sd">    hours = future hours to forecast (default 8, max 48)</span>
+<span class="sd">    avg_temp = override weather model °C         (optional)</span>
+<span class="sd">    avg_humidity = override weather model %          (optional)</span>
+<span class="sd">    avg_pressure = override weather model hPa        (optional)</span>
+<span class="sd">    is_raining = override rain flag 0/1            (optional)</span>
+
+<span class="sd">    Response JSON</span>
+
+<span class="sd">    {</span>
+<span class="sd">      &quot;number&quot;: 42,</span>
+<span class="sd">      &quot;times&quot;:               [&quot;2026-04-08 12:47&quot;, ...],</span>
+<span class="sd">      &quot;predicted_bikes&quot;:     [9.8, 8.5, ...],</span>
+<span class="sd">      &quot;predicted_docks&quot;:     [20.4, 21.4, ...],</span>
+<span class="sd">      &quot;predicted_temp&quot;:      [9.0, 9.0, ...],</span>
+<span class="sd">      &quot;predicted_humidity&quot;:  [81.3, 80.0, ...],</span>
+<span class="sd">      &quot;predicted_pressure&quot;:  [1014.9, 1014.6, ...],</span>
+<span class="sd">      &quot;predicted_rain&quot;:      [0, 0, ...]</span>
+<span class="sd">    }</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">models</span> <span class="o">=</span> <span class="n">_load_models</span><span class="p">()</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">jsonify</span><span class="p">(</span><span class="n">error</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Models could not be loaded: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">),</span> <span class="mi">500</span>
+
+    <span class="c1"># Parse params </span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">station_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;number&quot;</span><span class="p">,</span>   <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+        <span class="n">capacity</span>   <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;capacity&quot;</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+        <span class="n">hours</span>      <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;hours&quot;</span><span class="p">,</span> <span class="mi">8</span><span class="p">)),</span> <span class="mi">48</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">jsonify</span><span class="p">(</span><span class="n">error</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Invalid parameter: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">),</span> <span class="mi">400</span>
+
+    <span class="k">if</span> <span class="n">station_id</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">jsonify</span><span class="p">(</span><span class="n">error</span><span class="o">=</span><span class="s2">&quot;&#39;number&#39; (station_id) is required&quot;</span><span class="p">),</span> <span class="mi">400</span>
+    <span class="k">if</span> <span class="n">capacity</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">jsonify</span><span class="p">(</span><span class="n">error</span><span class="o">=</span><span class="s2">&quot;&#39;capacity&#39; is required&quot;</span><span class="p">),</span> <span class="mi">400</span>
+
+    <span class="c1"># Optional live weather override </span>
+    <span class="n">wx_keys</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;avg_temp&quot;</span><span class="p">,</span> <span class="s2">&quot;avg_humidity&quot;</span><span class="p">,</span> <span class="s2">&quot;avg_pressure&quot;</span><span class="p">,</span> <span class="s2">&quot;is_raining&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">k</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">wx_keys</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">wx_override</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;avg_temp&quot;</span>    <span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;avg_temp&quot;</span><span class="p">]),</span>
+                <span class="s2">&quot;avg_humidity&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;avg_humidity&quot;</span><span class="p">]),</span>
+                <span class="s2">&quot;avg_pressure&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;avg_pressure&quot;</span><span class="p">]),</span>
+                <span class="s2">&quot;is_raining&quot;</span>  <span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;is_raining&quot;</span><span class="p">]),</span>
+            <span class="p">}</span>
+        <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">jsonify</span><span class="p">(</span><span class="n">error</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Invalid weather override param: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">),</span> <span class="mi">400</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">wx_override</span> <span class="o">=</span> <span class="kc">None</span>   <span class="c1"># use weather models</span>
+
+    <span class="c1"># Run pipeline for each future hour </span>
+    <span class="n">now</span>    <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">_predict_hour</span><span class="p">(</span><span class="n">models</span><span class="p">,</span> <span class="n">station_id</span><span class="p">,</span> <span class="n">capacity</span><span class="p">,</span>
+                      <span class="n">now</span> <span class="o">+</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="n">offset</span><span class="p">),</span> <span class="n">wx_override</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">offset</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">hours</span><span class="p">)</span>
+    <span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">jsonify</span><span class="p">(</span>
+        <span class="n">number</span>             <span class="o">=</span> <span class="n">station_id</span><span class="p">,</span>
+        <span class="n">times</span>              <span class="o">=</span> <span class="p">[</span><span class="n">r</span><span class="p">[</span><span class="s2">&quot;time&quot;</span><span class="p">]</span>                <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">result</span><span class="p">],</span>
+        <span class="n">predicted_bikes</span>    <span class="o">=</span> <span class="p">[</span><span class="n">r</span><span class="p">[</span><span class="s2">&quot;predicted_bikes&quot;</span><span class="p">]</span>     <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">result</span><span class="p">],</span>
+        <span class="n">predicted_docks</span>    <span class="o">=</span> <span class="p">[</span><span class="n">r</span><span class="p">[</span><span class="s2">&quot;predicted_docks&quot;</span><span class="p">]</span>     <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">result</span><span class="p">],</span>
+        <span class="n">predicted_temp</span>     <span class="o">=</span> <span class="p">[</span><span class="n">r</span><span class="p">[</span><span class="s2">&quot;predicted_temp&quot;</span><span class="p">]</span>      <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">result</span><span class="p">],</span>
+        <span class="n">predicted_humidity</span> <span class="o">=</span> <span class="p">[</span><span class="n">r</span><span class="p">[</span><span class="s2">&quot;predicted_humidity&quot;</span><span class="p">]</span>  <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">result</span><span class="p">],</span>
+        <span class="n">predicted_pressure</span> <span class="o">=</span> <span class="p">[</span><span class="n">r</span><span class="p">[</span><span class="s2">&quot;predicted_pressure&quot;</span><span class="p">]</span>  <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">result</span><span class="p">],</span>
+        <span class="n">predicted_rain</span>     <span class="o">=</span> <span class="p">[</span><span class="n">r</span><span class="p">[</span><span class="s2">&quot;predicted_rain&quot;</span><span class="p">]</span>      <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">result</span><span class="p">],</span>
+    <span class="p">)</span>
+
+
+<span class="c1"># Local test </span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">pathlib</span><span class="o">,</span><span class="w"> </span><span class="nn">sys</span>
+
+    <span class="c1"># Point directly at the pkl files when running standalone</span>
+    <span class="n">_FORECAST_DIR_OVERRIDE</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span><span class="o">.</span><span class="n">parent</span>
+    <span class="nb">globals</span><span class="p">()[</span><span class="s2">&quot;_FORECAST_DIR&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_FORECAST_DIR_OVERRIDE</span>
+
+    <span class="c1"># Reload path constants to pick up the override</span>
+    <span class="nb">globals</span><span class="p">()[</span><span class="s2">&quot;_BIKE_MODEL_PATH&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_FORECAST_DIR_OVERRIDE</span> <span class="o">/</span> <span class="s2">&quot;bike_model.pkl&quot;</span>
+    <span class="nb">globals</span><span class="p">()[</span><span class="s2">&quot;_DOCK_MODEL_PATH&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_FORECAST_DIR_OVERRIDE</span> <span class="o">/</span> <span class="s2">&quot;docks_model.pkl&quot;</span>
+    <span class="nb">globals</span><span class="p">()[</span><span class="s2">&quot;_TEMP_MODEL_PATH&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_FORECAST_DIR_OVERRIDE</span> <span class="o">/</span> <span class="s2">&quot;weather_temp.pkl&quot;</span>
+    <span class="nb">globals</span><span class="p">()[</span><span class="s2">&quot;_HUM_MODEL_PATH&quot;</span><span class="p">]</span>  <span class="o">=</span> <span class="n">_FORECAST_DIR_OVERRIDE</span> <span class="o">/</span> <span class="s2">&quot;weather_humidity.pkl&quot;</span>
+    <span class="nb">globals</span><span class="p">()[</span><span class="s2">&quot;_PRES_MODEL_PATH&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_FORECAST_DIR_OVERRIDE</span> <span class="o">/</span> <span class="s2">&quot;weather_pressure.pkl&quot;</span>
+    <span class="nb">globals</span><span class="p">()[</span><span class="s2">&quot;_RAIN_MODEL_PATH&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_FORECAST_DIR_OVERRIDE</span> <span class="o">/</span> <span class="s2">&quot;weather_rain.pkl&quot;</span>
+    <span class="nb">globals</span><span class="p">()[</span><span class="s2">&quot;_META_PATH&quot;</span><span class="p">]</span>       <span class="o">=</span> <span class="n">_FORECAST_DIR_OVERRIDE</span> <span class="o">/</span> <span class="s2">&quot;model_meta.json&quot;</span>
+
+    <span class="c1"># Test params — change these </span>
+    <span class="n">STATION_ID</span> <span class="o">=</span> <span class="mi">42</span>
+    <span class="n">CAPACITY</span>   <span class="o">=</span> <span class="mi">30</span>
+    <span class="n">HOURS</span>      <span class="o">=</span> <span class="mi">8</span>
+
+    <span class="c1"># Optional: pass live weather to override the weather models</span>
+    <span class="c1"># Set to None to use the built-in weather prediction</span>
+    <span class="n">LIVE_WEATHER</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="c1"># LIVE_WEATHER = {</span>
+    <span class="c1">#     &quot;avg_temp&quot;: 9.0, &quot;avg_humidity&quot;: 82.0,</span>
+    <span class="c1">#     &quot;avg_pressure&quot;: 1010.0, &quot;is_raining&quot;: 0</span>
+    <span class="c1"># }</span>
+
+    <span class="n">models</span> <span class="o">=</span> <span class="n">_load_models</span><span class="p">()</span>
+    <span class="n">now</span>    <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">_predict_hour</span><span class="p">(</span><span class="n">models</span><span class="p">,</span> <span class="n">STATION_ID</span><span class="p">,</span> <span class="n">CAPACITY</span><span class="p">,</span>
+                      <span class="n">now</span> <span class="o">+</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="n">i</span><span class="p">),</span> <span class="n">LIVE_WEATHER</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">HOURS</span><span class="p">)</span>
+    <span class="p">]</span>
+
+    <span class="n">output</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;number&quot;</span>             <span class="p">:</span> <span class="n">STATION_ID</span><span class="p">,</span>
+        <span class="s2">&quot;times&quot;</span>              <span class="p">:</span> <span class="p">[</span><span class="n">r</span><span class="p">[</span><span class="s2">&quot;time&quot;</span><span class="p">]</span>                <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">result</span><span class="p">],</span>
+        <span class="s2">&quot;predicted_bikes&quot;</span>    <span class="p">:</span> <span class="p">[</span><span class="n">r</span><span class="p">[</span><span class="s2">&quot;predicted_bikes&quot;</span><span class="p">]</span>     <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">result</span><span class="p">],</span>
+        <span class="s2">&quot;predicted_docks&quot;</span>    <span class="p">:</span> <span class="p">[</span><span class="n">r</span><span class="p">[</span><span class="s2">&quot;predicted_docks&quot;</span><span class="p">]</span>     <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">result</span><span class="p">],</span>
+        <span class="s2">&quot;predicted_temp&quot;</span>     <span class="p">:</span> <span class="p">[</span><span class="n">r</span><span class="p">[</span><span class="s2">&quot;predicted_temp&quot;</span><span class="p">]</span>      <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">result</span><span class="p">],</span>
+        <span class="s2">&quot;predicted_humidity&quot;</span> <span class="p">:</span> <span class="p">[</span><span class="n">r</span><span class="p">[</span><span class="s2">&quot;predicted_humidity&quot;</span><span class="p">]</span>  <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">result</span><span class="p">],</span>
+        <span class="s2">&quot;predicted_pressure&quot;</span> <span class="p">:</span> <span class="p">[</span><span class="n">r</span><span class="p">[</span><span class="s2">&quot;predicted_pressure&quot;</span><span class="p">]</span>  <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">result</span><span class="p">],</span>
+        <span class="s2">&quot;predicted_rain&quot;</span>     <span class="p">:</span> <span class="p">[</span><span class="n">r</span><span class="p">[</span><span class="s2">&quot;predicted_rain&quot;</span><span class="p">]</span>      <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">result</span><span class="p">],</span>
+    <span class="p">}</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+
+    
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,16 @@
+main\_project.journey package
+==============================
+
+main\_project.journey.services module
+---------------------------------------
+
+.. automodule:: main_project.journey.services
+   :members:
+   :show-inheritance:
+
+main\_project.journey.routes module
+-------------------------------------
+
+.. automodule:: main_project.journey.routes
+   :members:
+   :show-inheritance:

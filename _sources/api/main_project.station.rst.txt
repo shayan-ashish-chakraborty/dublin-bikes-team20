@@ -1,0 +1,16 @@
+main\_project.station package
+==============================
+
+main\_project.station.services module
+---------------------------------------
+
+.. automodule:: main_project.station.services
+   :members: get_all_stations, get_station, format_station, _forecast_series_start_on_the_hour, _weather_forecast_list_from_openweather, station_predict_from_request
+   :show-inheritance:
+
+main\_project.station.routes module
+-------------------------------------
+
+.. automodule:: main_project.station.routes
+   :members:
+   :show-inheritance:

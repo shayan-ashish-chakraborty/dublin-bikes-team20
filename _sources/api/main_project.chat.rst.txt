@@ -1,0 +1,9 @@
+main\_project.chat package
+===========================
+
+main\_project.chat.chat\_grok module
+--------------------------------------
+
+.. automodule:: main_project.chat.chat_grok
+   :members:
+   :show-inheritance:

@@ -1,0 +1,336 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>main_project.journey.services &mdash; Dublin Bikes 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=f2a433a1"></script>
+      <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Dublin Bikes
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">main_project</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Dublin Bikes</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">main_project.journey.services</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for main_project.journey.services</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">requests</span><span class="o">,</span><span class="w"> </span><span class="nn">math</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..config</span><span class="w"> </span><span class="kn">import</span> <span class="n">Config</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..weather.services</span><span class="w"> </span><span class="kn">import</span> <span class="n">_fetch_nearest_weather</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..bike_forecast.models.forecast</span><span class="w"> </span><span class="kn">import</span> <span class="n">_predict_hour</span>
+
+<span class="n">GOOGLE_MAPS_API_KEY</span> <span class="o">=</span> <span class="n">Config</span><span class="o">.</span><span class="n">GOOGLE_MAPS_API_KEY</span>
+
+
+<div class="viewcode-block" id="geocode_address">
+<a class="viewcode-back" href="../../../api/main_project.journey.html#main_project.journey.services.geocode_address">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">geocode_address</span><span class="p">(</span><span class="n">address</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert a free-text address to latitude/longitude using the Google Geocoding API.</span>
+
+<span class="sd">    The query is scoped to Dublin, Ireland.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        address: A free-text address string (e.g. ``&quot;O&#39;Connell Street&quot;``).</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A ``(lat, lng)`` tuple of floats.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        requests.HTTPError: If the API returns a non-2xx status code.</span>
+<span class="sd">        ValueError: If the geocoding result status is not ``&quot;OK&quot;`` or no</span>
+<span class="sd">            results are returned.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;https://maps.googleapis.com/maps/api/geocode/json&quot;</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;address&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">address</span><span class="si">}</span><span class="s2">, Dublin, Ireland&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;key&quot;</span><span class="p">:</span> <span class="n">GOOGLE_MAPS_API_KEY</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    <span class="n">response</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;status&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;OK&quot;</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;results&quot;</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Could not geocode address: </span><span class="si">{</span><span class="n">address</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="n">location</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;results&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;geometry&quot;</span><span class="p">][</span><span class="s2">&quot;location&quot;</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">location</span><span class="p">[</span><span class="s2">&quot;lat&quot;</span><span class="p">],</span> <span class="n">location</span><span class="p">[</span><span class="s2">&quot;lng&quot;</span><span class="p">]</span></div>
+
+
+
+<div class="viewcode-block" id="haversine">
+<a class="viewcode-back" href="../../../api/main_project.journey.html#main_project.journey.services.haversine">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">haversine</span><span class="p">(</span><span class="n">lat1</span><span class="p">,</span> <span class="n">lng1</span><span class="p">,</span> <span class="n">lat2</span><span class="p">,</span> <span class="n">lng2</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the great-circle distance in metres between two coordinates.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        lat1: Latitude of the first point in decimal degrees.</span>
+<span class="sd">        lng1: Longitude of the first point in decimal degrees.</span>
+<span class="sd">        lat2: Latitude of the second point in decimal degrees.</span>
+<span class="sd">        lng2: Longitude of the second point in decimal degrees.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Distance in metres as a float.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">R</span> <span class="o">=</span> <span class="mi">6371000</span>
+    <span class="n">phi1</span><span class="p">,</span> <span class="n">phi2</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">lat1</span><span class="p">),</span> <span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">lat2</span><span class="p">)</span>
+    <span class="n">d_phi</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">lat2</span> <span class="o">-</span> <span class="n">lat1</span><span class="p">)</span>
+    <span class="n">d_lambda</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">lng2</span> <span class="o">-</span> <span class="n">lng1</span><span class="p">)</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">d_phi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">phi1</span><span class="p">)</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">phi2</span><span class="p">)</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">d_lambda</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+    <span class="k">return</span> <span class="n">R</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">atan2</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">a</span><span class="p">),</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">a</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="find_nearest_station">
+<a class="viewcode-back" href="../../../api/main_project.journey.html#main_project.journey.services.find_nearest_station">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">find_nearest_station</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lng</span><span class="p">,</span> <span class="n">stations</span><span class="p">,</span> <span class="n">require_bikes</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">require_stands</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Find the nearest bike stations to a point, with optional availability filters.</span>
+
+<span class="sd">    Uses:</span>
+<span class="sd">        - :func:`~main_project.journey.services.haversine` — computes the great-circle distance</span>
+<span class="sd">          between the reference point and each candidate station.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        lat: Latitude of the reference point.</span>
+<span class="sd">        lng: Longitude of the reference point.</span>
+<span class="sd">        stations: List of formatted station dicts (must include ``lat``, ``lng``,</span>
+<span class="sd">            ``available_bikes``, and ``available_stands``).</span>
+<span class="sd">        require_bikes: If ``True``, exclude stations with no available bikes.</span>
+<span class="sd">            Defaults to ``False``.</span>
+<span class="sd">        require_stands: If ``True``, exclude stations with no available docks.</span>
+<span class="sd">            Defaults to ``False``.</span>
+<span class="sd">        limit: Maximum number of stations to return. Defaults to ``3``.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A list of up to ``limit`` station dicts sorted by distance ascending,</span>
+<span class="sd">        each augmented with a ``distance_m`` key (int, metres).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">candidates</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">stations</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">require_bikes</span> <span class="ow">and</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;available_bikes&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="k">if</span> <span class="n">require_stands</span> <span class="ow">and</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;available_stands&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">dist</span> <span class="o">=</span> <span class="n">haversine</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lng</span><span class="p">,</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;lat&quot;</span><span class="p">],</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;lng&quot;</span><span class="p">])</span>
+        <span class="n">candidates</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="o">**</span><span class="n">s</span><span class="p">,</span> <span class="s2">&quot;distance_m&quot;</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="n">dist</span><span class="p">)})</span>
+    <span class="n">candidates</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="s2">&quot;distance_m&quot;</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">candidates</span><span class="p">[:</span><span class="n">limit</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="predict_stations_availability">
+<a class="viewcode-back" href="../../../api/main_project.journey.html#main_project.journey.services.predict_stations_availability">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">predict_stations_availability</span><span class="p">(</span>
+    <span class="n">stations</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">],</span>
+    <span class="n">time_str</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">models</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">],</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Predict bike and dock availability for a list of stations at a given time.</span>
+
+<span class="sd">    Logic:</span>
+
+<span class="sd">    1. Parse ``time_str`` into a target ``datetime``.</span>
+<span class="sd">    2. Fetch the nearest hourly weather record **once** for the target time</span>
+<span class="sd">       using :func:`~main_project.weather.services._fetch_nearest_weather`.</span>
+<span class="sd">       If weather is available, build a ``wx_override`` dict with</span>
+<span class="sd">       ``avg_temp``, ``avg_humidity``, ``avg_pressure``, and ``is_raining``</span>
+<span class="sd">       (derived from ``rain_3h &gt; 0.01`` or ``pop &gt;= 0.5``).</span>
+<span class="sd">    3. For each station, run the two-stage ML pipeline via</span>
+<span class="sd">       :func:`~main_project.bike_forecast.models.forecast._predict_hour`,</span>
+<span class="sd">       passing the shared ``wx_override`` so weather is not re-fetched</span>
+<span class="sd">       per station.</span>
+<span class="sd">    4. Clamp predictions to ``[0, capacity]`` and compute</span>
+<span class="sd">       ``available_stands = capacity − predicted_bikes``.</span>
+
+<span class="sd">    If weather data is unavailable (DB empty and API failed), ``wx_override``</span>
+<span class="sd">    is ``None`` and the internal weather model predicts conditions from</span>
+<span class="sd">    hour/month alone — a ``weather_warning`` string is returned to inform</span>
+<span class="sd">    the caller.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        stations: List of formatted station dicts; each must have ``number``</span>
+<span class="sd">            and ``total_stands``.</span>
+<span class="sd">        time_str: Target datetime as ``&quot;YYYY-MM-DD HH:MM:SS&quot;``, or ``&quot;now&quot;``</span>
+<span class="sd">            for the current time.</span>
+<span class="sd">        models: Pre-loaded ML model tuple from</span>
+<span class="sd">            :func:`~main_project.bike_forecast.models.forecast._load_models`.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A tuple ``(results, weather_warning)`` where:</span>
+
+<span class="sd">        - ``results`` is a copy of ``stations`` with ``available_bikes`` and</span>
+<span class="sd">          ``available_stands`` overwritten by ML predictions.</span>
+<span class="sd">        - ``weather_warning`` is ``None`` on success, or a descriptive string</span>
+<span class="sd">          if weather data was unavailable and the internal weather model was</span>
+<span class="sd">          used instead.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">target_dt</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="k">if</span> <span class="n">time_str</span> <span class="o">==</span> <span class="s2">&quot;now&quot;</span> <span class="k">else</span> <span class="n">datetime</span><span class="o">.</span><span class="n">fromisoformat</span><span class="p">(</span><span class="n">time_str</span><span class="p">)</span>
+
+    <span class="c1"># Fetch weather once for all stations</span>
+    <span class="n">weather</span> <span class="o">=</span> <span class="n">_fetch_nearest_weather</span><span class="p">(</span><span class="n">time_str</span><span class="p">)</span> <span class="k">if</span> <span class="n">time_str</span> <span class="o">!=</span> <span class="s2">&quot;now&quot;</span> <span class="k">else</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">weather</span><span class="p">:</span>
+        <span class="n">is_raining</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="p">(</span><span class="n">weather</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;rain_3h&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="p">(</span><span class="n">weather</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;pop&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mf">0.5</span> <span class="k">else</span> <span class="mi">0</span>
+        <span class="n">wx_override</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;avg_temp&quot;</span>    <span class="p">:</span> <span class="n">weather</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;temp&quot;</span><span class="p">),</span>
+            <span class="s2">&quot;avg_humidity&quot;</span><span class="p">:</span> <span class="n">weather</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;humidity&quot;</span><span class="p">),</span>
+            <span class="s2">&quot;avg_pressure&quot;</span><span class="p">:</span> <span class="n">weather</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;pressure&quot;</span><span class="p">),</span>
+            <span class="s2">&quot;is_raining&quot;</span>  <span class="p">:</span> <span class="n">is_raining</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="n">weather_warning</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">wx_override</span>     <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">weather_warning</span> <span class="o">=</span> <span class="s2">&quot;Could not fetch weather data; prediction used internal weather model&quot;</span>
+
+    <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">stations</span><span class="p">:</span>
+        <span class="n">capacity</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;total_stands&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">pred</span> <span class="o">=</span> <span class="n">_predict_hour</span><span class="p">(</span><span class="n">models</span><span class="p">,</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;number&quot;</span><span class="p">],</span> <span class="n">capacity</span><span class="p">,</span> <span class="n">target_dt</span><span class="p">,</span> <span class="n">wx_override</span><span class="p">)</span>
+        <span class="n">available_bikes</span>  <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="n">capacity</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">pred</span><span class="p">[</span><span class="s2">&quot;predicted_bikes&quot;</span><span class="p">])))</span>
+        <span class="n">available_stands</span> <span class="o">=</span> <span class="n">capacity</span> <span class="o">-</span> <span class="n">available_bikes</span>
+        <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+            <span class="o">**</span><span class="n">s</span><span class="p">,</span>
+            <span class="s2">&quot;available_bikes&quot;</span> <span class="p">:</span> <span class="n">available_bikes</span><span class="p">,</span>
+            <span class="s2">&quot;available_stands&quot;</span><span class="p">:</span> <span class="n">available_stands</span><span class="p">,</span>
+        <span class="p">})</span>
+
+    <span class="k">return</span> <span class="n">results</span><span class="p">,</span> <span class="n">weather_warning</span></div>
+
+
+
+<div class="viewcode-block" id="get_directions">
+<a class="viewcode-back" href="../../../api/main_project.journey.html#main_project.journey.services.get_directions">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_directions</span><span class="p">(</span><span class="n">origin_lat</span><span class="p">,</span> <span class="n">origin_lng</span><span class="p">,</span> <span class="n">dest_lat</span><span class="p">,</span> <span class="n">dest_lng</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;bicycling&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Fetch turn-by-turn directions between two coordinates via the Google Directions API.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        origin_lat: Latitude of the origin.</span>
+<span class="sd">        origin_lng: Longitude of the origin.</span>
+<span class="sd">        dest_lat: Latitude of the destination.</span>
+<span class="sd">        dest_lng: Longitude of the destination.</span>
+<span class="sd">        mode: Travel mode — ``&quot;bicycling&quot;``, ``&quot;walking&quot;``, or ``&quot;driving&quot;``.</span>
+<span class="sd">            Defaults to ``&quot;bicycling&quot;``.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A dict with keys: ``distance_text``, ``distance_m``, ``duration_text``,</span>
+<span class="sd">        ``duration_s``, ``polyline`` (encoded), and ``steps`` (list of dicts</span>
+<span class="sd">        with ``instruction``, ``distance``, ``duration``).</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        requests.HTTPError: If the API returns a non-2xx status code.</span>
+<span class="sd">        ValueError: If the API returns no route.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;https://maps.googleapis.com/maps/api/directions/json&quot;</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;origin&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">origin_lat</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="n">origin_lng</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;destination&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">dest_lat</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="n">dest_lng</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;mode&quot;</span><span class="p">:</span> <span class="n">mode</span><span class="p">,</span>
+        <span class="s2">&quot;key&quot;</span><span class="p">:</span> <span class="n">GOOGLE_MAPS_API_KEY</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    <span class="n">response</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;status&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;OK&quot;</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;routes&quot;</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No route found (status: </span><span class="si">{</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;status&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+
+    <span class="n">route</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;routes&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;legs&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">&quot;distance_text&quot;</span><span class="p">:</span> <span class="n">route</span><span class="p">[</span><span class="s2">&quot;distance&quot;</span><span class="p">][</span><span class="s2">&quot;text&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;distance_m&quot;</span><span class="p">:</span> <span class="n">route</span><span class="p">[</span><span class="s2">&quot;distance&quot;</span><span class="p">][</span><span class="s2">&quot;value&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;duration_text&quot;</span><span class="p">:</span> <span class="n">route</span><span class="p">[</span><span class="s2">&quot;duration&quot;</span><span class="p">][</span><span class="s2">&quot;text&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;duration_s&quot;</span><span class="p">:</span> <span class="n">route</span><span class="p">[</span><span class="s2">&quot;duration&quot;</span><span class="p">][</span><span class="s2">&quot;value&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;polyline&quot;</span><span class="p">:</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;routes&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;overview_polyline&quot;</span><span class="p">][</span><span class="s2">&quot;points&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;steps&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;instruction&quot;</span><span class="p">:</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;html_instructions&quot;</span><span class="p">],</span>
+                <span class="s2">&quot;distance&quot;</span><span class="p">:</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;distance&quot;</span><span class="p">][</span><span class="s2">&quot;text&quot;</span><span class="p">],</span>
+                <span class="s2">&quot;duration&quot;</span><span class="p">:</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;duration&quot;</span><span class="p">][</span><span class="s2">&quot;text&quot;</span><span class="p">],</span>
+            <span class="p">}</span>
+            <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">route</span><span class="p">[</span><span class="s2">&quot;steps&quot;</span><span class="p">]</span>
+        <span class="p">],</span>
+    <span class="p">}</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

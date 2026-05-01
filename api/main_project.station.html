@@ -1,0 +1,336 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>main_project.station package &mdash; Dublin Bikes 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=f2a433a1"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="main_project.weather package" href="main_project.weather.html" />
+    <link rel="prev" title="main_project.auth package" href="main_project.auth.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Dublin Bikes
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">main_project</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="main_project.html">main_project package</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="main_project.auth.html">main_project.auth package</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">main_project.station package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#module-main_project.station.services">main_project.station.services module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-main_project.station.routes">main_project.station.routes module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="main_project.weather.html">main_project.weather package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="main_project.journey.html">main_project.journey package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="main_project.bike_forecast.html">main_project.bike_forecast package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="main_project.chat.html">main_project.chat package</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Dublin Bikes</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">main_project</a></li>
+          <li class="breadcrumb-item"><a href="main_project.html">main_project package</a></li>
+      <li class="breadcrumb-item active">main_project.station package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/main_project.station.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="main-project-station-package">
+<h1>main_project.station package<a class="headerlink" href="#main-project-station-package" title="Link to this heading"></a></h1>
+<section id="module-main_project.station.services">
+<span id="main-project-station-services-module"></span><h2>main_project.station.services module<a class="headerlink" href="#module-main_project.station.services" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="main_project.station.services._forecast_series_start_on_the_hour">
+<span class="sig-prename descclassname"><span class="pre">main_project.station.services.</span></span><span class="sig-name descname"><span class="pre">_forecast_series_start_on_the_hour</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">now</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">datetime</span></span></span><a class="reference internal" href="../_modules/main_project/station/services.html#_forecast_series_start_on_the_hour"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main_project.station.services._forecast_series_start_on_the_hour" title="Link to this definition"></a></dt>
+<dd><p>Return the first forecast timestep aligned to the next full clock hour.</p>
+<p>If the current time is already exactly on the hour it is returned as-is;
+otherwise the next hour boundary is returned (e.g. 16:14 → 17:00).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>now</strong> – The current local datetime.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A <code class="docutils literal notranslate"><span class="pre">datetime</span></code> with <code class="docutils literal notranslate"><span class="pre">minute</span></code>, <code class="docutils literal notranslate"><span class="pre">second</span></code>, and <code class="docutils literal notranslate"><span class="pre">microsecond</span></code> set to
+zero, advanced by one hour if <code class="docutils literal notranslate"><span class="pre">now</span></code> is past the floor of the current hour.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="main_project.station.services._weather_forecast_list_from_openweather">
+<span class="sig-prename descclassname"><span class="pre">main_project.station.services.</span></span><span class="sig-name descname"><span class="pre">_weather_forecast_list_from_openweather</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hours</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">now</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/main_project/station/services.html#_weather_forecast_list_from_openweather"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main_project.station.services._weather_forecast_list_from_openweather" title="Link to this definition"></a></dt>
+<dd><p>Build a per-hour weather series for the station forecast pipeline.</p>
+<p>Uses the same hourly rows as the weather UI (via
+<a class="reference internal" href="main_project.weather.html#main_project.weather.services.hourly_forecast_list_like_weather_page" title="main_project.weather.services.hourly_forecast_list_like_weather_page"><code class="xref py py-func docutils literal notranslate"><span class="pre">hourly_forecast_list_like_weather_page()</span></code></a>).
+Timesteps are clock-hour aligned: starting from the next full hour if <code class="docutils literal notranslate"><span class="pre">now</span></code>
+is already past <code class="docutils literal notranslate"><span class="pre">HH:00</span></code>, then <code class="docutils literal notranslate"><span class="pre">+1</span> <span class="pre">h</span></code> per step.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>hours</strong> – Number of forecast steps to build (one per hour).</p></li>
+<li><p><strong>now</strong> – The current local datetime used to anchor the series start.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of <code class="docutils literal notranslate"><span class="pre">hours</span></code> weather dicts, each with keys <code class="docutils literal notranslate"><span class="pre">avg_temp</span></code>,
+<code class="docutils literal notranslate"><span class="pre">avg_humidity</span></code>, <code class="docutils literal notranslate"><span class="pre">avg_pressure</span></code>, <code class="docutils literal notranslate"><span class="pre">is_raining</span></code>, and <code class="docutils literal notranslate"><span class="pre">time</span></code>
+(<code class="docutils literal notranslate"><span class="pre">&quot;YYYY-MM-DD</span> <span class="pre">HH:MM&quot;</span></code>). Returns <code class="docutils literal notranslate"><span class="pre">None</span></code> if the weather source
+(DB and OpenWeather API) is unavailable or returns no rows.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="main_project.station.services.get_all_stations">
+<span class="sig-prename descclassname"><span class="pre">main_project.station.services.</span></span><span class="sig-name descname"><span class="pre">get_all_stations</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="../_modules/main_project/station/services.html#get_all_stations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main_project.station.services.get_all_stations" title="Link to this definition"></a></dt>
+<dd><p>Fetch all Dublin Bikes stations with live availability from the JCDecaux API.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A list of raw station dicts as returned by the JCDecaux VLS v1 API.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>requests.HTTPError</strong> – If the API returns a non-2xx status code.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="main_project.station.services.get_station">
+<span class="sig-prename descclassname"><span class="pre">main_project.station.services.</span></span><span class="sig-name descname"><span class="pre">get_station</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">station_number</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="../_modules/main_project/station/services.html#get_station"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main_project.station.services.get_station" title="Link to this definition"></a></dt>
+<dd><p>Fetch a single Dublin Bikes station by its station number.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>station_number</strong> – The integer station identifier used by JCDecaux.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A raw station dict as returned by the JCDecaux VLS v1 API.</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>requests.HTTPError</strong> – If the API returns a non-2xx status code.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="main_project.station.services.format_station">
+<span class="sig-prename descclassname"><span class="pre">main_project.station.services.</span></span><span class="sig-name descname"><span class="pre">format_station</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">raw</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="../_modules/main_project/station/services.html#format_station"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main_project.station.services.format_station" title="Link to this definition"></a></dt>
+<dd><p>Normalise a raw JCDecaux station dict into the app’s station schema.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>raw</strong> – A station dict as returned directly by the JCDecaux API,
+including a nested <code class="docutils literal notranslate"><span class="pre">position</span></code> key with <code class="docutils literal notranslate"><span class="pre">lat</span></code> and <code class="docutils literal notranslate"><span class="pre">lng</span></code>.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">number</span></code>, <code class="docutils literal notranslate"><span class="pre">name</span></code>, <code class="docutils literal notranslate"><span class="pre">address</span></code>, <code class="docutils literal notranslate"><span class="pre">lat</span></code>, <code class="docutils literal notranslate"><span class="pre">lng</span></code>,
+<code class="docutils literal notranslate"><span class="pre">status</span></code>, <code class="docutils literal notranslate"><span class="pre">available_bikes</span></code>, <code class="docutils literal notranslate"><span class="pre">available_stands</span></code>, <code class="docutils literal notranslate"><span class="pre">total_stands</span></code>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A dict with keys</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="main_project.station.services.station_predict_from_request">
+<span class="sig-prename descclassname"><span class="pre">main_project.station.services.</span></span><span class="sig-name descname"><span class="pre">station_predict_from_request</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">flask.Request</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="../_modules/main_project/station/services.html#station_predict_from_request"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main_project.station.services.station_predict_from_request" title="Link to this definition"></a></dt>
+<dd><p>Run a multi-hour bike and dock availability prediction for one station.</p>
+<p>Reads query parameters from the Flask request, fetches live station data,
+builds an hourly weather series, and runs the two-stage ML pipeline in
+batch mode.</p>
+<dl class="simple">
+<dt>Uses:</dt><dd><ul class="simple">
+<li><p><a class="reference internal" href="#main_project.station.services.get_station" title="main_project.station.services.get_station"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_station()</span></code></a> — fetches live station data and capacity from JCDecaux.</p></li>
+<li><p><a class="reference internal" href="#main_project.station.services.format_station" title="main_project.station.services.format_station"><code class="xref py py-func docutils literal notranslate"><span class="pre">format_station()</span></code></a> — normalises the raw station dict.</p></li>
+<li><p><a class="reference internal" href="#main_project.station.services._forecast_series_start_on_the_hour" title="main_project.station.services._forecast_series_start_on_the_hour"><code class="xref py py-func docutils literal notranslate"><span class="pre">_forecast_series_start_on_the_hour()</span></code></a> — computes the first forecast timestep aligned to the next full clock hour.</p></li>
+<li><p><a class="reference internal" href="#main_project.station.services._weather_forecast_list_from_openweather" title="main_project.station.services._weather_forecast_list_from_openweather"><code class="xref py py-func docutils literal notranslate"><span class="pre">_weather_forecast_list_from_openweather()</span></code></a> — builds the per-hour weather series (DB → OpenWeather fallback) used as <code class="docutils literal notranslate"><span class="pre">wx_override</span></code> for each forecast step.</p></li>
+<li><p><a class="reference internal" href="main_project.bike_forecast.html#main_project.bike_forecast.models.forecast._load_models" title="main_project.bike_forecast.models.forecast._load_models"><code class="xref py py-func docutils literal notranslate"><span class="pre">_load_models()</span></code></a> — loads the trained ML model tuple from disk.</p></li>
+<li><p><a class="reference internal" href="main_project.bike_forecast.html#main_project.bike_forecast.models.forecast._predict_bike_dock_batch" title="main_project.bike_forecast.models.forecast._predict_bike_dock_batch"><code class="xref py py-func docutils literal notranslate"><span class="pre">_predict_bike_dock_batch()</span></code></a> — runs the bike/dock models across all forecast hours in one batch call.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>request</strong> – <p>The Flask <code class="docutils literal notranslate"><span class="pre">Request</span></code> object. Expected query parameters:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">number</span></code> (int, required): JCDecaux station ID.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">hours</span></code> (int, optional): Forecast horizon in hours.
+Clamped to <code class="docutils literal notranslate"><span class="pre">[1,</span> <span class="pre">48]</span></code>. Defaults to <code class="docutils literal notranslate"><span class="pre">48</span></code>.</p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">number</span></code> (int): Station ID.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">times</span></code> (list[str]): ISO-formatted forecast timestamps.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">predicted_bikes</span></code> (list[float]): Predicted available bikes per hour.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">predicted_docks</span></code> (list[float]): Predicted available docks per hour.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">predicted_temp</span></code> (list[float]): Predicted temperature (°C).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">predicted_humidity</span></code> (list[float]): Predicted relative humidity (%).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">predicted_pressure</span></code> (list[float]): Predicted pressure (hPa).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">predicted_rain</span></code> (list[int]): Binary rain flag per hour.</p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A dict with keys</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If <code class="docutils literal notranslate"><span class="pre">number</span></code> is missing or invalid, station capacity is
+    unavailable, ML models cannot be loaded, or weather data is
+    unavailable.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-main_project.station.routes">
+<span id="main-project-station-routes-module"></span><h2>main_project.station.routes module<a class="headerlink" href="#module-main_project.station.routes" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="main_project.station.routes.stations">
+<span class="sig-prename descclassname"><span class="pre">main_project.station.routes.</span></span><span class="sig-name descname"><span class="pre">stations</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main_project.station.routes.stations" title="Link to this definition"></a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">GET</span> <span class="pre">/api/stations</span></code> — Return live availability for all Dublin Bikes stations.</p>
+<dl class="simple">
+<dt>Uses:</dt><dd><ul class="simple">
+<li><p><a class="reference internal" href="#main_project.station.services.get_all_stations" title="main_project.station.services.get_all_stations"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_all_stations()</span></code></a> — fetches all stations from JCDecaux.</p></li>
+<li><p><a class="reference internal" href="#main_project.station.services.format_station" title="main_project.station.services.format_station"><code class="xref py py-func docutils literal notranslate"><span class="pre">format_station()</span></code></a> — normalises each raw station dict.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>JSON list of formatted station dicts with live <code class="docutils literal notranslate"><span class="pre">available_bikes</span></code>
+and <code class="docutils literal notranslate"><span class="pre">available_stands</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="main_project.station.routes.stations_predict">
+<span class="sig-prename descclassname"><span class="pre">main_project.station.routes.</span></span><span class="sig-name descname"><span class="pre">stations_predict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main_project.station.routes.stations_predict" title="Link to this definition"></a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">GET</span> <span class="pre">/api/stations/predict</span></code> — Run a multi-hour bike and dock prediction for one station.</p>
+<dl class="simple">
+<dt>Uses:</dt><dd><ul class="simple">
+<li><p><a class="reference internal" href="#main_project.station.services.station_predict_from_request" title="main_project.station.services.station_predict_from_request"><code class="xref py py-func docutils literal notranslate"><span class="pre">station_predict_from_request()</span></code></a> — runs the full
+multi-hour ML pipeline and returns the forecast dict.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Example request:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>GET /api/stations/predict?number=42&amp;hours=8
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>number</strong> – JCDecaux station ID (query param, required).</p></li>
+<li><p><strong>hours</strong> – Forecast horizon in hours, max 48. Defaults to 48 (query param).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>JSON prediction dict from
+<a class="reference internal" href="#main_project.station.services.station_predict_from_request" title="main_project.station.services.station_predict_from_request"><code class="xref py py-func docutils literal notranslate"><span class="pre">station_predict_from_request()</span></code></a>,
+or an error JSON with status 400/503.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="main_project.station.routes.stations_page">
+<span class="sig-prename descclassname"><span class="pre">main_project.station.routes.</span></span><span class="sig-name descname"><span class="pre">stations_page</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main_project.station.routes.stations_page" title="Link to this definition"></a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">GET</span> <span class="pre">/stations</span></code> — Render the stations map page.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Rendered <code class="docutils literal notranslate"><span class="pre">stations.html</span></code> template. Live station data is fetched
+client-side from <code class="docutils literal notranslate"><span class="pre">GET</span> <span class="pre">/api/stations</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="main_project.auth.html" class="btn btn-neutral float-left" title="main_project.auth package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="main_project.weather.html" class="btn btn-neutral float-right" title="main_project.weather package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

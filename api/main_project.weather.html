@@ -1,0 +1,387 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>main_project.weather package &mdash; Dublin Bikes 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=f2a433a1"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="main_project.journey package" href="main_project.journey.html" />
+    <link rel="prev" title="main_project.station package" href="main_project.station.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Dublin Bikes
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">main_project</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="main_project.html">main_project package</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="main_project.auth.html">main_project.auth package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="main_project.station.html">main_project.station package</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">main_project.weather package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#module-main_project.weather.services">main_project.weather.services module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-main_project.weather.routes">main_project.weather.routes module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="main_project.journey.html">main_project.journey package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="main_project.bike_forecast.html">main_project.bike_forecast package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="main_project.chat.html">main_project.chat package</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Dublin Bikes</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">main_project</a></li>
+          <li class="breadcrumb-item"><a href="main_project.html">main_project package</a></li>
+      <li class="breadcrumb-item active">main_project.weather package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/main_project.weather.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="main-project-weather-package">
+<h1>main_project.weather package<a class="headerlink" href="#main-project-weather-package" title="Link to this heading"></a></h1>
+<section id="module-main_project.weather.services">
+<span id="main-project-weather-services-module"></span><h2>main_project.weather.services module<a class="headerlink" href="#module-main_project.weather.services" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="main_project.weather.services.hourly_forecast_rows_from_db">
+<span class="sig-prename descclassname"><span class="pre">main_project.weather.services.</span></span><span class="sig-name descname"><span class="pre">hourly_forecast_rows_from_db</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">40</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/main_project/weather/services.html#hourly_forecast_rows_from_db"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main_project.weather.services.hourly_forecast_rows_from_db" title="Link to this definition"></a></dt>
+<dd><p>Fetch future hourly weather rows directly from the MySQL <code class="docutils literal notranslate"><span class="pre">hourly</span></code> table.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>limit</strong> – Maximum number of rows to return. Clamped to <code class="docutils literal notranslate"><span class="pre">[1,</span> <span class="pre">100]</span></code>.
+Defaults to <code class="docutils literal notranslate"><span class="pre">40</span></code>.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">future_dt</span></code>, <code class="docutils literal notranslate"><span class="pre">temp</span></code>, <code class="docutils literal notranslate"><span class="pre">humidity</span></code>,
+<code class="docutils literal notranslate"><span class="pre">pressure</span></code>, <code class="docutils literal notranslate"><span class="pre">rain_3h</span></code>, <code class="docutils literal notranslate"><span class="pre">pop</span></code>, and others from the <code class="docutils literal notranslate"><span class="pre">hourly</span></code> table.
+Returns an empty list on any database error or if no future rows exist.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A list of row dicts with keys</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="main_project.weather.services._fetch_nearest_weather">
+<span class="sig-prename descclassname"><span class="pre">main_project.weather.services.</span></span><span class="sig-name descname"><span class="pre">_fetch_nearest_weather</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dt_str</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/main_project/weather/services.html#_fetch_nearest_weather"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main_project.weather.services._fetch_nearest_weather" title="Link to this definition"></a></dt>
+<dd><p>Find the nearest hourly weather record to a given datetime.</p>
+<p>Queries the DB <code class="docutils literal notranslate"><span class="pre">hourly</span></code> table first (within ±3 hours of <code class="docutils literal notranslate"><span class="pre">dt_str</span></code>),
+then falls back to the live OpenWeatherMap forecast API if no DB row is found.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>dt_str</strong> – Target datetime string in <code class="docutils literal notranslate"><span class="pre">&quot;YYYY-MM-DD</span> <span class="pre">HH:MM:SS&quot;</span></code> format
+(Irish local time).</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A weather row dict, or <code class="docutils literal notranslate"><span class="pre">None</span></code> if no match is found within ±3 hours
+and the API fallback also fails.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="main_project.weather.services.openweather_current">
+<span class="sig-prename descclassname"><span class="pre">main_project.weather.services.</span></span><span class="sig-name descname"><span class="pre">openweather_current</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="../_modules/main_project/weather/services.html#openweather_current"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main_project.weather.services.openweather_current" title="Link to this definition"></a></dt>
+<dd><p>Fetch current weather conditions for a given location.</p>
+<p>Tries the live OpenWeatherMap <code class="docutils literal notranslate"><span class="pre">/data/2.5/weather</span></code> API first. Falls back
+to the nearest row in the DB <code class="docutils literal notranslate"><span class="pre">hourly</span></code> table (Irish time) if the API key
+is missing or the request fails.</p>
+<dl class="simple">
+<dt>Uses:</dt><dd><ul class="simple">
+<li><p><a class="reference internal" href="#main_project.weather.services._fetch_nearest_weather" title="main_project.weather.services._fetch_nearest_weather"><code class="xref py py-func docutils literal notranslate"><span class="pre">_fetch_nearest_weather()</span></code></a> — DB fallback when
+the live API key is absent or the request fails.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lat</strong> – Latitude of the target location.</p></li>
+<li><p><strong>lon</strong> – Longitude of the target location.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">dt</span></code>, <code class="docutils literal notranslate"><span class="pre">temp</span></code>, <code class="docutils literal notranslate"><span class="pre">feels_like</span></code>, <code class="docutils literal notranslate"><span class="pre">humidity</span></code>,
+<code class="docutils literal notranslate"><span class="pre">pressure</span></code>, <code class="docutils literal notranslate"><span class="pre">wind_speed</span></code>, <code class="docutils literal notranslate"><span class="pre">wind_gust</span></code>, <code class="docutils literal notranslate"><span class="pre">rain_1h</span></code>, <code class="docutils literal notranslate"><span class="pre">weather_desc</span></code>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A dict with keys</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>RuntimeError</strong> – If both the API and the DB fallback are unavailable.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="main_project.weather.services.openweather_forecast_3h_list">
+<span class="sig-prename descclassname"><span class="pre">main_project.weather.services.</span></span><span class="sig-name descname"><span class="pre">openweather_forecast_3h_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/main_project/weather/services.html#openweather_forecast_3h_list"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main_project.weather.services.openweather_forecast_3h_list" title="Link to this definition"></a></dt>
+<dd><p>Fetch a 3-hour interval weather forecast from the OpenWeatherMap API.</p>
+<p>Uses the free-tier <code class="docutils literal notranslate"><span class="pre">/data/2.5/forecast</span></code> endpoint (up to 40 timesteps).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lat</strong> – Latitude of the target location.</p></li>
+<li><p><strong>lon</strong> – Longitude of the target location.</p></li>
+<li><p><strong>limit</strong> – Maximum number of timesteps to return (capped at 48).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">dt</span></code>, <code class="docutils literal notranslate"><span class="pre">future_dt</span></code>, <code class="docutils literal notranslate"><span class="pre">temp</span></code>,
+<code class="docutils literal notranslate"><span class="pre">feels_like</span></code>, <code class="docutils literal notranslate"><span class="pre">humidity</span></code>, <code class="docutils literal notranslate"><span class="pre">pressure</span></code>, <code class="docutils literal notranslate"><span class="pre">wind_speed</span></code>,
+<code class="docutils literal notranslate"><span class="pre">wind_gust</span></code>, <code class="docutils literal notranslate"><span class="pre">pop</span></code>, <code class="docutils literal notranslate"><span class="pre">rain_1h</span></code>, <code class="docutils literal notranslate"><span class="pre">rain_3h</span></code>, <code class="docutils literal notranslate"><span class="pre">snow_3h</span></code>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A list of row dicts with keys</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>ValueError</strong> – If <code class="docutils literal notranslate"><span class="pre">OPENWEATHER_API_KEY</span></code> is not set.</p></li>
+<li><p><strong>requests.HTTPError</strong> – If the API returns a non-2xx status code.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="main_project.weather.services.hourly_row_time_ms">
+<span class="sig-prename descclassname"><span class="pre">main_project.weather.services.</span></span><span class="sig-name descname"><span class="pre">hourly_row_time_ms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">row</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/main_project/weather/services.html#hourly_row_time_ms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main_project.weather.services.hourly_row_time_ms" title="Link to this definition"></a></dt>
+<dd><p>Extract the timestamp from a forecast row as milliseconds since epoch.</p>
+<p>Handles Unix int/float (seconds), naive <code class="docutils literal notranslate"><span class="pre">datetime</span></code> objects (assumed Dublin
+time), and ISO 8601 strings. Checks <code class="docutils literal notranslate"><span class="pre">dt</span></code> first, then <code class="docutils literal notranslate"><span class="pre">future_dt</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>row</strong> – A forecast row dict.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Milliseconds since the Unix epoch as a float, or <code class="docutils literal notranslate"><span class="pre">None</span></code> if no
+parseable timestamp field is found.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="main_project.weather.services.hourly_forecast_list_like_weather_page">
+<span class="sig-prename descclassname"><span class="pre">main_project.weather.services.</span></span><span class="sig-name descname"><span class="pre">hourly_forecast_list_like_weather_page</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">24</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/main_project/weather/services.html#hourly_forecast_list_like_weather_page"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main_project.weather.services.hourly_forecast_list_like_weather_page" title="Link to this definition"></a></dt>
+<dd><p>Return an hourly weather forecast using the same pipeline as the weather UI.</p>
+<p>Pipeline:</p>
+<ol class="arabic simple">
+<li><p>Query MySQL <code class="docutils literal notranslate"><span class="pre">hourly</span></code> table (primary).</p></li>
+<li><p>If empty, fall back to live OpenWeatherMap 3-hour forecast API
+(subject to a 5-minute cooldown).</p></li>
+<li><p>Filter to future-only rows.</p></li>
+<li><p>If fewer than 16 rows remain, supplement with API rows;
+DB rows take precedence within each 3-hour slot.</p></li>
+</ol>
+<dl class="simple">
+<dt>Uses:</dt><dd><ul class="simple">
+<li><p><a class="reference internal" href="#main_project.weather.services.hourly_forecast_rows_from_db" title="main_project.weather.services.hourly_forecast_rows_from_db"><code class="xref py py-func docutils literal notranslate"><span class="pre">hourly_forecast_rows_from_db()</span></code></a> — primary source;
+queries the <code class="docutils literal notranslate"><span class="pre">hourly</span></code> MySQL table.</p></li>
+<li><p><a class="reference internal" href="#main_project.weather.services.openweather_forecast_3h_list" title="main_project.weather.services.openweather_forecast_3h_list"><code class="xref py py-func docutils literal notranslate"><span class="pre">openweather_forecast_3h_list()</span></code></a> — fallback and
+supplement source; calls the OpenWeatherMap 5-day/3-hour forecast API.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>limit</strong> – Maximum number of rows to return. Clamped to <code class="docutils literal notranslate"><span class="pre">[1,</span> <span class="pre">100]</span></code>.
+Defaults to <code class="docutils literal notranslate"><span class="pre">24</span></code>.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">temp</span></code>, <code class="docutils literal notranslate"><span class="pre">humidity</span></code>, <code class="docutils literal notranslate"><span class="pre">pressure</span></code>,
+<code class="docutils literal notranslate"><span class="pre">rain_3h</span></code>, <code class="docutils literal notranslate"><span class="pre">pop</span></code>, and a timestamp (<code class="docutils literal notranslate"><span class="pre">dt</span></code> or <code class="docutils literal notranslate"><span class="pre">future_dt</span></code>).
+Returns an empty list if both the DB and API are unavailable.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A list of row dicts with keys</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-main_project.weather.routes">
+<span id="main-project-weather-routes-module"></span><h2>main_project.weather.routes module<a class="headerlink" href="#module-main_project.weather.routes" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="main_project.weather.routes.get_current_weather">
+<span class="sig-prename descclassname"><span class="pre">main_project.weather.routes.</span></span><span class="sig-name descname"><span class="pre">get_current_weather</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main_project.weather.routes.get_current_weather" title="Link to this definition"></a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">GET</span> <span class="pre">/api/weather/db/current</span></code> — Return the most recent current weather record from the local database.</p>
+<p>Example request:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>GET /api/weather/db/current?limit=1
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>limit</strong> – Maximum number of records to return. Defaults to <code class="docutils literal notranslate"><span class="pre">1</span></code>, max <code class="docutils literal notranslate"><span class="pre">10</span></code>.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>JSON with key <code class="docutils literal notranslate"><span class="pre">weather</span></code> containing a list of current weather dicts.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="main_project.weather.routes.get_nearest_hourly_weather">
+<span class="sig-prename descclassname"><span class="pre">main_project.weather.routes.</span></span><span class="sig-name descname"><span class="pre">get_nearest_hourly_weather</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main_project.weather.routes.get_nearest_hourly_weather" title="Link to this definition"></a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">GET</span> <span class="pre">/api/weather/db/hourly/nearest</span></code> — Return the hourly forecast record closest to a requested datetime.</p>
+<p>Searches within a ±3-hour window. Tries the local DB first, then falls
+back to the OpenWeather forecast API.</p>
+<dl class="simple">
+<dt>Uses:</dt><dd><ul class="simple">
+<li><p><a class="reference internal" href="#main_project.weather.services._fetch_nearest_weather" title="main_project.weather.services._fetch_nearest_weather"><code class="xref py py-func docutils literal notranslate"><span class="pre">_fetch_nearest_weather()</span></code></a> — queries the DB and
+falls back to the OpenWeather API if needed.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Example request:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>GET /api/weather/db/hourly/nearest?dt=2026-04-09+12:00:00
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>dt</strong> – Target datetime string in <code class="docutils literal notranslate"><span class="pre">&quot;YYYY-MM-DD</span> <span class="pre">HH:MM:SS&quot;</span></code> format (query param, required).</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>JSON weather row dict, or a 404 error if no match is found.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="main_project.weather.routes.db_hourly_weather">
+<span class="sig-prename descclassname"><span class="pre">main_project.weather.routes.</span></span><span class="sig-name descname"><span class="pre">db_hourly_weather</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main_project.weather.routes.db_hourly_weather" title="Link to this definition"></a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">GET</span> <span class="pre">/api/weather/db/hourly</span></code> — Return hourly weather forecast rows from the local database.</p>
+<dl class="simple">
+<dt>Uses:</dt><dd><ul class="simple">
+<li><p><a class="reference internal" href="#main_project.weather.services.hourly_forecast_rows_from_db" title="main_project.weather.services.hourly_forecast_rows_from_db"><code class="xref py py-func docutils literal notranslate"><span class="pre">hourly_forecast_rows_from_db()</span></code></a> — queries the DB
+for hourly forecast rows.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Example request:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>GET /api/weather/db/hourly?limit=40
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>limit</strong> – Maximum number of rows to return. Defaults to <code class="docutils literal notranslate"><span class="pre">40</span></code>, max <code class="docutils literal notranslate"><span class="pre">100</span></code>.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>JSON with key <code class="docutils literal notranslate"><span class="pre">hourly</span></code> containing a list of forecast row dicts.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="main_project.weather.routes.api_current_weather">
+<span class="sig-prename descclassname"><span class="pre">main_project.weather.routes.</span></span><span class="sig-name descname"><span class="pre">api_current_weather</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main_project.weather.routes.api_current_weather" title="Link to this definition"></a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">GET</span> <span class="pre">/api/weather/openweather/current</span></code> — Fetch current weather conditions via the OpenWeatherMap API.</p>
+<dl class="simple">
+<dt>Uses:</dt><dd><ul class="simple">
+<li><p><a class="reference internal" href="#main_project.weather.services.openweather_current" title="main_project.weather.services.openweather_current"><code class="xref py py-func docutils literal notranslate"><span class="pre">openweather_current()</span></code></a> — calls the OpenWeatherMap
+current weather endpoint and returns a normalised dict.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Example request:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>GET /api/weather/openweather/current?lat=53.3498&amp;lon=-6.2603
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lat</strong> – Latitude of the target location. Defaults to Dublin (<code class="docutils literal notranslate"><span class="pre">53.3498</span></code>).</p></li>
+<li><p><strong>lon</strong> – Longitude of the target location. Defaults to Dublin (<code class="docutils literal notranslate"><span class="pre">-6.2603</span></code>).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>JSON with keys <code class="docutils literal notranslate"><span class="pre">source</span></code> and <code class="docutils literal notranslate"><span class="pre">weather</span></code> (current conditions dict).</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="main_project.station.html" class="btn btn-neutral float-left" title="main_project.station package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="main_project.journey.html" class="btn btn-neutral float-right" title="main_project.journey package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

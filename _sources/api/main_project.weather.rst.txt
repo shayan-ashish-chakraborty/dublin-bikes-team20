@@ -1,0 +1,17 @@
+main\_project.weather package
+==============================
+
+main\_project.weather.services module
+---------------------------------------
+
+.. automodule:: main_project.weather.services
+   :members: hourly_forecast_rows_from_db, _fetch_nearest_weather, openweather_current, openweather_forecast_3h_list, hourly_row_time_ms, hourly_forecast_list_like_weather_page
+   :show-inheritance:
+
+main\_project.weather.routes module
+-------------------------------------
+
+.. automodule:: main_project.weather.routes
+   :members:
+   :show-inheritance:
+   :exclude-members: weather_page, _db_row_for_json, _jsonify_openweather_http_error

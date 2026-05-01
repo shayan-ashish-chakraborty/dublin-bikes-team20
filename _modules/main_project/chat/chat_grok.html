@@ -1,0 +1,326 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>main_project.chat.chat_grok &mdash; Dublin Bikes 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=f2a433a1"></script>
+      <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Dublin Bikes
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">main_project</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Dublin Bikes</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">main_project.chat.chat_grok</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for main_project.chat.chat_grok</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">flask</span><span class="w"> </span><span class="kn">import</span> <span class="n">Blueprint</span><span class="p">,</span> <span class="n">current_app</span><span class="p">,</span> <span class="n">jsonify</span><span class="p">,</span> <span class="n">request</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..config</span><span class="w"> </span><span class="kn">import</span> <span class="n">Config</span>
+
+<span class="n">chat_bp</span> <span class="o">=</span> <span class="n">Blueprint</span><span class="p">(</span><span class="s2">&quot;chat&quot;</span><span class="p">,</span> <span class="vm">__name__</span><span class="p">)</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<span class="c1"># GROQ SETTINGS </span>
+<span class="n">GROQ_ENDPOINT</span> <span class="o">=</span> <span class="s2">&quot;https://api.groq.com/openai/v1/chat/completions&quot;</span>
+<span class="n">GROQ_MODEL</span>    <span class="o">=</span> <span class="s2">&quot;llama-3.3-70b-versatile&quot;</span>   <span class="c1"># free, fast</span>
+
+<span class="c1"># BASE SYSTEM PROMPT </span>
+<span class="n">BASE_SYSTEM</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s2">&quot;You are a helpful assistant for Dublin Bikes. &quot;</span>
+    <span class="s2">&quot;Help users find stations, plan cycling routes, check weather, and give tips. &quot;</span>
+    <span class="s2">&quot;Keep replies short and friendly.&quot;</span>
+    <span class="s2">&quot;When answering about bike availability, use ONLY the live station data &quot;</span>
+    <span class="s2">&quot;provided below — never guess or make up numbers.</span><span class="se">\n\n</span><span class="s2">&quot;</span>
+<span class="p">)</span>
+
+
+<div class="viewcode-block" id="fetch_station_context">
+<a class="viewcode-back" href="../../../api/main_project.chat.html#main_project.chat.chat_grok.fetch_station_context">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">fetch_station_context</span><span class="p">(</span><span class="n">base_url</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Fetch a live station summary to inject into the chatbot system prompt.</span>
+
+<span class="sd">    Calls the internal ``/api/stations`` endpoint and formats up to 50 stations</span>
+<span class="sd">    as a compact plain-text block. Falls back to an empty string on any error</span>
+<span class="sd">    so the chat endpoint continues to work without station context.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        base_url: The application&#39;s base URL (e.g. ``&quot;http://127.0.0.1:8000&quot;``).</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A plain-text summary string listing station names, available bikes,</span>
+<span class="sd">        available spaces, and status. Returns an empty string if the endpoint</span>
+<span class="sd">        is unreachable or returns no data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">base_url</span><span class="si">}</span><span class="s2">/api/stations&quot;</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">res</span><span class="o">.</span><span class="n">status_code</span> <span class="o">!=</span> <span class="mi">200</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">stations</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+
+        <span class="c1"># Support both {&quot;stations&quot;: [...]} and a bare list</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">stations</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">stations</span> <span class="o">=</span> <span class="n">stations</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;stations&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">stations</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[]</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">stations</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;&quot;</span>
+
+        <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;LIVE DUBLIN BIKES DATA (as of right now):&quot;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">stations</span><span class="p">[:</span><span class="mi">50</span><span class="p">]:</span>  <span class="c1"># cap at 50 stations to stay within token budget</span>
+            <span class="n">name</span>      <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">s</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;address&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;Unknown&quot;</span>
+            <span class="n">available</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;available_bikes&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">s</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;bikes&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">s</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;availableBikes&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;?&quot;</span>
+            <span class="n">spaces</span>    <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;available_bike_stands&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">s</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;spaces&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">s</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;availableStands&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;?&quot;</span>
+            <span class="n">status</span>    <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;status&quot;</span><span class="p">,</span> <span class="s2">&quot;OPEN&quot;</span><span class="p">)</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;- </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">available</span><span class="si">}</span><span class="s2"> bikes, </span><span class="si">{</span><span class="n">spaces</span><span class="si">}</span><span class="s2"> spaces (</span><span class="si">{</span><span class="n">status</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span>
+
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Could not fetch station context: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s2">&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="call_groq_with_retry">
+<a class="viewcode-back" href="../../../api/main_project.chat.html#main_project.chat.chat_grok.call_groq_with_retry">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">call_groq_with_retry</span><span class="p">(</span><span class="n">messages</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">api_key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">max_retries</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">requests</span><span class="o">.</span><span class="n">Response</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Send a chat completion request to the Groq API with retry logic.</span>
+
+<span class="sd">    Retries on connection timeouts, 429 rate-limit responses (honouring</span>
+<span class="sd">    ``Retry-After`` headers), and 503 service-unavailable responses using</span>
+<span class="sd">    exponential back-off.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        messages: List of OpenAI-format message dicts (``role`` + ``content``).</span>
+<span class="sd">        api_key: Groq API key for the ``Authorization`` header.</span>
+<span class="sd">        max_retries: Maximum number of attempts before giving up. Defaults to ``3``.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The final ``requests.Response`` object (successful or not). The caller</span>
+<span class="sd">        is responsible for checking ``response.status_code``.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        requests.exceptions.ConnectTimeout: If all retry attempts time out.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;Authorization&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Bearer </span><span class="si">{</span><span class="n">api_key</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Content-Type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json&quot;</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;model&quot;</span><span class="p">:</span> <span class="n">GROQ_MODEL</span><span class="p">,</span>
+        <span class="s2">&quot;messages&quot;</span><span class="p">:</span> <span class="n">messages</span><span class="p">,</span>
+        <span class="s2">&quot;max_tokens&quot;</span><span class="p">:</span> <span class="mi">400</span><span class="p">,</span>
+        <span class="s2">&quot;temperature&quot;</span><span class="p">:</span> <span class="mf">0.7</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="k">for</span> <span class="n">attempt</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">max_retries</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">GROQ_ENDPOINT</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="n">payload</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">25</span><span class="p">))</span>
+        <span class="k">except</span> <span class="n">requests</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">ConnectTimeout</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Connection timeout (attempt </span><span class="si">{</span><span class="n">attempt</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">max_retries</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">attempt</span> <span class="o">&lt;</span> <span class="n">max_retries</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="n">attempt</span><span class="p">)</span>
+                <span class="k">continue</span>
+            <span class="k">raise</span>
+
+        <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">response</span>
+        <span class="k">elif</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">429</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">attempt</span> <span class="o">&lt;</span> <span class="n">max_retries</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">retry_after</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;Retry-After&quot;</span><span class="p">)</span>
+                <span class="n">wait</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">retry_after</span><span class="p">)</span> <span class="k">if</span> <span class="n">retry_after</span> <span class="k">else</span> <span class="p">(</span><span class="mi">5</span> <span class="o">*</span> <span class="p">(</span><span class="n">attempt</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;429 rate limit, retrying in </span><span class="si">{</span><span class="n">wait</span><span class="si">}</span><span class="s2">s (attempt </span><span class="si">{</span><span class="n">attempt</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">max_retries</span><span class="si">}</span><span class="s2">)...&quot;</span><span class="p">)</span>
+                <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">wait</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">response</span>
+        <span class="k">elif</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">503</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">attempt</span> <span class="o">&lt;</span> <span class="n">max_retries</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">wait</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">**</span> <span class="n">attempt</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;503 received, retrying in </span><span class="si">{</span><span class="n">wait</span><span class="si">}</span><span class="s2">s (attempt </span><span class="si">{</span><span class="n">attempt</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">max_retries</span><span class="si">}</span><span class="s2">)...&quot;</span><span class="p">)</span>
+                <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">wait</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">response</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">response</span>
+
+    <span class="k">return</span> <span class="n">response</span></div>
+
+
+
+<span class="nd">@chat_bp</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">chat</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;``POST /api/chat`` — Handle a chat completion request using the Groq LLM API.</span>
+
+<span class="sd">    Injects live Dublin Bikes station data into the system prompt, then</span>
+<span class="sd">    forwards the conversation history to Groq and returns the assistant reply.</span>
+
+<span class="sd">    Uses:</span>
+<span class="sd">        - :func:`fetch_station_context` — fetches live station data from ``GET /api/stations``</span>
+<span class="sd">          and formats it as a plain-text block for the system prompt.</span>
+<span class="sd">        - :func:`call_groq_with_retry` — sends the message list to the Groq API with</span>
+<span class="sd">          automatic retry on rate-limit and service errors.</span>
+
+<span class="sd">    Example request::</span>
+
+<span class="sd">        POST /api/chat</span>
+<span class="sd">        Content-Type: application/json</span>
+
+<span class="sd">        {</span>
+<span class="sd">            &quot;messages&quot;: [</span>
+<span class="sd">                {&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;Which station has the most bikes right now?&quot;}</span>
+<span class="sd">            ]</span>
+<span class="sd">        }</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        messages: List of OpenAI-format message dicts (JSON body, required).</span>
+<span class="sd">            Each dict must have ``role`` (``&quot;user&quot;`` or ``&quot;assistant&quot;``) and ``content``.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A Flask JSON response tuple. On success: ``{&quot;reply&quot;: str}``, 200.</span>
+<span class="sd">        On rate limit: ``{&quot;error&quot;: ..., &quot;message&quot;: ..., &quot;retry_after_seconds&quot;: int}``, 429.</span>
+<span class="sd">        On other errors: ``{&quot;error&quot;: str}``, 400/500.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">get_json</span><span class="p">(</span><span class="n">silent</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">data</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;messages&quot;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;Invalid request&quot;</span><span class="p">}),</span> <span class="mi">400</span>
+
+        <span class="n">incoming_messages</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;messages&quot;</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="n">groq_api_key</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">Config</span><span class="p">,</span> <span class="s2">&quot;GROQ_API_KEY&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;GROQ_API_KEY&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">groq_api_key</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;GROQ_API_KEY not configured&quot;</span><span class="p">}),</span> <span class="mi">500</span>
+
+        <span class="c1"># Build live station context and inject into system prompt</span>
+        <span class="n">base_url</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">host_url</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>   <span class="c1"># e.g. http://127.0.0.1:8000</span>
+        <span class="n">station_ctx</span> <span class="o">=</span> <span class="n">fetch_station_context</span><span class="p">(</span><span class="n">base_url</span><span class="p">)</span>
+        <span class="n">system_content</span> <span class="o">=</span> <span class="n">BASE_SYSTEM</span> <span class="o">+</span> <span class="n">station_ctx</span>
+
+        <span class="c1"># Build OpenAI-format messages: system first, then conversation history</span>
+        <span class="n">messages</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;system&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="n">system_content</span><span class="p">}]</span>
+        <span class="k">for</span> <span class="n">msg</span> <span class="ow">in</span> <span class="n">incoming_messages</span><span class="p">:</span>
+            <span class="n">role</span>    <span class="o">=</span> <span class="s2">&quot;user&quot;</span> <span class="k">if</span> <span class="n">msg</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;role&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;user&quot;</span> <span class="k">else</span> <span class="s2">&quot;assistant&quot;</span>
+            <span class="n">content</span> <span class="o">=</span> <span class="n">msg</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;content&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">content</span><span class="p">:</span>
+                <span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="n">role</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="n">content</span><span class="p">})</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">messages</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>   <span class="c1"># only system prompt, no user messages</span>
+            <span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;No valid messages&quot;</span><span class="p">}),</span> <span class="mi">400</span>
+
+        <span class="n">response</span> <span class="o">=</span> <span class="n">call_groq_with_retry</span><span class="p">(</span><span class="n">messages</span><span class="p">,</span> <span class="n">groq_api_key</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+            <span class="n">reply</span>  <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;choices&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;message&quot;</span><span class="p">][</span><span class="s2">&quot;content&quot;</span><span class="p">]</span>
+            <span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span><span class="s2">&quot;reply&quot;</span><span class="p">:</span> <span class="n">reply</span><span class="p">})</span>
+
+        <span class="k">elif</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">429</span><span class="p">:</span>
+            <span class="n">detail</span>  <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span> <span class="k">if</span> <span class="s2">&quot;application/json&quot;</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;Content-Type&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="p">{}</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="n">detail</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;error&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;message&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">detail</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
+            <span class="n">resp_payload</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;error&quot;</span><span class="p">:</span>   <span class="s2">&quot;API quota exceeded&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="n">message</span> <span class="ow">or</span> <span class="s2">&quot;Too many requests — Groq rate limit hit.&quot;</span><span class="p">,</span>
+            <span class="p">}</span>
+            <span class="n">retry_after</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;Retry-After&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">retry_after</span><span class="p">:</span>
+                <span class="n">resp_payload</span><span class="p">[</span><span class="s2">&quot;retry_after_seconds&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">retry_after</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">jsonify</span><span class="p">(</span><span class="n">resp_payload</span><span class="p">),</span> <span class="mi">429</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Groq API error </span><span class="si">{</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="p">[:</span><span class="mi">200</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;Service temporarily unavailable&quot;</span><span class="p">,</span> <span class="s2">&quot;groq_status&quot;</span><span class="p">:</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">}),</span> <span class="mi">500</span>
+
+    <span class="k">except</span> <span class="n">requests</span><span class="o">.</span><span class="n">RequestException</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Network error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;Connection error&quot;</span><span class="p">}),</span> <span class="mi">500</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unexpected error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;Internal server error&quot;</span><span class="p">}),</span> <span class="mi">500</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

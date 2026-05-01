@@ -1,0 +1,9 @@
+main\_project.auth package
+==========================
+
+main\_project.auth.auth module
+--------------------------------
+
+.. automodule:: main_project.auth.auth
+   :members:
+   :show-inheritance:

@@ -1,0 +1,16 @@
+main\_project.bike\_forecast package
+=====================================
+
+main\_project.bike\_forecast.models.forecast module
+-----------------------------------------------------
+
+.. automodule:: main_project.bike_forecast.models.forecast
+   :members: _load_models, _predict_hour, _predict_bike_dock_batch
+   :show-inheritance:
+
+main\_project.bike\_forecast.routes module
+-------------------------------------------
+
+.. automodule:: main_project.bike_forecast.routes
+   :members:
+   :show-inheritance:

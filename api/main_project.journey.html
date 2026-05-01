@@ -1,0 +1,446 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>main_project.journey package &mdash; Dublin Bikes 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=f2a433a1"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="main_project.bike_forecast package" href="main_project.bike_forecast.html" />
+    <link rel="prev" title="main_project.weather package" href="main_project.weather.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Dublin Bikes
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">main_project</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="main_project.html">main_project package</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="main_project.auth.html">main_project.auth package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="main_project.station.html">main_project.station package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="main_project.weather.html">main_project.weather package</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">main_project.journey package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#module-main_project.journey.services">main_project.journey.services module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-main_project.journey.routes">main_project.journey.routes module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="main_project.bike_forecast.html">main_project.bike_forecast package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="main_project.chat.html">main_project.chat package</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Dublin Bikes</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">main_project</a></li>
+          <li class="breadcrumb-item"><a href="main_project.html">main_project package</a></li>
+      <li class="breadcrumb-item active">main_project.journey package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/main_project.journey.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="main-project-journey-package">
+<h1>main_project.journey package<a class="headerlink" href="#main-project-journey-package" title="Link to this heading"></a></h1>
+<section id="module-main_project.journey.services">
+<span id="main-project-journey-services-module"></span><h2>main_project.journey.services module<a class="headerlink" href="#module-main_project.journey.services" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="main_project.journey.services.geocode_address">
+<span class="sig-prename descclassname"><span class="pre">main_project.journey.services.</span></span><span class="sig-name descname"><span class="pre">geocode_address</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">address</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="reference internal" href="../_modules/main_project/journey/services.html#geocode_address"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main_project.journey.services.geocode_address" title="Link to this definition"></a></dt>
+<dd><p>Convert a free-text address to latitude/longitude using the Google Geocoding API.</p>
+<p>The query is scoped to Dublin, Ireland.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>address</strong> – A free-text address string (e.g. <code class="docutils literal notranslate"><span class="pre">&quot;O'Connell</span> <span class="pre">Street&quot;</span></code>).</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A <code class="docutils literal notranslate"><span class="pre">(lat,</span> <span class="pre">lng)</span></code> tuple of floats.</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>requests.HTTPError</strong> – If the API returns a non-2xx status code.</p></li>
+<li><p><strong>ValueError</strong> – If the geocoding result status is not <code class="docutils literal notranslate"><span class="pre">&quot;OK&quot;</span></code> or no
+    results are returned.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="main_project.journey.services.haversine">
+<span class="sig-prename descclassname"><span class="pre">main_project.journey.services.</span></span><span class="sig-name descname"><span class="pre">haversine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lat1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lng1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lat2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lng2</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../_modules/main_project/journey/services.html#haversine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main_project.journey.services.haversine" title="Link to this definition"></a></dt>
+<dd><p>Calculate the great-circle distance in metres between two coordinates.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lat1</strong> – Latitude of the first point in decimal degrees.</p></li>
+<li><p><strong>lng1</strong> – Longitude of the first point in decimal degrees.</p></li>
+<li><p><strong>lat2</strong> – Latitude of the second point in decimal degrees.</p></li>
+<li><p><strong>lng2</strong> – Longitude of the second point in decimal degrees.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Distance in metres as a float.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="main_project.journey.services.find_nearest_station">
+<span class="sig-prename descclassname"><span class="pre">main_project.journey.services.</span></span><span class="sig-name descname"><span class="pre">find_nearest_station</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lng</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">require_bikes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">require_stands</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="../_modules/main_project/journey/services.html#find_nearest_station"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main_project.journey.services.find_nearest_station" title="Link to this definition"></a></dt>
+<dd><p>Find the nearest bike stations to a point, with optional availability filters.</p>
+<dl class="simple">
+<dt>Uses:</dt><dd><ul class="simple">
+<li><p><a class="reference internal" href="#main_project.journey.services.haversine" title="main_project.journey.services.haversine"><code class="xref py py-func docutils literal notranslate"><span class="pre">haversine()</span></code></a> — computes the great-circle distance
+between the reference point and each candidate station.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lat</strong> – Latitude of the reference point.</p></li>
+<li><p><strong>lng</strong> – Longitude of the reference point.</p></li>
+<li><p><strong>stations</strong> – List of formatted station dicts (must include <code class="docutils literal notranslate"><span class="pre">lat</span></code>, <code class="docutils literal notranslate"><span class="pre">lng</span></code>,
+<code class="docutils literal notranslate"><span class="pre">available_bikes</span></code>, and <code class="docutils literal notranslate"><span class="pre">available_stands</span></code>).</p></li>
+<li><p><strong>require_bikes</strong> – If <code class="docutils literal notranslate"><span class="pre">True</span></code>, exclude stations with no available bikes.
+Defaults to <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p></li>
+<li><p><strong>require_stands</strong> – If <code class="docutils literal notranslate"><span class="pre">True</span></code>, exclude stations with no available docks.
+Defaults to <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p></li>
+<li><p><strong>limit</strong> – Maximum number of stations to return. Defaults to <code class="docutils literal notranslate"><span class="pre">3</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of up to <code class="docutils literal notranslate"><span class="pre">limit</span></code> station dicts sorted by distance ascending,
+each augmented with a <code class="docutils literal notranslate"><span class="pre">distance_m</span></code> key (int, metres).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="main_project.journey.services.predict_stations_availability">
+<span class="sig-prename descclassname"><span class="pre">main_project.journey.services.</span></span><span class="sig-name descname"><span class="pre">predict_stations_availability</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stations</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_str</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">models</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/main_project/journey/services.html#predict_stations_availability"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main_project.journey.services.predict_stations_availability" title="Link to this definition"></a></dt>
+<dd><p>Predict bike and dock availability for a list of stations at a given time.</p>
+<p>Logic:</p>
+<ol class="arabic simple">
+<li><p>Parse <code class="docutils literal notranslate"><span class="pre">time_str</span></code> into a target <code class="docutils literal notranslate"><span class="pre">datetime</span></code>.</p></li>
+<li><p>Fetch the nearest hourly weather record <strong>once</strong> for the target time
+using <a class="reference internal" href="main_project.weather.html#main_project.weather.services._fetch_nearest_weather" title="main_project.weather.services._fetch_nearest_weather"><code class="xref py py-func docutils literal notranslate"><span class="pre">_fetch_nearest_weather()</span></code></a>.
+If weather is available, build a <code class="docutils literal notranslate"><span class="pre">wx_override</span></code> dict with
+<code class="docutils literal notranslate"><span class="pre">avg_temp</span></code>, <code class="docutils literal notranslate"><span class="pre">avg_humidity</span></code>, <code class="docutils literal notranslate"><span class="pre">avg_pressure</span></code>, and <code class="docutils literal notranslate"><span class="pre">is_raining</span></code>
+(derived from <code class="docutils literal notranslate"><span class="pre">rain_3h</span> <span class="pre">&gt;</span> <span class="pre">0.01</span></code> or <code class="docutils literal notranslate"><span class="pre">pop</span> <span class="pre">&gt;=</span> <span class="pre">0.5</span></code>).</p></li>
+<li><p>For each station, run the two-stage ML pipeline via
+<a class="reference internal" href="main_project.bike_forecast.html#main_project.bike_forecast.models.forecast._predict_hour" title="main_project.bike_forecast.models.forecast._predict_hour"><code class="xref py py-func docutils literal notranslate"><span class="pre">_predict_hour()</span></code></a>,
+passing the shared <code class="docutils literal notranslate"><span class="pre">wx_override</span></code> so weather is not re-fetched
+per station.</p></li>
+<li><p>Clamp predictions to <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">capacity]</span></code> and compute
+<code class="docutils literal notranslate"><span class="pre">available_stands</span> <span class="pre">=</span> <span class="pre">capacity</span> <span class="pre">−</span> <span class="pre">predicted_bikes</span></code>.</p></li>
+</ol>
+<p>If weather data is unavailable (DB empty and API failed), <code class="docutils literal notranslate"><span class="pre">wx_override</span></code>
+is <code class="docutils literal notranslate"><span class="pre">None</span></code> and the internal weather model predicts conditions from
+hour/month alone — a <code class="docutils literal notranslate"><span class="pre">weather_warning</span></code> string is returned to inform
+the caller.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>stations</strong> – List of formatted station dicts; each must have <code class="docutils literal notranslate"><span class="pre">number</span></code>
+and <code class="docutils literal notranslate"><span class="pre">total_stands</span></code>.</p></li>
+<li><p><strong>time_str</strong> – Target datetime as <code class="docutils literal notranslate"><span class="pre">&quot;YYYY-MM-DD</span> <span class="pre">HH:MM:SS&quot;</span></code>, or <code class="docutils literal notranslate"><span class="pre">&quot;now&quot;</span></code>
+for the current time.</p></li>
+<li><p><strong>models</strong> – Pre-loaded ML model tuple from
+<a class="reference internal" href="main_project.bike_forecast.html#main_project.bike_forecast.models.forecast._load_models" title="main_project.bike_forecast.models.forecast._load_models"><code class="xref py py-func docutils literal notranslate"><span class="pre">_load_models()</span></code></a>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">results</span></code> is a copy of <code class="docutils literal notranslate"><span class="pre">stations</span></code> with <code class="docutils literal notranslate"><span class="pre">available_bikes</span></code> and
+<code class="docutils literal notranslate"><span class="pre">available_stands</span></code> overwritten by ML predictions.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">weather_warning</span></code> is <code class="docutils literal notranslate"><span class="pre">None</span></code> on success, or a descriptive string
+if weather data was unavailable and the internal weather model was
+used instead.</p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A tuple <code class="docutils literal notranslate"><span class="pre">(results,</span> <span class="pre">weather_warning)</span></code> where</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="main_project.journey.services.get_directions">
+<span class="sig-prename descclassname"><span class="pre">main_project.journey.services.</span></span><span class="sig-name descname"><span class="pre">get_directions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">origin_lat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">origin_lng</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dest_lat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dest_lng</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'bicycling'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="../_modules/main_project/journey/services.html#get_directions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main_project.journey.services.get_directions" title="Link to this definition"></a></dt>
+<dd><p>Fetch turn-by-turn directions between two coordinates via the Google Directions API.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>origin_lat</strong> – Latitude of the origin.</p></li>
+<li><p><strong>origin_lng</strong> – Longitude of the origin.</p></li>
+<li><p><strong>dest_lat</strong> – Latitude of the destination.</p></li>
+<li><p><strong>dest_lng</strong> – Longitude of the destination.</p></li>
+<li><p><strong>mode</strong> – Travel mode — <code class="docutils literal notranslate"><span class="pre">&quot;bicycling&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;walking&quot;</span></code>, or <code class="docutils literal notranslate"><span class="pre">&quot;driving&quot;</span></code>.
+Defaults to <code class="docutils literal notranslate"><span class="pre">&quot;bicycling&quot;</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">distance_text</span></code>, <code class="docutils literal notranslate"><span class="pre">distance_m</span></code>, <code class="docutils literal notranslate"><span class="pre">duration_text</span></code>,
+<code class="docutils literal notranslate"><span class="pre">duration_s</span></code>, <code class="docutils literal notranslate"><span class="pre">polyline</span></code> (encoded), and <code class="docutils literal notranslate"><span class="pre">steps</span></code> (list of dicts
+with <code class="docutils literal notranslate"><span class="pre">instruction</span></code>, <code class="docutils literal notranslate"><span class="pre">distance</span></code>, <code class="docutils literal notranslate"><span class="pre">duration</span></code>).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A dict with keys</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>requests.HTTPError</strong> – If the API returns a non-2xx status code.</p></li>
+<li><p><strong>ValueError</strong> – If the API returns no route.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-main_project.journey.routes">
+<span id="main-project-journey-routes-module"></span><h2>main_project.journey.routes module<a class="headerlink" href="#module-main_project.journey.routes" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="main_project.journey.routes.availability">
+<span class="sig-prename descclassname"><span class="pre">main_project.journey.routes.</span></span><span class="sig-name descname"><span class="pre">availability</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main_project.journey.routes.availability" title="Link to this definition"></a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">GET</span> <span class="pre">/journey/api/availability</span></code> — Return live availability for all Dublin Bikes stations.</p>
+<p>Fetches raw station data from the JCDecaux API and normalises each entry.
+Date/time query parameters are accepted but currently unused — this route
+always returns live data. ML-based availability is handled by
+<a class="reference internal" href="#main_project.journey.routes.predict_availability" title="main_project.journey.routes.predict_availability"><code class="xref py py-func docutils literal notranslate"><span class="pre">predict_availability()</span></code></a> instead.</p>
+<dl class="simple">
+<dt>Uses:</dt><dd><ul class="simple">
+<li><p><a class="reference internal" href="main_project.station.html#main_project.station.services.get_all_stations" title="main_project.station.services.get_all_stations"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_all_stations()</span></code></a> — fetches all stations from JCDecaux.</p></li>
+<li><p><a class="reference internal" href="main_project.station.html#main_project.station.services.format_station" title="main_project.station.services.format_station"><code class="xref py py-func docutils literal notranslate"><span class="pre">format_station()</span></code></a> — normalises each raw station dict.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>JSON list of formatted station dicts with live <code class="docutils literal notranslate"><span class="pre">available_bikes</span></code>
+and <code class="docutils literal notranslate"><span class="pre">available_stands</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="main_project.journey.routes.route">
+<span class="sig-prename descclassname"><span class="pre">main_project.journey.routes.</span></span><span class="sig-name descname"><span class="pre">route</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main_project.journey.routes.route" title="Link to this definition"></a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">POST</span> <span class="pre">/journey/api/route</span></code> — Plan a live cycling route between two addresses using current station availability.</p>
+<p>Logic:</p>
+<ol class="arabic simple">
+<li><p>Geocode <code class="docutils literal notranslate"><span class="pre">start</span></code> and <code class="docutils literal notranslate"><span class="pre">end</span></code> addresses to coordinates.</p></li>
+<li><p>Fetch all live stations from JCDecaux.</p></li>
+<li><p>Find the nearest pickup station with available bikes.</p></li>
+<li><p>Find the nearest dropoff station with available docks.</p></li>
+<li><p>Fetch three route legs from Google Directions API.</p></li>
+</ol>
+<dl class="simple">
+<dt>Uses:</dt><dd><ul class="simple">
+<li><p><a class="reference internal" href="#main_project.journey.services.geocode_address" title="main_project.journey.services.geocode_address"><code class="xref py py-func docutils literal notranslate"><span class="pre">geocode_address()</span></code></a> — converts addresses to coordinates.</p></li>
+<li><p><a class="reference internal" href="main_project.station.html#main_project.station.services.get_all_stations" title="main_project.station.services.get_all_stations"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_all_stations()</span></code></a> — fetches live station data.</p></li>
+<li><p><a class="reference internal" href="main_project.station.html#main_project.station.services.format_station" title="main_project.station.services.format_station"><code class="xref py py-func docutils literal notranslate"><span class="pre">format_station()</span></code></a> — normalises station dicts.</p></li>
+<li><p><a class="reference internal" href="#main_project.journey.services.find_nearest_station" title="main_project.journey.services.find_nearest_station"><code class="xref py py-func docutils literal notranslate"><span class="pre">find_nearest_station()</span></code></a> — finds closest stations with availability filters.</p></li>
+<li><p><a class="reference internal" href="#main_project.journey.services.get_directions" title="main_project.journey.services.get_directions"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_directions()</span></code></a> — fetches walking and cycling legs.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Example request:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">POST</span> <span class="o">/</span><span class="n">journey</span><span class="o">/</span><span class="n">api</span><span class="o">/</span><span class="n">route</span>
+<span class="n">Content</span><span class="o">-</span><span class="n">Type</span><span class="p">:</span> <span class="n">application</span><span class="o">/</span><span class="n">json</span>
+
+<span class="p">{</span>
+    <span class="s2">&quot;start&quot;</span><span class="p">:</span> <span class="s2">&quot;O&#39;Connell Street&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;end&quot;</span><span class="p">:</span> <span class="s2">&quot;Grand Canal Dock&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>start</strong> – Origin address string (JSON body, required).</p></li>
+<li><p><strong>end</strong> – Destination address string (JSON body, required).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>JSON with <code class="docutils literal notranslate"><span class="pre">start</span></code>, <code class="docutils literal notranslate"><span class="pre">end</span></code>, <code class="docutils literal notranslate"><span class="pre">pickup_station</span></code>, <code class="docutils literal notranslate"><span class="pre">dropoff_station</span></code>,
+<code class="docutils literal notranslate"><span class="pre">legs</span></code> (walk_to_bike, cycle, walk_from_bike), and <code class="docutils literal notranslate"><span class="pre">summary</span></code>
+(total distance and duration).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="main_project.journey.routes.predict_availability">
+<span class="sig-prename descclassname"><span class="pre">main_project.journey.routes.</span></span><span class="sig-name descname"><span class="pre">predict_availability</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main_project.journey.routes.predict_availability" title="Link to this definition"></a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">GET</span> <span class="pre">/journey/api/predict/availability</span></code> — Predict bike and dock availability at a single station for a future datetime.</p>
+<p>Logic:</p>
+<ol class="arabic simple">
+<li><p>Validate <code class="docutils literal notranslate"><span class="pre">stand_no</span></code> and <code class="docutils literal notranslate"><span class="pre">time</span></code> query parameters.</p></li>
+<li><p>Fetch live station data to obtain capacity (<code class="docutils literal notranslate"><span class="pre">total_stands</span></code>).</p></li>
+<li><p>Run the ML pipeline for the single station at the requested time.</p></li>
+</ol>
+<dl class="simple">
+<dt>Uses:</dt><dd><ul class="simple">
+<li><p><a class="reference internal" href="main_project.station.html#main_project.station.services.get_station" title="main_project.station.services.get_station"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_station()</span></code></a> — fetches live station data from JCDecaux.</p></li>
+<li><p><a class="reference internal" href="main_project.station.html#main_project.station.services.format_station" title="main_project.station.services.format_station"><code class="xref py py-func docutils literal notranslate"><span class="pre">format_station()</span></code></a> — normalises the station dict.</p></li>
+<li><p><a class="reference internal" href="#main_project.journey.services.predict_stations_availability" title="main_project.journey.services.predict_stations_availability"><code class="xref py py-func docutils literal notranslate"><span class="pre">predict_stations_availability()</span></code></a> — runs the two-stage ML pipeline (weather + bike model).</p></li>
+</ul>
+</dd>
+</dl>
+<p>Example request:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>GET /journey/api/predict/availability?stand_no=42&amp;time=2026-04-09+12:00:00
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>stand_no</strong> – JCDecaux station number (query param, required).</p></li>
+<li><p><strong>time</strong> – Target datetime as <code class="docutils literal notranslate"><span class="pre">&quot;YYYY-MM-DD</span> <span class="pre">HH:MM:SS&quot;</span></code> (query param, required).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>JSON with keys <code class="docutils literal notranslate"><span class="pre">stand_no</span></code>, <code class="docutils literal notranslate"><span class="pre">time</span></code>, <code class="docutils literal notranslate"><span class="pre">predicted_bikes</span></code>,
+<code class="docutils literal notranslate"><span class="pre">predicted_docks</span></code>, and <code class="docutils literal notranslate"><span class="pre">weather_warning</span></code> (<code class="docutils literal notranslate"><span class="pre">null</span></code> on success,
+or a message string if weather data was unavailable).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="main_project.journey.routes.route_predict">
+<span class="sig-prename descclassname"><span class="pre">main_project.journey.routes.</span></span><span class="sig-name descname"><span class="pre">route_predict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#main_project.journey.routes.route_predict" title="Link to this definition"></a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">POST</span> <span class="pre">/journey/api/route/predict</span></code> — Plan a cycling route using predicted station availability at a future time.</p>
+<p>Logic:</p>
+<ol class="arabic simple">
+<li><p>Geocode <code class="docutils literal notranslate"><span class="pre">start</span></code> and <code class="docutils literal notranslate"><span class="pre">end</span></code> addresses to coordinates.</p></li>
+<li><p>Fetch all live stations for coordinates and capacity data.</p></li>
+<li><p>Find the 5 nearest candidate stations for pickup and dropoff.</p></li>
+<li><p>Deduplicate candidates and run the ML pipeline <strong>once</strong> for all of them
+(weather is fetched only once and reused across all stations).</p></li>
+<li><p>Filter to stations with predicted bikes/docks available.</p></li>
+<li><p>Fetch three route legs from Google Directions API.</p></li>
+</ol>
+<dl class="simple">
+<dt>Uses:</dt><dd><ul class="simple">
+<li><p><a class="reference internal" href="#main_project.journey.services.geocode_address" title="main_project.journey.services.geocode_address"><code class="xref py py-func docutils literal notranslate"><span class="pre">geocode_address()</span></code></a> — converts addresses to coordinates.</p></li>
+<li><p><a class="reference internal" href="main_project.station.html#main_project.station.services.get_all_stations" title="main_project.station.services.get_all_stations"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_all_stations()</span></code></a> — fetches live station data.</p></li>
+<li><p><a class="reference internal" href="main_project.station.html#main_project.station.services.format_station" title="main_project.station.services.format_station"><code class="xref py py-func docutils literal notranslate"><span class="pre">format_station()</span></code></a> — normalises station dicts.</p></li>
+<li><p><a class="reference internal" href="#main_project.journey.services.find_nearest_station" title="main_project.journey.services.find_nearest_station"><code class="xref py py-func docutils literal notranslate"><span class="pre">find_nearest_station()</span></code></a> — finds nearest candidate stations.</p></li>
+<li><p><a class="reference internal" href="#main_project.journey.services.predict_stations_availability" title="main_project.journey.services.predict_stations_availability"><code class="xref py py-func docutils literal notranslate"><span class="pre">predict_stations_availability()</span></code></a> — runs batch ML prediction (weather fetched once).</p></li>
+<li><p><a class="reference internal" href="#main_project.journey.services.get_directions" title="main_project.journey.services.get_directions"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_directions()</span></code></a> — fetches walking and cycling route legs.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Example request:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">POST</span> <span class="o">/</span><span class="n">journey</span><span class="o">/</span><span class="n">api</span><span class="o">/</span><span class="n">route</span><span class="o">/</span><span class="n">predict</span>
+<span class="n">Content</span><span class="o">-</span><span class="n">Type</span><span class="p">:</span> <span class="n">application</span><span class="o">/</span><span class="n">json</span>
+
+<span class="p">{</span>
+    <span class="s2">&quot;start&quot;</span><span class="p">:</span> <span class="s2">&quot;O&#39;Connell Street&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;end&quot;</span><span class="p">:</span> <span class="s2">&quot;Grand Canal Dock&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="s2">&quot;2026-04-09 15:00:00&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>start</strong> – Origin address string (JSON body, required).</p></li>
+<li><p><strong>end</strong> – Destination address string (JSON body, required).</p></li>
+<li><p><strong>time</strong> – Target datetime as <code class="docutils literal notranslate"><span class="pre">&quot;YYYY-MM-DD</span> <span class="pre">HH:MM:SS&quot;</span></code>, or <code class="docutils literal notranslate"><span class="pre">&quot;now&quot;</span></code> (JSON body, required).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>JSON with the same shape as <code class="docutils literal notranslate"><span class="pre">/api/route</span></code>, plus <code class="docutils literal notranslate"><span class="pre">prediction_mode:</span> <span class="pre">true</span></code>
+and <code class="docutils literal notranslate"><span class="pre">weather_warning</span></code> (<code class="docutils literal notranslate"><span class="pre">null</span></code> on success, or a message string).
+<code class="docutils literal notranslate"><span class="pre">available_bikes</span></code> and <code class="docutils literal notranslate"><span class="pre">available_stands</span></code> reflect predicted values.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="main_project.weather.html" class="btn btn-neutral float-left" title="main_project.weather package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="main_project.bike_forecast.html" class="btn btn-neutral float-right" title="main_project.bike_forecast package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
