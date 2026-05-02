@@ -13,7 +13,7 @@
 
 ## AI Tool Used
 
-- **Tool:** ChatGPT (OpenAI)
+**Tool:** ChatGPT (OpenAI)
 
 ---
 
@@ -58,7 +58,31 @@
 
 ---
 
+### Session 4
 
+| Field       | Details                        |
+|-------------|--------------------------------|
+| **Purpose** | Flask and UI Debugging |
+| **Link**    | https://chatgpt.com/share/69f62586-0978-83eb-8765-64f33ac60240 |
+
+**Summary of what was discussed / how it was used:**
+
+> Had Flask and overall ui issues with app.py not running properly.
+
+---
+
+### Session 4
+
+| Field       | Details                        |
+|-------------|--------------------------------|
+| **Purpose** | ML Implemetation Research |
+| **Link**    | https://chatgpt.com/share/69f6260b-ce10-83eb-832f-a22df0557aec |
+
+**Summary of what was discussed / how it was used:**
+
+> Had Flask and overall ui issues with app.py not running properly.
+
+---
 
 ## Declaration
 
