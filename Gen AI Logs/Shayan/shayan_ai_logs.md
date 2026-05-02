@@ -28,7 +28,7 @@
 
 **Summary of what was discussed / how it was used:**
 
-> I had a Gemini Implementation template from https://behainguyen.wordpress.com/2024/06/05/google-ai-gemini-api-a-complete-example-of-a-python-flask-chatbot/ but the main problem it was getting exhausted for the response part. So was trying to debug it using AI.
+> I had a Gemini Implementation template from https://behainguyen.wordpress.com/2024/06/05/google-ai-gemini-api-a-complete-example-of-a-python-flask-chatbot/ but the main problem it was getting exhausted for the response part. So was trying to debug it using AI. Eventually shifted to grok AI api for better free tier capabilities.
 
 ---
 
