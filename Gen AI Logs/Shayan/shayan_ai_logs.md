@@ -37,8 +37,7 @@
 | Field       | Details                        |
 |-------------|--------------------------------|
 | **Purpose** | Github Issues |
-| **Link**    | https://chatgpt.com/share/69f62285-9498-83eb-8418-cb89b2c89d4d, 
-               https://chatgpt.com/share/69f62299-b82c-83eb-b8dc-104aa58894a9, https://chatgpt.com/share/   69f622aa-6a98-83eb-98a7-99a01128fcac, https://chatgpt.com/share/69f622bd-c27c-83eb-a863-644de54e7fac, https://chatgpt.com/share/69f622db-1134-83eb-a204-8ea426451450, https://chatgpt.com/share/69f622f1-3a48-83eb-9d79-1ffc6914b43b, https://chatgpt.com/share/69f62304-58e4-83eb-b5b3-89a0f3334ad3 |
+| **Link**    | https://chatgpt.com/share/69f62285-9498-83eb-8418-cb89b2c89d4d, https://chatgpt.com/share/69f62299-b82c-83eb-b8dc-104aa58894a9, https://chatgpt.com/share/   69f622aa-6a98-83eb-98a7-99a01128fcac, https://chatgpt.com/share/69f622bd-c27c-83eb-a863-644de54e7fac, https://chatgpt.com/share/69f622db-1134-83eb-a204-8ea426451450, https://chatgpt.com/share/69f622f1-3a48-83eb-9d79-1ffc6914b43b, https://chatgpt.com/share/69f62304-58e4-83eb-b5b3-89a0f3334ad3 |
 
 **Summary of what was discussed / how it was used:**
 
