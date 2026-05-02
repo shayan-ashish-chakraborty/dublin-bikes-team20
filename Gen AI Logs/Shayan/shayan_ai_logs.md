@@ -50,7 +50,7 @@
 | Field       | Details                        |
 |-------------|--------------------------------|
 | **Purpose** | Overall local DB and App setup |
-| **Link**    | https://chatgpt.com/share/69baac8f-be94-8010-bd4d-4d44a5179f65 |
+| **Link**    | https://chatgpt.com/share/69baac8f-be94-8010-bd4d-4d44a5179f65, https://chatgpt.com/share/69f62834-12a4-83eb-832c-8d977a128484 |
 
 **Summary of what was discussed / how it was used:**
 
@@ -62,7 +62,7 @@
 
 | Field       | Details                        |
 |-------------|--------------------------------|
-| **Purpose** | Flask and UI Debugging |
+| **Purpose** | Flask and Home, Weather UI Debugging |
 | **Link**    | https://chatgpt.com/share/69f62586-0978-83eb-8765-64f33ac60240 |
 
 **Summary of what was discussed / how it was used:**
@@ -75,8 +75,8 @@
 
 | Field       | Details                        |
 |-------------|--------------------------------|
-| **Purpose** | ML Implemetation Research |
-| **Link**    | https://chatgpt.com/share/69f6260b-ce10-83eb-832f-a22df0557aec |
+| **Purpose** | ML Implemetation and Dataset Research |
+| **Link**    | https://chatgpt.com/share/69f6260b-ce10-83eb-832f-a22df0557aec, https://chatgpt.com/c/69b99d68-932c-832c-95dc-1f799f0b5881 |
 
 **Summary of what was discussed / how it was used:**
 
