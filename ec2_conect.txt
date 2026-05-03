@@ -1,7 +1,0 @@
-chmod 400 “dublin-bike.pem”
-
-ssh -i "dublin-bike.pem" ubuntu@ec2-18-203-84-255.eu-west-1.compute.amazonaws.com
-
-mysql -h dublinbike-database.czaue8icehn7.eu-west-1.rds.amazonaws.com -P 3306 -u admin -p
-
-password: Dublinbiketeam20
