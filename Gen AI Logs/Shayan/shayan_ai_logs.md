@@ -1,89 +1,57 @@
 # Generative AI Chat Log
 
-## Student Information
-
-| Field        | Details          |
-|--------------|------------------|
-| **Name**     | Shayan Ashish Chakaborty |
-| **Student ID** | 25200821      |
-| **Course**   | COMP30830-Software Engineering    |
-| **Group**    | Team 20 |
+**Name:** Shayan Ashish Chakaborty
 
 ---
 
-## AI Tool Used
+## Prompts
 
-**Tool:** ChatGPT (OpenAI)
+1. I'm building a home page for a Dublin Bikes web app. What are the key UI/UX principles I should consider when designing a landing page that displays real-time bike station data?
 
----
+2. My Flask app is throwing a 500 error when trying to render the home page — what are the most common reasons this happens and how do I systematically debug it?
 
-## Conversation Logs
+3. I have a home page that loads station data but the layout feels cluttered on smaller screens. What are some approaches to structuring a responsive UI with HTML and CSS?
 
-### Session 1
+4. What is the best way to display dynamic data on a webpage that updates without requiring a full page reload?
 
-| Field       | Details                        |
-|-------------|--------------------------------|
-| **Purpose** | Gemini Response Debugging |
-| **Link**    | https://chatgpt.com/share/69f61f9b-1ba0-83eb-ae86-63f1261bbdbb |
+5. I'm building a weather page for my Dublin Bikes app. What weather metrics are most relevant to bike-sharing users and how should I think about presenting them visually?
 
-**Summary of what was discussed / how it was used:**
+6. I'm fetching weather data from an external API in Flask and passing it to my frontend, but the data sometimes doesn't render correctly. What should I check to debug this?
 
-> I had a Gemini Implementation template from https://behainguyen.wordpress.com/2024/06/05/google-ai-gemini-api-a-complete-example-of-a-python-flask-chatbot/ but the main problem it was getting exhausted for the response part. So was trying to debug it using AI. Eventually shifted to grok AI api for better free tier capabilities.
+7. My weather page UI looks inconsistent across different browsers. What are the common CSS issues that cause this and how do I approach fixing them?
 
----
+8. What is the general process for training a machine learning model to predict bike availability using historical data? What factors should I consider before choosing a model type?
 
-### Session 2
+9. I have a Dublin Bikes dataset with timestamps, station data, and weather conditions. How should I think about feature engineering before training a prediction model?
 
-| Field       | Details                        |
-|-------------|--------------------------------|
-| **Purpose** | Github Issues |
-| **Link**    | https://chatgpt.com/share/69f62285-9498-83eb-8418-cb89b2c89d4d, https://chatgpt.com/share/69f62299-b82c-83eb-b8dc-104aa58894a9, https://chatgpt.com/share/   69f622aa-6a98-83eb-98a7-99a01128fcac, https://chatgpt.com/share/69f622bd-c27c-83eb-a863-644de54e7fac, https://chatgpt.com/share/69f622db-1134-83eb-a204-8ea426451450, https://chatgpt.com/share/69f622f1-3a48-83eb-9d79-1ffc6914b43b, https://chatgpt.com/share/69f62304-58e4-83eb-b5b3-89a0f3334ad3 |
+10. I trained a model but the accuracy seems low. What are the typical reasons a regression or classification model underperforms on time-series transport data and how do I investigate?
 
-**Summary of what was discussed / how it was used:**
+11. I want to serve my trained machine learning model through a Flask backend so the frontend can request predictions. What are the main architectural considerations for doing this?
 
-> Various github related to issues 
+12. My Flask ML endpoint is returning unexpected values compared to what I see during local model testing. How do I trace where the discrepancy is coming from?
 
----
+13. I'm implementing a chatbot in my Flask web app using the Gemini API. Can you explain how the request and response flow works end-to-end?
 
-### Session 3
+14. My Gemini API integration stops returning responses after a few messages — what are the likely causes of this and how do I investigate whether it's a rate limit, quota, or implementation issue?
 
-| Field       | Details                        |
-|-------------|--------------------------------|
-| **Purpose** | Overall local DB and App setup |
-| **Link**    | https://chatgpt.com/share/69baac8f-be94-8010-bd4d-4d44a5179f65, https://chatgpt.com/share/69f62834-12a4-83eb-832c-8d977a128484 |
+15. I'm switching my chatbot backend from Gemini to Grok due to free-tier limitations. What differences should I be aware of in how the two APIs handle requests and responses?
 
-**Summary of what was discussed / how it was used:**
+16. My chatbot sometimes returns an error on the frontend even though the Flask route appears to be working. What are common points of failure between an API call and the final UI response?
 
-> Project research, error handling, etc
+17. What should a good README for a student software engineering project include, and how do I structure it so it clearly documents setup, features, and architecture?
 
----
+18. I want to document the machine learning component of my project in the README. How should I explain the model, dataset, and prediction logic to someone unfamiliar with the project?
 
-### Session 4
+19. I'm working on a team project and want to understand the best branching strategy for a group of developers — what are the common approaches and what are the tradeoffs?
 
-| Field       | Details                        |
-|-------------|--------------------------------|
-| **Purpose** | Flask and Home, Weather UI Debugging |
-| **Link**    | https://chatgpt.com/share/69f62586-0978-83eb-8765-64f33ac60240 |
+20. I created a new branch for my feature but my teammate's changes aren't showing up in it — how does branch syncing work in Git and what steps should I take?
 
-**Summary of what was discussed / how it was used:**
+21. I'm trying to merge my feature branch into main but Git is reporting merge conflicts. What is the correct process to understand and resolve them without losing changes?
 
-> Had Flask and overall ui issues with app.py not running properly.
+22. I accidentally committed directly to the main branch instead of my feature branch — what are the safest ways to undo or move that commit?
 
----
+23. My pull request is showing a large number of unintended file changes that I didn't work on. What could cause this and how do I clean up the PR before requesting a review?
 
-### Session 4
+24. After merging a teammate's branch, my local version of the app stopped working. How do I identify whether the issue is a merge conflict that wasn't caught or a missing dependency?
 
-| Field       | Details                        |
-|-------------|--------------------------------|
-| **Purpose** | ML Implemetation and Dataset Research |
-| **Link**    | https://chatgpt.com/share/69f6260b-ce10-83eb-832f-a22df0557aec, https://chatgpt.com/c/69b99d68-932c-832c-95dc-1f799f0b5881 |
-
-**Summary of what was discussed / how it was used:**
-
-> Had Flask and overall ui issues with app.py not running properly.
-
----
-
-## Declaration
-
-I confirm that all AI-assisted content listed above was reviewed, validated, and adapted by me. All final decisions and written work remain my own responsibility.
+25. What is the difference between git merge and git rebase, and in a team project context, when is it appropriate to use each?
