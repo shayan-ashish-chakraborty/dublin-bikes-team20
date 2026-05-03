@@ -31,6 +31,9 @@ weather_forecast_api.py
 
 #ec2 keys
 ec2/
+# ec2 instructions
+ec2_conect.txt
+docs
 
 # Ignore machine learning files and .csv as they are too large
 
