@@ -1,14 +1,18 @@
 from flask import Flask, jsonify
 from sqlalchemy import create_engine
+from dotenv import load_dotenv
 import json
+import os
 
 app = Flask(__name__)
 
-USER = "root"
-PASSWORD = "shayan1664"
-PORT = "3306"
-DB = "local_databasejcdecaux"
-URI = "127.0.0.1"
+load_dotenv(dotenv_path="var.env")
+
+USER = os.getenv("DB_USER")
+PASSWORD = os.getenv("DB_PASSWORD")
+PORT = os.getenv("DB_PORT")
+DB = os.getenv("DB_NAME_JCDECAUX")
+URI = os.getenv("DB_HOST")
 
 connection_string = f"mysql+pymysql://{USER}:{PASSWORD}@{URI}:{PORT}/{DB}"
 engine = create_engine(connection_string)
@@ -47,4 +51,4 @@ def get_availability():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host='0.0.0.0',port=5000)

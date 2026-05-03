@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <!-- Pin body -->
+  <path d="M32 6 C22 6 14 14 14 24 C14 38 32 58 32 58 C32 58 50 38 50 24 C50 14 42 6 32 6 Z" stroke="currentColor" stroke-width="3.5" stroke-linejoin="round"/>
+  <!-- Inner circle -->
+  <circle cx="32" cy="24" r="7" stroke="currentColor" stroke-width="3"/>
+  <!-- Route dots above -->
+  <circle cx="16" cy="10" r="2.5" fill="currentColor" opacity="0.5"/>
+  <circle cx="48" cy="10" r="2.5" fill="currentColor" opacity="0.5"/>
+  <path d="M18 10 Q32 4 46 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-dasharray="3,2" opacity="0.5"/>
+</svg>

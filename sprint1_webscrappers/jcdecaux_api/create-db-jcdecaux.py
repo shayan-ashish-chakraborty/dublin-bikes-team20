@@ -1,4 +1,3 @@
-import dbinfo
 import requests
 import json
 import sqlalchemy as sqla
@@ -10,13 +9,16 @@ from pprint import pprint
 import simplejson as json
 import time
 from IPython.display import display
+from dotenv import load_dotenv
 
+if os.path.exists("var.env"):
+    load_dotenv(dotenv_path="var.env")
 
-USER = "root"
-PASSWORD = "shayan1664"
-PORT = "3306"
-DB = "local_databasejcdecaux"
-URI = "127.0.0.1"
+USER = os.getenv("DB_USER")
+PASSWORD = os.getenv("DB_PASSWORD")
+PORT = os.getenv("DB_PORT")
+DB = os.getenv("DB_NAME_JCDECAUX")
+URI = os.getenv("DB_HOST")
 
 connection_string = "mysql+pymysql://{}:{}@{}:{}/{}".format(USER, PASSWORD, URI, PORT, DB)
 

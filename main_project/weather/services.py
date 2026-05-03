@@ -1,0 +1,434 @@
+import math
+import time
+import requests
+from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
+from sqlalchemy import text
+from ..config import Config
+from ..db import create_engine_for, DbConfig
+from sqlalchemy.orm import sessionmaker
+ 
+weather_db_cfg = DbConfig(
+    host=Config.DB_HOST,
+    port=Config.DB_PORT,
+    user=Config.DB_USER,
+    password=Config.DB_PASSWORD,
+    db_name=Config.DB_NAME_WEATHER
+)
+weather_engine = create_engine_for(weather_db_cfg)
+WeatherSession = sessionmaker(bind=weather_engine)
+ 
+# 5 mins cooldown for API calls 
+_CACHE_TTL_SECONDS = 300
+_last_api_call_time: float = 0.0
+ 
+def hourly_forecast_rows_from_db(limit: int = 40) -> list[dict]:
+    """Fetch future hourly weather rows directly from the MySQL ``hourly`` table.
+
+    Args:
+        limit: Maximum number of rows to return. Clamped to ``[1, 100]``.
+            Defaults to ``40``.
+
+    Returns:
+        A list of row dicts with keys: ``future_dt``, ``temp``, ``humidity``,
+        ``pressure``, ``rain_3h``, ``pop``, and others from the ``hourly`` table.
+        Returns an empty list on any database error or if no future rows exist.
+    """
+    limit = min(max(int(limit), 1), 100)
+    try:
+        # DB stores Irish time (Europe/Dublin), so compute the cutoff in Dublin time
+        # rather than using MySQL's UTC_TIMESTAMP(), which would be 1 hour behind in summer.
+        cutoff_dublin = (
+            datetime.now(tz=ZoneInfo("Europe/Dublin")) - timedelta(hours=1)
+        ).replace(tzinfo=None)
+        db_session = WeatherSession()
+        result = db_session.execute(
+            text(
+                """
+                SELECT *
+                FROM hourly
+                WHERE future_dt >= :cutoff
+                ORDER BY future_dt ASC
+                LIMIT :limit
+                """
+            ),
+            {"cutoff": cutoff_dublin, "limit": limit},
+        )
+        rows = [dict(row) for row in result.mappings().all()]
+        db_session.close()
+        return rows
+    except Exception:
+        return []
+ 
+ 
+def _fetch_nearest_weather(dt_str: str) -> dict | None:
+    """Find the nearest hourly weather record to a given datetime.
+
+    Queries the DB ``hourly`` table first (within ±3 hours of ``dt_str``),
+    then falls back to the live OpenWeatherMap forecast API if no DB row is found.
+
+    Args:
+        dt_str: Target datetime string in ``"YYYY-MM-DD HH:MM:SS"`` format
+            (Irish local time).
+
+    Returns:
+        A weather row dict, or ``None`` if no match is found within ±3 hours
+        and the API fallback also fails.
+    """
+    try:
+        request_dt = datetime.strptime(dt_str, "%Y-%m-%d %H:%M:%S")
+    except ValueError:
+        return None
+
+    # Try DB
+    try:
+        dt_low  = request_dt - timedelta(hours=3)
+        dt_high = request_dt + timedelta(hours=3)
+        db_session = WeatherSession()
+        result = db_session.execute(
+            text("""
+                SELECT *,
+                       ABS(TIMESTAMPDIFF(SECOND, future_dt, :dt)) AS diff
+                FROM hourly
+                WHERE future_dt BETWEEN :dt_low AND :dt_high
+                ORDER BY diff ASC
+                LIMIT 1
+            """),
+            {"dt": request_dt, "dt_low": dt_low, "dt_high": dt_high}
+        )
+        row = result.mappings().fetchone()
+        db_session.close()
+        if row:
+            record = dict(row)
+            record.pop("diff", None)
+            return record
+    except Exception:
+        pass
+
+    # Fallback: OpenWeather API
+    try:
+        cfg = Config()
+        r = requests.get(
+            cfg.FORECAST_WEATHER_URI,
+            params={"appid": cfg.OPENWEATHER_API_KEY, "q": cfg.CITY, "units": "metric"},
+            timeout=10,
+        )
+        r.raise_for_status()
+        raw = r.json()
+
+        best_item, best_diff = None, None
+        for item in raw.get("list", []):
+            item_dt = datetime.strptime(item["dt_txt"], "%Y-%m-%d %H:%M:%S")
+            diff = abs((item_dt - request_dt).total_seconds())
+            if diff <= 10800 and (best_diff is None or diff < best_diff):
+                best_item, best_diff = item, diff
+
+        if best_item is None:
+            return None
+
+        now_str = datetime.now(tz=ZoneInfo("Europe/Dublin")).strftime("%Y-%m-%d %H:%M:%S")
+        return {
+            "dt":         now_str,
+            "future_dt":  best_item.get("dt_txt"),
+            "feels_like": best_item["main"].get("feels_like"),
+            "humidity":   best_item["main"].get("humidity"),
+            "pop":        best_item.get("pop"),
+            "pressure":   best_item["main"].get("pressure"),
+            "temp":       best_item["main"].get("temp"),
+            "weather_id": best_item["weather"][0]["id"] if best_item.get("weather") else None,
+            "wind_speed": best_item.get("wind", {}).get("speed"),
+            "wind_gust":  best_item.get("wind", {}).get("gust"),
+            "rain_3h":    best_item.get("rain", {}).get("3h"),
+            "snow_3h":    best_item.get("snow", {}).get("3h"),
+        }
+    except Exception:
+        return None
+ 
+ 
+# Weather forecast
+def _openweather_session() -> requests.Session:
+    """Make a requests session that ignores proxy env vars.
+
+    This avoids surprising failures on localhost dev setups.
+    """
+    s = requests.Session()
+    s.trust_env = False
+    return s
+ 
+ 
+def openweather_current(lat: float, lon: float) -> dict:
+    """Fetch current weather conditions for a given location.
+
+    Tries the live OpenWeatherMap ``/data/2.5/weather`` API first. Falls back
+    to the nearest row in the DB ``hourly`` table (Irish time) if the API key
+    is missing or the request fails.
+
+    Uses:
+        - :func:`~main_project.weather.services._fetch_nearest_weather` — DB fallback when
+          the live API key is absent or the request fails.
+
+    Args:
+        lat: Latitude of the target location.
+        lon: Longitude of the target location.
+
+    Returns:
+        A dict with keys: ``dt``, ``temp``, ``feels_like``, ``humidity``,
+        ``pressure``, ``wind_speed``, ``wind_gust``, ``rain_1h``, ``weather_desc``.
+
+    Raises:
+        RuntimeError: If both the API and the DB fallback are unavailable.
+    """
+    cfg = Config()
+ 
+    # Primary: live API
+    if cfg.OPENWEATHER_API_KEY:
+        try:
+            s = _openweather_session()
+            res = s.get(
+                cfg.CURRENT_WEATHER_URI,
+                params={"lat": lat, "lon": lon, "appid": cfg.OPENWEATHER_API_KEY, "units": "metric"},
+                timeout=12,
+            )
+            res.raise_for_status()
+            data = res.json()
+ 
+            weather0 = (data.get("weather") or [{}])[0] or {}
+            main = data.get("main") or {}
+            wind = data.get("wind") or {}
+            rain = data.get("rain") or {}
+ 
+            return {
+                "dt": data.get("dt"),  # unix seconds (UTC)
+                "temp": main.get("temp"),
+                "feels_like": main.get("feels_like"),
+                "humidity": main.get("humidity"),
+                "pressure": main.get("pressure"),
+                "wind_speed": wind.get("speed"),
+                "wind_gust": wind.get("gust"),
+                "rain_1h": rain.get("1h"),
+                "weather_desc": weather0.get("description"),
+            }
+        except Exception:
+            pass
+ 
+    # Fallback: nearest row from DB (stored in Irish time)
+    now_dublin_str = datetime.now(tz=ZoneInfo("Europe/Dublin")).strftime("%Y-%m-%d %H:%M:%S")
+    row = _fetch_nearest_weather(now_dublin_str)
+    if row is not None:
+        return row
+ 
+    raise RuntimeError("openweather_current: API unavailable and no DB fallback found")
+ 
+ 
+def openweather_forecast_3h_list(lat: float, lon: float, limit: int) -> list[dict]:
+    """Fetch a 3-hour interval weather forecast from the OpenWeatherMap API.
+
+    Uses the free-tier ``/data/2.5/forecast`` endpoint (up to 40 timesteps).
+
+    Args:
+        lat: Latitude of the target location.
+        lon: Longitude of the target location.
+        limit: Maximum number of timesteps to return (capped at 48).
+
+    Returns:
+        A list of row dicts with keys: ``dt``, ``future_dt``, ``temp``,
+        ``feels_like``, ``humidity``, ``pressure``, ``wind_speed``,
+        ``wind_gust``, ``pop``, ``rain_1h``, ``rain_3h``, ``snow_3h``.
+
+    Raises:
+        ValueError: If ``OPENWEATHER_API_KEY`` is not set.
+        requests.HTTPError: If the API returns a non-2xx status code.
+    """
+    cfg = Config()
+    if not cfg.OPENWEATHER_API_KEY:
+        raise ValueError("OPENWEATHER_API_KEY is not set")
+ 
+    limit = min(int(limit), 48)
+    s = _openweather_session()
+    res = s.get(
+        cfg.FORECAST_WEATHER_URI,
+        params={"lat": lat, "lon": lon, "appid": cfg.OPENWEATHER_API_KEY, "units": "metric"},
+        timeout=12,
+    )
+    res.raise_for_status()
+    data = res.json()
+ 
+    out: list[dict] = []
+    for it in (data.get("list") or [])[:limit]:
+        main = it.get("main") or {}
+        wind = it.get("wind") or {}
+        rain = it.get("rain") or {}
+        snow = it.get("snow") or {}
+        out.append(
+            {
+                "dt": it.get("dt"),
+                "future_dt": it.get("dt"),
+                "temp": main.get("temp"),
+                "feels_like": main.get("feels_like"),
+                "humidity": main.get("humidity"),
+                "pressure": main.get("pressure"),
+                "wind_speed": wind.get("speed"),
+                "wind_gust": wind.get("gust"),
+                "pop": it.get("pop"),
+                "rain_1h": None,
+                "rain_3h": rain.get("3h") if isinstance(rain, dict) else None,
+                "snow_3h": snow.get("3h") if isinstance(snow, dict) else None,
+            }
+        )
+    return out
+ 
+ 
+# use for machine learning
+_DUBLIN_LAT = 53.3498
+_DUBLIN_LON = -6.2603
+_MIN_HOURLY_ROWS = 16
+ 
+ 
+def hourly_row_time_ms(row: dict) -> float | None:
+    """Extract the timestamp from a forecast row as milliseconds since epoch.
+
+    Handles Unix int/float (seconds), naive ``datetime`` objects (assumed Dublin
+    time), and ISO 8601 strings. Checks ``dt`` first, then ``future_dt``.
+
+    Args:
+        row: A forecast row dict.
+
+    Returns:
+        Milliseconds since the Unix epoch as a float, or ``None`` if no
+        parseable timestamp field is found.
+    """
+    ts = row.get("dt")
+    if ts is None:
+        ts = row.get("future_dt")
+    if ts is None:
+        return None
+    if isinstance(ts, (int, float)):
+        v = float(ts)
+        if v < 1e11:
+            return v * 1000.0
+        return v
+    if isinstance(ts, datetime):
+        if ts.tzinfo is None:
+            ts = ts.replace(tzinfo=ZoneInfo("Europe/Dublin"))
+        return ts.timestamp() * 1000.0
+    if isinstance(ts, str):
+        s = ts.replace("Z", "+00:00")
+        try:
+            d = datetime.fromisoformat(s)
+            if d.tzinfo is None:
+                d = d.replace(tzinfo=ZoneInfo("Europe/Dublin"))
+            return d.timestamp() * 1000.0
+        except ValueError:
+            return None
+    return None
+ 
+ 
+def _filter_future_hourly_rows(rows: list[dict], now_ms: float, limit: int) -> list[dict]:
+    """Same as weather.html loadHourly after primary fetch: sort, future-only, slice."""
+    skew = 60_000.0
+ 
+    def sort_key(r: dict) -> float:
+        t = hourly_row_time_ms(r)
+        return t if t is not None and math.isfinite(t) else 0.0
+ 
+    sorted_rows = sorted(rows, key=sort_key)
+    out = [
+        r
+        for r in sorted_rows
+        if (t := hourly_row_time_ms(r)) is not None
+        and math.isfinite(t)
+        and t >= now_ms - skew
+    ]
+    return out[:limit]
+ 
+ 
+def _merge_hourly_prefer_db(db_rows: list[dict], api_rows: list[dict], now_ms: float) -> list[dict]:
+    """Same as weather.html mergeHourlyPreferDb: 3h slot, DB wins."""
+    skew = 60_000.0
+    slot_map: dict[int, tuple[dict, bool]] = {}
+ 
+    def put(r: dict, from_db: bool) -> None:
+        t = hourly_row_time_ms(r)
+        if t is None or not math.isfinite(t) or t < now_ms - skew:
+            return
+        k = int(t // (3 * 60 * 60 * 1000))
+        prev = slot_map.get(k)
+        if prev is None:
+            slot_map[k] = (r, from_db)
+        elif from_db:
+            slot_map[k] = (r, True)
+ 
+    for r in api_rows or []:
+        put(r, False)
+    for r in db_rows or []:
+        put(r, True)
+ 
+    merged = [pair[0] for pair in slot_map.values()]
+    merged.sort(key=lambda r: hourly_row_time_ms(r) or 0.0)
+    return merged
+ 
+ 
+def hourly_forecast_list_like_weather_page(limit: int = 24) -> list[dict]:
+    """Return an hourly weather forecast using the same pipeline as the weather UI.
+
+    Pipeline:
+
+    1. Query MySQL ``hourly`` table (primary).
+    2. If empty, fall back to live OpenWeatherMap 3-hour forecast API
+       (subject to a 5-minute cooldown).
+    3. Filter to future-only rows.
+    4. If fewer than 16 rows remain, supplement with API rows;
+       DB rows take precedence within each 3-hour slot.
+
+    Uses:
+        - :func:`~main_project.weather.services.hourly_forecast_rows_from_db` — primary source;
+          queries the ``hourly`` MySQL table.
+        - :func:`~main_project.weather.services.openweather_forecast_3h_list` — fallback and
+          supplement source; calls the OpenWeatherMap 5-day/3-hour forecast API.
+
+    Args:
+        limit: Maximum number of rows to return. Clamped to ``[1, 100]``.
+            Defaults to ``24``.
+
+    Returns:
+        A list of row dicts with keys: ``temp``, ``humidity``, ``pressure``,
+        ``rain_3h``, ``pop``, and a timestamp (``dt`` or ``future_dt``).
+        Returns an empty list if both the DB and API are unavailable.
+    """
+    global _last_api_call_time
+ 
+    limit = min(max(int(limit), 1), 100)
+    now_ms = time.time() * 1000.0
+ 
+    # Primary: DB
+    rows: list[dict] = hourly_forecast_rows_from_db(limit)
+ 
+    # Fallback: live OpenWeather API
+    if not rows:
+        if time.time() - _last_api_call_time >= _CACHE_TTL_SECONDS:
+            try:
+                rows = openweather_forecast_3h_list(_DUBLIN_LAT, _DUBLIN_LON, limit)
+                if rows:
+                    _last_api_call_time = time.time()
+            except Exception:
+                rows = []
+ 
+    if not rows:
+        return []
+ 
+    rows = _filter_future_hourly_rows(rows, now_ms, limit)
+ 
+    # If DB was sparse, supplement with API rows; DB wins per 3h slot.
+    if len(rows) < _MIN_HOURLY_ROWS:
+        if time.time() - _last_api_call_time >= _CACHE_TTL_SECONDS:
+            try:
+                api_rows = openweather_forecast_3h_list(_DUBLIN_LAT, _DUBLIN_LON, limit)
+                if api_rows:
+                    _last_api_call_time = time.time()
+                    rows = _merge_hourly_prefer_db(rows, api_rows, now_ms)
+                    rows = _filter_future_hourly_rows(rows, now_ms, limit)
+            except Exception:
+                pass
+ 
+    return rows
+

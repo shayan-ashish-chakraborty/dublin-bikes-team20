@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <!-- Map shape -->
+  <polygon points="4,12 22,6 42,12 60,6 60,52 42,58 22,52 4,58" stroke="currentColor" stroke-width="3" stroke-linejoin="round" fill="none"/>
+  <line x1="22" y1="6" x2="22" y2="52" stroke="currentColor" stroke-width="2.5" stroke-dasharray="3,2"/>
+  <line x1="42" y1="12" x2="42" y2="58" stroke="currentColor" stroke-width="2.5" stroke-dasharray="3,2"/>
+  <!-- Route path on map -->
+  <path d="M10 30 Q18 22 28 30 Q36 38 50 26" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Location pins -->
+  <circle cx="10" cy="30" r="3" fill="currentColor"/>
+  <circle cx="50" cy="26" r="3" fill="currentColor"/>
+</svg>

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body class="login-page">
+
+  <a href="{{ url_for('frontend.home') }}" class="auth-back-btn">
+    &#8592; Back to Home
+  </a>
+
+  <div class="form-wrapper">
+    <div class="form-container">
+      <a href="{{ url_for('frontend.home') }}" class="auth-logo">
+        <img src="{{ url_for('static', filename='images/icons/bike.svg') }}"
+             alt="Dublin Bikes" class="auth-logo-icon">
+      </a>
+
+      <h2>Login</h2>
+
+      <!-- Flash messages -->
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="flash-message {{ category }}">{{ message }}</div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      <form method="POST">
+        <input type="email" name="email" placeholder="Email" required autocomplete="email">
+        <input type="password" name="password" placeholder="6-digit Password"
+               required maxlength="6" inputmode="numeric" pattern="[0-9]{6}">
+        <button type="submit">Login</button>
+      </form>
+
+      <p class="switch-page">
+        Don't have an account? <a href="{{ url_for('auth.register') }}">Register here</a>
+      </p>
+    </div>
+  </div>
+</body>
+</html>

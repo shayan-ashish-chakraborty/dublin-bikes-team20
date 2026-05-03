@@ -1,10 +1,12 @@
+import os
 import requests
 import traceback
 import datetime
 import time
-import dbinfo
 import json
+from zoneinfo import ZoneInfo
 from sqlalchemy import create_engine
+from dotenv import load_dotenv
 
 def hourly_to_db(text, in_engine):
 
@@ -15,8 +17,8 @@ def hourly_to_db(text, in_engine):
     print("Number of forecast entries:", len(forecasts))
 
     for item in forecasts:
-
-        dt = datetime.datetime.fromtimestamp(item.get("dt"))
+        _DUBLIN = ZoneInfo("Europe/Dublin")
+        dt = datetime.datetime.fromtimestamp(item.get("dt"), tz=_DUBLIN).replace(tzinfo=None)
         future_dt = dt   # for forecast, dt itself is future
 
         main = item.get("main", {})
@@ -37,6 +39,7 @@ def hourly_to_db(text, in_engine):
             future_dt,
             main.get("feels_like"),
             main.get("humidity"),
+            item.get("pop"),
             main.get("pressure"),
             main.get("temp"),
             weather.get("id"),
@@ -48,13 +51,14 @@ def hourly_to_db(text, in_engine):
 
         in_engine.execute("""
             INSERT INTO hourly
-            (dt, future_dt, feels_like, humidity, pressure,
+            (dt, future_dt, feels_like, humidity, pop, pressure,
              temp, weather_id, wind_speed, wind_gust,
              rain_3h, snow_3h)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             ON DUPLICATE KEY UPDATE
                 feels_like = VALUES(feels_like),
                 humidity = VALUES(humidity),
+                pop = VALUES(pop),
                 pressure = VALUES(pressure),
                 temp = VALUES(temp),
                 wind_speed = VALUES(wind_speed),
@@ -65,12 +69,14 @@ def hourly_to_db(text, in_engine):
 
 
 def main():
+    if os.path.exists("var.env"):
+        load_dotenv(dotenv_path="var.env")
 
-    USER = "root"
-    PASSWORD = "shayan1664"
-    PORT = "3306"
-    DB = "local_databaseopenweather"
-    URI = "127.0.0.1"
+    USER = os.getenv("DB_USER")
+    PASSWORD = os.getenv("DB_PASSWORD")
+    PORT = os.getenv("DB_PORT")
+    DB = os.getenv("DB_NAME_WEATHER")
+    URI = os.getenv("DB_HOST")
 
     connection_string = f"mysql+pymysql://{USER}:{PASSWORD}@{URI}:{PORT}/{DB}"
 
@@ -78,10 +84,10 @@ def main():
 
     try:
         r = requests.get(
-            dbinfo.FORECAST_WEATHER_URI,
+            os.getenv('FORECAST_WEATHER_URI'),
             params={
-                "q": dbinfo.CITY,
-                "appid": dbinfo.WEATHER_KEY,
+                "q": os.getenv('CITY'),
+                "appid": os.getenv('OPENWEATHER_API_KEY'),
                 "units": "metric"
             }
         )

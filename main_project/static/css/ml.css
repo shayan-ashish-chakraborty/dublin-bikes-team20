@@ -1,0 +1,85 @@
+/* Stations map — bike prediction UI inside Google Maps InfoWindows (used with MLbikes.js). */
+
+.stations-page .gm-iw .iw-status {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #6b7280;
+}
+
+.stations-page .gm-iw .iw-more-btn {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: var(--font-head, inherit);
+  color: #fff;
+  background: var(--color-primary, #1a7340);
+  border: 1px solid rgba(19, 84, 48, 0.45);
+  border-radius: var(--radius, 8px);
+  box-shadow: none;
+  cursor: pointer;
+  transition: background 0.15s ease, box-shadow 0.15s ease;
+}
+
+.stations-page .gm-iw .iw-more-btn:hover:not(:disabled) {
+  background: var(--color-primary-dark, #135430);
+  box-shadow: var(--shadow-md, 0 2px 6px rgba(0, 0, 0, 0.08));
+}
+
+.stations-page .gm-iw .iw-more-btn:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+.stations-page .gm-iw .iw-charts {
+  margin: 0;
+  padding-top: 10px;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+  box-sizing: border-box;
+}
+
+.stations-page .gm-iw .iw-charts-title {
+  margin: 0 0 6px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.stations-page .gm-iw .iw-chart-subtitle {
+  margin: 6px 0 4px;
+  font-size: 10px;
+  font-weight: 600;
+  color: #6b7280;
+}
+
+.stations-page .gm-iw .iw-chart-wrap {
+  position: relative;
+  height: 130px;
+  margin-bottom: 0;
+}
+
+.stations-page .gm-iw .iw-chart-wrap-line {
+  height: 168px;
+}
+
+.stations-page .gm-iw .iw-chart-wrap canvas {
+  max-height: 130px;
+}
+
+.stations-page .gm-iw .iw-chart-wrap-line canvas {
+  max-height: 168px;
+}
+
+.stations-page .gm-iw .iw-charts-error {
+  margin: 0;
+  font-size: 12px;
+  color: #b91c1c;
+}

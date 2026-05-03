@@ -1,0 +1,14 @@
+JCDecaux API key - b46d259f68fc8cf6e74cbb1c49022e8d9398e586
+
+
+OpenWeather API key - 70fc10d7ab1946ec517456c3876b9e27
+
+
+Logging in to the ec2 instance
+ssh -i "dublin-bike.pem" ubuntu@ec2-18-203-84-255.eu-west-1.compute.amazonaws.com
+
+logging in to the RDS sql database
+mysql -h dublinbike-database.czaue8icehn7.eu-west-1.rds.amazonaws.com -P 3306 -u admin -p
+
+Password for the above sql 
+Dublinbiketeam20

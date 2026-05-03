@@ -1,0 +1,515 @@
+/* Stations page — sidebar + map-wrap; station markers use Journey-style look in JS only. */
+:root {
+  --color-primary: #1a7340;
+  --color-primary-dark: #135430;
+  --color-primary-light: #e8f5ee;
+  --color-walk: #4a90d9;
+  --color-cycle: #27ae60;
+  --color-walk2: #e67e22;
+  --color-surface: #ffffff;
+  --color-bg: #f0f2f5;
+  --color-text: #1a1a2e;
+  --color-text-muted: #6b7280;
+  --color-border: #e5e7eb;
+  --color-error-bg: #fef2f2;
+  --color-error: #dc2626;
+  --color-bikes: #16a34a;
+  --color-stands: #2563eb;
+  --radius: 8px;
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+/* Height = viewport - navbar - footer, no page-level scroll */
+:root {
+  --footer-h: 56px;
+}
+
+html:has(#stations-app.stations-page),
+body:has(#stations-app.stations-page) {
+  height: 100%;
+  overflow: hidden;
+}
+
+body:has(#stations-app.stations-page) {
+  display: flex;
+  flex-direction: column;
+}
+
+main:has(#stations-app.stations-page) {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+main:has(#stations-app.stations-page) + .footer {
+  margin-top: 0;
+  flex-shrink: 0;
+  height: var(--footer-h);
+}
+
+/* app-root fills exactly: 100vh - nav - footer */
+main:has(#stations-app.stations-page) #stations-app.stations-page {
+  height: calc(100vh - var(--nav-h) - var(--footer-h));
+  max-height: calc(100vh - var(--nav-h) - var(--footer-h));
+  overflow: hidden;
+}
+
+#stations-app.stations-page {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  width: 100%;
+}
+
+.stations-page * {
+  box-sizing: border-box;
+}
+
+.stations-page .app-root {
+  width: 100%;
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.stations-page .top-spacer {
+  width: 125px;
+  flex-shrink: 0;
+}
+
+.stations-page .main-row {
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
+  align-items: stretch;
+  overflow: hidden;
+}
+
+.stations-page .sidebar {
+  width: 380px;
+  min-width: 320px;
+  min-height: 0;
+  background: var(--color-surface);
+  color: var(--color-text);
+  flex-shrink: 0;
+  overflow-y: auto;
+  padding-top: 0;
+  box-shadow: 2px 0 12px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  z-index: 10;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+  padding: 16px 20px;
+}
+
+
+
+/* Shared button base — identical sizing/shape for both sidebar buttons */
+.stations-page .plan-title,
+.stations-page .sidebar .btn-my-location {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font-head, "Outfit", system-ui, sans-serif);
+  border-radius: var(--radius);
+  border: 1.5px solid var(--color-primary);
+  cursor: pointer;
+  text-decoration: none;
+  text-align: center;
+  box-sizing: border-box;
+  transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease, transform 0.12s ease;
+}
+
+/* "Plan Your Journey" — primary solid green */
+.stations-page .plan-title {
+  background: var(--color-primary);
+  color: #fff;
+  margin: 0 0 10px 0;
+  box-shadow: var(--shadow-sm);
+}
+
+.stations-page .plan-title:hover {
+  background: var(--color-primary-dark);
+  border-color: var(--color-primary-dark);
+  box-shadow: var(--shadow-md);
+}
+
+/* "My Location" — outlined green */
+.stations-page .sidebar .btn-my-location {
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  color: var(--color-primary);
+  margin: 0 0 4px 0;
+}
+
+.stations-page .sidebar .btn-my-location:hover {
+  background: var(--color-primary-light);
+  box-shadow: var(--shadow-sm);
+}
+
+.stations-page .sidebar .btn-my-location:active {
+  transform: scale(0.97);
+}
+
+.stations-page .sidebar-section {
+  padding: 10px 0px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.stations-page .sidebar .btn-my-location-icon {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+}
+
+.stations-page .sidebar h2 {
+  margin: 10px 0 10px 0;
+  font-size: 20px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--color-text-muted);
+}
+
+.stations-page .warning {
+  margin: 2px 0;
+  padding: 7px 10px;
+  background: var(--color-error-bg);
+  color: var(--color-error);
+  border-left: 4px solid var(--color-error);
+  border-radius: var(--radius);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.stations-page .warning-2km {
+  margin: 2px 0;
+  padding: 7px 10px;
+  background: #fff7ed;
+  color: #9a3412;
+  border-left: 4px solid var(--color-walk2);
+  border-radius: var(--radius);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.stations-page .station-block {
+  position: relative;
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius);
+  margin-bottom: 10px;
+  padding: 10px 12px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.stations-page .station-block:hover {
+  background: var(--color-primary-light);
+  border-color: var(--color-primary);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+#station-list{
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.stations-page .station-block::before {
+  content: '';
+  display: block;
+  height: 3px;
+  background: var(--color-walk);
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  border-radius: 2px 2px 0 0;
+}
+
+.stations-page .station-inner {
+  margin-left: 0;
+}
+
+.stations-page .station-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 8px;
+  line-height: 1.3;
+}
+
+.stations-page .station-availability {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+
+.stations-page .avail-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 20px;
+  display: inline-block;
+}
+
+.stations-page .avail-badge.bikes {
+  background: #dcfce7;
+  color: var(--color-bikes);
+}
+
+.stations-page .avail-badge.stands {
+  background: #dbeafe;
+  color: var(--color-stands);
+}
+
+.stations-page .station-meta {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  margin-top: 6px;
+}
+
+.stations-page .btn-primary {
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  box-shadow: var(--shadow-sm);
+}
+
+.stations-page .btn-primary:hover {
+  background: var(--color-primary-dark);
+  box-shadow: var(--shadow-md);
+}
+
+.stations-page .map-wrap {
+  flex: 1 1 auto;
+  position: relative;
+  min-width: 0;
+  min-height: 280px;
+}
+
+/* Fill the whole map column (same height as sidebar); avoids white band under a short fixed-height map. */
+.stations-page #map {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 320px;
+}
+
+/* Map search — frosted glass over map (sidebar My location stays yellow) */
+.stations-page #places-search-host {
+  position: absolute;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 450px;
+  max-width: calc(100% - 32px);
+  z-index: 500;
+  padding: 0;
+  border: none;
+  background: transparent;
+  transition: filter 0.15s ease;
+}
+
+.stations-page #places-search-host:hover .stations-place-autocomplete {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  --gmp-mat-color-surface: rgba(255, 255, 255, 0.7);
+}
+
+/* Native <input> only — host keeps .search-input class after swap, so use input selector */
+.stations-page .map-wrap input.search-input {
+  position: absolute;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 450px;
+  max-width: calc(100% - 32px);
+  z-index: 500;
+  display: block;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 400;
+  font-family: var(--font-head, "Outfit", system-ui, sans-serif);
+  color: var(--color-text);
+  color-scheme: light;
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius);
+  outline: none;
+  box-shadow: var(--shadow-sm);
+}
+
+.stations-page .map-wrap input.search-input::placeholder {
+  color: var(--color-text-muted);
+  font-weight: 400;
+}
+
+.stations-page .map-wrap input.search-input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(26, 115, 64, 0.12);
+}
+
+/* gmp-place-autocomplete — clean style over map */
+.stations-page #places-search-host .stations-place-autocomplete {
+  display: block;
+  width: 100%;
+  color-scheme: light;
+  border-radius: var(--radius);
+  border: 1.5px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  transition: background 0.2s ease, backdrop-filter 0.2s ease;
+  color: var(--color-text);
+  font-family: var(--font-head, "Outfit", system-ui, sans-serif);
+  font-size: 14px;
+  font-weight: 400;
+  --gmp-mat-color-surface: rgba(255, 255, 255, 0.5);
+  --gmp-mat-color-on-surface: #1a1a2e;
+  --gmp-mat-color-on-surface-variant: #6b7280;
+  --gmp-mat-color-primary: #1a7340;
+  --gmp-mat-color-outline-decorative: rgba(0, 0, 0, 0.08);
+  --gmp-mat-font-family: var(--font-head, "Outfit", system-ui, sans-serif);
+}
+
+/*
+ * Map InfoWindow: trim Google chrome (CSS + JS) + card content aligned with sidebar badges.
+ */
+/* Do not change gm-style-iw-c position — the bubble may not render in some environments */
+#stations-app .gm-style-iw-c {
+  padding: 0 !important;
+}
+
+#stations-app .gm-style-iw-chr {
+  height: 0 !important;
+  max-height: 0 !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  overflow: visible !important;
+}
+
+#stations-app .gm-style-iw-t,
+#stations-app .gm-style-iw-tc {
+  padding-top: 0 !important;
+  min-height: 0 !important;
+}
+
+/* Bottom padding slightly less than top to reduce the visual gap below the close button */
+#stations-app .gm-style-iw-d {
+  padding: 12px !important;
+  box-sizing: border-box !important;
+  max-width: min(288px, calc(100vw - 32px));
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+}
+
+.stations-page .gm-iw {
+  font-family: var(--font-head, "Segoe UI", system-ui, sans-serif);
+  font-size: 13px;
+  line-height: 1.45;
+  width: 100%;
+  max-width: none;
+  min-width: 200px;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  color: var(--color-text);
+}
+
+/* One column: even vertical rhythm; button spans full card width */
+.stations-page .gm-iw-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  width: 100%;
+  min-width: 0;
+}
+
+.stations-page .gm-iw strong {
+  display: block;
+  margin: 0;
+  padding: 0 32px 0 0;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: 0.02em;
+  color: #111827;
+}
+
+.stations-page .gm-iw .iw-avail {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  margin: 0;
+}
+
+/* Same pill idea as sidebar `.avail-badge` */
+.stations-page .gm-iw .iw-tag {
+  display: inline-flex;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 999px;
+  line-height: 1.2;
+}
+
+.stations-page .gm-iw .iw-tag-bikes {
+  background: #dcfce7;
+  color: var(--color-bikes);
+}
+
+.stations-page .gm-iw .iw-tag-stands {
+  background: #dbeafe;
+  color: var(--color-stands);
+}
+
+@media (max-width: 900px) {
+  .stations-page .main-row {
+    flex-direction: column;
+    min-height: unset;
+  }
+
+  .stations-page .sidebar {
+    width: 100%;
+    height: auto;
+    min-height: unset;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  }
+
+  .stations-page .map-wrap {
+    min-height: 50vh;
+    height: 50vh;
+  }
+
+  .stations-page #map {
+    position: absolute;
+    inset: 0;
+  }
+}
+

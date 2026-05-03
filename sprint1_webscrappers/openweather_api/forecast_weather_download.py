@@ -42,13 +42,15 @@ def write_to_db(text):
 def main():
     while True:
         try:
+            if os.path.exists("var.env"):
+                load_dotenv(dotenv_path="var.env")
             r = requests.get(
-                dbinfo.FORECAST_WEATHER_URI,
+                os.getenv('FORECAST_WEATHER_URI'),
                 params={
-                    "lat": dbinfo.LAT,
-                    "lon": dbinfo.LON,
+                    "lat": os.get('LAT'),
+                    "lon": os.get('LON'),
                     "units": "metric",
-                    "appid": dbinfo.WEATHER_KEY
+                    "appid": os.get('OPENWEATHER_API_KEY')
                 }
             )
 

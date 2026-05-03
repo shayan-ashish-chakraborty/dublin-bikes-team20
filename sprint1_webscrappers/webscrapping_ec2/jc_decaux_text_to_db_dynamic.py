@@ -1,0 +1,112 @@
+import requests
+import traceback
+import datetime
+import time
+import os
+import json
+import sqlalchemy as sqla
+from sqlalchemy import create_engine
+import traceback
+import glob
+import os
+from pprint import pprint
+import simplejson as json
+import requests
+import time
+from IPython.display import display
+from datetime import datetime
+from dotenv import load_dotenv
+import logging
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    handlers=[
+        logging.FileHandler("jcdecaux.log"),
+        logging.StreamHandler()
+    ]
+)
+
+logger = logging.getLogger(__name__)
+
+def stations_to_db(text, in_engine):
+    # let us load the stations from the text received from jcdecaux
+    stations = json.loads(text)
+    # print(stations)
+    # print type of the stations object, and number of stations
+    # print(type(stations), len(stations))
+    
+    # let us print the type of the object stations (a dictionary) and load the content
+    count = 0
+    for station in stations:
+
+        # print(type(station))
+        # print(station)
+
+        # let us load only the parts that we have included in our db:
+        # address VARCHAR(256), 
+        # banking INTEGER,
+        # bikestands INTEGER,
+        # name VARCHAR(256),
+        # status VARCHAR(256))
+        
+        # let us extract the relevant info from the dictionary
+        vals = (
+                int(station.get('number')),
+                int(station.get('available_bikes')),
+                int(station.get('available_bike_stands')),
+                datetime.fromtimestamp(station.get("last_update")/1000),
+                station.get('status')
+                )
+
+        
+        # now let us use the engine to insert into the stations
+        in_engine.execute("""
+                            INSERT INTO availability
+                            (number, available_bikes, available_bike_stands, last_update, status)
+                            VALUES (%s, %s, %s, %s, %s)
+                            ON DUPLICATE KEY UPDATE
+                            available_bikes = VALUES(available_bikes),
+                            available_bike_stands = VALUES(available_bike_stands),
+                            status = VALUES(status);
+                            """, vals)
+        count += 1
+    logger.info("{} rows inserted".format(count))
+
+
+
+def db_connection():
+    if os.path.exists("var.env"):
+        load_dotenv(dotenv_path="var.env")
+
+    USER = os.getenv("DB_USER")
+    PASSWORD = os.getenv("DB_PASSWORD")
+    PORT = os.getenv("DB_PORT")
+    DB = os.getenv("DB_NAME_JCDECAUX")
+    URI = os.getenv("DB_HOST")
+    print("URI = {}".format(URI))
+
+    connection_string = "mysql+pymysql://{}:{}@{}:{}/{}".format(USER, PASSWORD, URI, PORT, DB)
+    engine = create_engine(
+        connection_string,
+        pool_pre_ping = True,
+        pool_recycle = 3600,
+        echo = True)
+    return engine
+
+
+def jcdecaux_to_db(engine):
+    logger.info("Program started")
+    try:
+        r = requests.get(os.getenv('STATIONS_URI'), params={"apiKey": os.getenv('JCDECAUX_API_KEY'), "contract": os.getenv('JCDECAUX_City')})
+        stations_to_db(r.text, engine)
+        logger.info('Write to DB successfully')
+    except:
+        logger.info(traceback.format_exc())
+
+# CTRL + Z or CTRL + C to stop it
+if __name__ == '__main__':
+    while True:
+        engine = db_connection()
+        jcdecaux_to_db(engine)
+        time.sleep(10)
